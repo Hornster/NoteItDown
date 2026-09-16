@@ -25,7 +25,7 @@ General-purpose note and wiki tools require every link between entries to be cre
 
 ## User & Persona
 
-**Primary persona**: An individual TTRPG participant (GM or player) managing their own campaign notes solo. They may run or play in one or more campaigns, but each campaign's notes belong to and are visible only to them — this is not a shared/collaborative tool between a GM and their players, at least for v1. The moment they reach for this product is mid-campaign, after enough sessions have passed that quests, NPCs, and places have piled up and they can no longer recall or manually trace how everything connects.
+**Primary persona**: An individual TTRPG participant (GM or player) managing their own campaign notes solo. They may run or play in one or more campaigns, but each campaign's notes belong to and are visible only to them — this is not a shared/collaborative tool between a GM and their players, at least for v1. The product can be reached for at any moment in the campaign, though preferably at the beginning if the campaign is supposed to last longer than 3 sessions as this app will help organize the notes and ensure faster response whenever deeper notes study is required.
 
 ## Success Criteria
 
@@ -50,9 +50,9 @@ General-purpose note and wiki tools require every link between entries to be cre
 - **Then** the app automatically detects a relation between the two notes and the connection appears on the campaign's memory map, without any manual linking step
 
 #### Acceptance Criteria
-- Matching is exact-name only (case- and heuristic-based, no fuzzy/partial/NLP matching) — a partial or variant name does not create a relation.
+- Matching is exact-name only (case-insensitive and heuristic-based, no fuzzy/partial/NLP matching) — a partial or variant name does not create a relation.
 - No relation is created if no note names appear verbatim in another note's text.
-- The user can click the relation or the connected node on the map to navigate directly to that note.
+- The user can click the connected node on the map to navigate directly to that note.
 - If the mentioned note is later renamed or deleted, the relation is re-evaluated (per FR-008) and the change is visibly surfaced to the user, not silent.
 
 ## Functional Requirements
