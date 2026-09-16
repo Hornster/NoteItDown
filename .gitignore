@@ -1,0 +1,4 @@
+# 10xDevs AI Toolkit — skills, CLI config, and any other 10x-prefixed artifacts.
+# These are tooling, not part of this project's own codebase, and must not be published with it.
+10x*
+.10x*
