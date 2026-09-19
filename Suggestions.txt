@@ -1,0 +1,10 @@
+//From  Claude /init run:
+
+A few more suggestions based on what I found, most impactful first:
+
+1. Install GitHub CLI (gh) — not found on this machine, and the repo has a github.com remote (Hornster/NoteItDown). It lets Claude help with commits, PRs, issues, and code review directly instead of you copy-pasting.
+2. Add a real test suite — no unit/integration/e2e framework is configured; only the auth-flow smoke script exists, and the README itself flags this as a gap. Worth picking one before feature code grows past the auth scaffold.
+3. /plugin install frontend-design@claude-plugins-official — this is an Astro + React UI project; gives Claude design principles and component patterns for polished output.
+4. /plugin install playwright@claude-plugins-official — lets Claude launch a real browser, screenshot what it builds, and fix visual bugs itself.
+5. /plugin install skill-creator@claude-plugins-official, then /skill-creator <name> — for creating and refining skills (this project already leans on several custom /10x-* skills, so this pairs well).
+6. Browse /plugin for other official plugins — bundles of skills, agents, hooks, and MCP servers you may find useful.
