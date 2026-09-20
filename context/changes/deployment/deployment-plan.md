@@ -1,5 +1,5 @@
 ---
-status: planned
+status: in-progress
 created_at: 2026-09-20
 ---
 
@@ -21,18 +21,20 @@ Per `infrastructure.md`'s own approval policy, the first production deploy requi
 
 ## Steps
 
-### 1. Fix stale doc: `context/foundation/tech-stack.md`
+**Progress: steps 1–10 done (2026-09-20). App is live at https://note-it-down.crazedaerialcable.workers.dev, verified by full smoke pass. Only step 11 remains (user-performed GitHub repo secrets for CI auto-deploy).**
+
+### 1. Fix stale doc: `context/foundation/tech-stack.md` — DONE
 Replace the last sentence of the "Why this stack" paragraph:
 - From: "Deployment defaults to Cloudflare Pages (the starter's own default) and CI runs on GitHub Actions with auto-deploy-on-merge, both accepted as-is for a solo build."
 - To: "Deployment targets Cloudflare Workers (the adapter's current deployment model — Pages support was dropped in `@astrojs/cloudflare` v13+) and CI runs on GitHub Actions with auto-deploy-on-merge, both accepted as-is for a solo build."
 
-### 2. Rename the Worker: `wrangler.jsonc`
+### 2. Rename the Worker: `wrangler.jsonc` — DONE
 Change `"name": "10x-astro-starter"` → `"name": "note-it-down"`. Safe pre-deploy (no secrets/traffic exist under the old name yet). Resulting public URL: `https://note-it-down.<subdomain>.workers.dev`.
 
-### 3. Fix branch trigger: `.github/workflows/ci.yml`
+### 3. Fix branch trigger: `.github/workflows/ci.yml` — DONE
 Change both `on.push.branches` and `on.pull_request.branches` from `[master]` to `[main]`.
 
-### 4. Add CI `deploy` job to `.github/workflows/ci.yml`
+### 4. Add CI `deploy` job to `.github/workflows/ci.yml` — DONE
 Append a new job, gated on `ci` + `smoke` succeeding, running only on push to `main`:
 ```yaml
   deploy:
@@ -57,7 +59,7 @@ Append a new job, gated on `ci` + `smoke` succeeding, running only on push to `m
 ```
 Notes: reuses the existing `SUPABASE_URL`/`SUPABASE_KEY` repo secrets (already required by the `ci` job) for the build step only — the Worker's *runtime* secrets (set once via `wrangler secret put`, step 7) persist on Cloudflare independently and are not re-supplied by CI. Uses plain `npx wrangler deploy` (already a pinned devDependency) rather than a third-party action, to match exactly what the user runs manually in step 9.
 
-### 5. Create `context/deployment/deploy-plan.md`
+### 5. Create `context/deployment/deploy-plan.md` — DONE (stub; filled in progressively as later steps execute)
 Per CLAUDE.md's foundation-paths convention, this is the output audit trail of the actual executed deploy (distinct from this planning document). Once execution happens, record there (secret *names* only, never values):
 - Pre-deploy corrections made (steps 1–3)
 - Supabase production project record (name, that URL/anon key were set as both Worker secrets and GH Actions repo secrets; email-confirmation setting = off, with a follow-up note to revisit before onboarding real users)
