@@ -4,6 +4,17 @@ AGENTS.md is a symlink to this file — edit CLAUDE.md, not AGENTS.md.
 
 Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
 
+
+## Foundation paths
+
+- `context/foundation/tech-stack.md` — input (Lesson 2 hand-off, hard constraints)
+- `context/foundation/prd.md` — input (Lesson 1 hand-off, soft weights)
+- `context/foundation/infrastructure.md` — output (the third foundation contract)
+- `context/deployment/deploy-plan.md` — output of Plan Mode deploy (audit trail of "what was supposed to happen")
+- `context/foundation/lessons.md` — recurring rules & pitfalls (use `/10x-lesson` from Lesson 4 if you spot a class of agent failure during research or deploy)
+- `docs/reference/contract-surfaces.md` — load-bearing names registry
+
+
 ## Commands
 
 - `npm run dev` — start dev server (Cloudflare workerd runtime)
