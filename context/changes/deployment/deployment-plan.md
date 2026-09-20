@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 created_at: 2026-09-20
 ---
 
@@ -21,7 +21,7 @@ Per `infrastructure.md`'s own approval policy, the first production deploy requi
 
 ## Steps
 
-**Progress: steps 1–10 done (2026-09-20). App is live at https://note-it-down.crazedaerialcable.workers.dev, verified by full smoke pass. Only step 11 remains (user-performed GitHub repo secrets for CI auto-deploy).**
+**Progress: all steps done (2026-09-20). App is live at https://note-it-down.crazedaerialcable.workers.dev, verified by full smoke pass. CI auto-deploy-on-merge confirmed working (GitHub Actions run 35526322529: `ci`, `smoke`, `deploy` all passed on push to `main`). See `context/deployment/deploy-plan.md` for the full audit trail.**
 
 ### 1. Fix stale doc: `context/foundation/tech-stack.md` — DONE
 Replace the last sentence of the "Why this stack" paragraph:

@@ -1,5 +1,5 @@
 ---
-status: deployed — CI auto-deploy wiring (step 11) still outstanding
+status: done
 created_at: 2026-09-20
 ---
 
@@ -43,7 +43,7 @@ Executed deploy record for `context/changes/deployment/deployment-plan.md`. This
 - New `deploy` job added to `.github/workflows/ci.yml` (gated on `ci` + `smoke`, `push` to `main`).
 - New repo secrets added by user (step 11, done 2026-09-20): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 - `SUPABASE_URL` / `SUPABASE_KEY` repo secrets: **not already present as assumed** — the `ci` job's local-Supabase smoke job doesn't need them, so they'd never been added. User added both as repo secrets during step 11 so the new `deploy` job's build step can use them.
-- Remaining verification: confirm the `deploy` job actually fires and succeeds after these changes are pushed/merged to `main`.
+- **Verified**: pushed commit `6bcd6a9` to `main` (GitHub Actions run [35526322529](https://github.com/Hornster/NoteItDown/actions/runs/35526322529)) — all three jobs (`ci`, `smoke`, `deploy`) passed. Auto-deploy-on-merge to Cloudflare Workers confirmed working end to end.
 
 ## Approval record
 
