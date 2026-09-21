@@ -4,6 +4,13 @@ AGENTS.md is a symlink to this file — edit CLAUDE.md, not AGENTS.md.
 
 Skills must not write to `context/archive/`. Archived changes are immutable; if a resolved target path starts with `context/archive/`, abort with: "This change is archived. Open a new change with `/10x-new` instead."
 
+### Roadmap boundaries
+
+- Default to vertical slices: user-visible outcomes that cross UI, data, business logic, and integrations.
+- Horizontal work is allowed only as a bounded enabler that names the downstream vertical milestone it unlocks.
+- Avoid orphan horizontal work such as "build the whole database", "build all API endpoints", or "design the whole UI" before the first user-visible flow.
+- Roadmap is not a calendar estimate. Do not invent dates, story points, or sprint velocity unless the user explicitly asks for a separate planning artifact.
+
 
 ## Foundation paths
 
@@ -11,8 +18,10 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `context/foundation/prd.md` — input (Lesson 1 hand-off, soft weights)
 - `context/foundation/infrastructure.md` — output (the third foundation contract)
 - `context/deployment/deploy-plan.md` — output of Plan Mode deploy (audit trail of "what was supposed to happen")
-- `context/foundation/lessons.md` — recurring rules & pitfalls (use `/10x-lesson` from Lesson 4 if you spot a class of agent failure during research or deploy)
+- `context/foundation/lessons.md` - recurring rules and pitfalls
 - `docs/reference/contract-surfaces.md` — load-bearing names registry
+- `context/foundation/roadmap.md` - sequence of tasks to implement. preparation, edge-to-edge slices, dependencies, blockers, unknowns. Not an execution plan itself, only a base for making one.
+- `context/changes/<change-id>/plan.md` - per-change implementation plan. Architecture of a single slice, steps to execute, files.
 
 
 ## Commands
@@ -76,16 +85,6 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs two jobs on every push
 - `smoke` — starts local Supabase, builds, runs `npm run preview` on port 4321, then `npm run smoke` against it. No secrets needed.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
-
-## 10xDevs AI Toolkit — Module 1, Lesson 4
-
-Onboard the agent to the project you scaffolded in Lesson 3 with the **agent-context chain**:
-
-```
-(/10x-init  →  /10x-shape  →  /10x-prd  →  /10x-tech-stack-selector  →  /10x-bootstrapper)  →  /10x-agents-md  →  /10x-rule-review  →  /10x-lesson
-```
-
-The PRD → tech-stack → bootstrap chain ships from Lessons 1–3 (re-included so you can fix the project mid-flight). `/10x-agents-md`, `/10x-rule-review`, and `/10x-lesson` are the lesson's main topics. The chain extends in Lesson 5 to the infra/deploy step.
 
 ### Task Router — Where to start
 
