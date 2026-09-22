@@ -22,6 +22,9 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `docs/reference/contract-surfaces.md` — load-bearing names registry
 - `context/foundation/roadmap.md` - sequence of tasks to implement. preparation, edge-to-edge slices, dependencies, blockers, unknowns. Not an execution plan itself, only a base for making one.
 - `context/changes/<change-id>/plan.md` - per-change implementation plan. Architecture of a single slice, steps to execute, files.
+- `context/changes/<change-id>/change.md` - change identity
+- `context/changes/<change-id>/plan.md` - implementation contract
+- `context/changes/<change-id>/plan-brief.md` - compressed handoff
 
 
 ## Commands
