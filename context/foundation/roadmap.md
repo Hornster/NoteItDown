@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-09-21
+updated: 2026-09-22
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -41,7 +41,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 
 | ID   | Change ID                         | Outcome (user can …)                                           | Prerequisites | PRD refs                               | Status   |
 | ---- | ----------------------------------- | ------------------------------------------------------------------ | -------------- | ----------------------------------------- | -------- |
-| F-01 | campaign-notes-schema               | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —              | FR-002, Access Control                    | ready    |
+| F-01 | campaign-notes-schema               | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —              | FR-002, Access Control                    | in-progress |
 | S-01 | create-notes                        | add notes (predefined or custom type) to a campaign                | F-01           | FR-001, FR-003                            | proposed |
 | S-02 | auto-relations-memory-map           | see notes auto-connected on the memory map and navigate between them | S-01           | FR-007, FR-009, FR-010, FR-011, US-01     | proposed |
 | S-03 | multi-campaign-support              | create and switch between multiple campaigns                       | F-01           | FR-002                                    | proposed |
@@ -83,7 +83,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sequenced first because every FR touching notes/campaigns/relations needs this schema; getting the per-user RLS boundary wrong here would compromise the Access Control guardrail across every downstream slice, so it's worth isolating and getting right before any user-facing work builds on it.
-- **Status:** ready
+- **Status:** in-progress
 
 ## Slices
 
