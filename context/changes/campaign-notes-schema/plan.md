@@ -369,18 +369,18 @@ This is the first schema migration in the project, but production `auth.users` a
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 1.2 `npx astro sync && npx astro check` passes
-- [x] 1.3 `npm run lint` passes
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` — d703d9b
+- [x] 1.2 `npx astro sync && npx astro check` passes — d703d9b
+- [x] 1.3 `npm run lint` passes — d703d9b
 
 #### Manual
 
-- [x] 1.4 New signup produces exactly 1 campaign + 4 predefined note types
-- [x] 1.5 Cross-user RLS isolation verified for campaigns, note_types, notes, relations
-- [x] 1.6 Duplicate case-insensitive note name within a campaign is rejected
-- [x] 1.7 Out-of-order relation insert (note_a_id > note_b_id) is rejected
-- [x] 1.8 Cross-campaign type_id and cross-tenant relation inserts are rejected
-- [ ] 1.9 Migration pushed to production; every existing user has a backfilled default campaign
+- [x] 1.4 New signup produces exactly 1 campaign + 4 predefined note types — d703d9b
+- [x] 1.5 Cross-user RLS isolation verified for campaigns, note_types, notes, relations — d703d9b
+- [x] 1.6 Duplicate case-insensitive note name within a campaign is rejected — d703d9b
+- [x] 1.7 Out-of-order relation insert (note_a_id > note_b_id) is rejected — d703d9b
+- [x] 1.8 Cross-campaign type_id and cross-tenant relation inserts are rejected — d703d9b
+- [x] 1.9 Migration pushed to production; every existing user has a backfilled default campaign
 
 ### Phase 2: Shared types and documentation sync
 

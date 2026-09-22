@@ -45,6 +45,13 @@ Executed deploy record for `context/changes/deployment/deployment-plan.md`. This
 - `SUPABASE_URL` / `SUPABASE_KEY` repo secrets: **not already present as assumed** — the `ci` job's local-Supabase smoke job doesn't need them, so they'd never been added. User added both as repo secrets during step 11 so the new `deploy` job's build step can use them.
 - **Verified**: pushed commit `6bcd6a9` to `main` (GitHub Actions run [35526322529](https://github.com/Hornster/NoteItDown/actions/runs/35526322529)) — all three jobs (`ci`, `smoke`, `deploy`) passed. Auto-deploy-on-merge to Cloudflare Workers confirmed working end to end.
 
+## Schema migration — campaign-notes-schema (F-01)
+
+- Migration `supabase/migrations/20260922120000_campaign_notes_schema.sql` pushed to production, 2026-09-22 (user-performed `supabase link --project-ref xxnftruwtalhjmhblmlq` + `supabase db push`, using a personal access token; ref/token not stored here).
+- `supabase migration list` against the linked remote confirms `20260922120000` applied on both `local` and `remote`.
+- Backfill verified in production Studio: 2/2 existing `auth.users` rows each own exactly 1 `campaigns` row and 4 `note_types` rows (NPC, Place, Quest, Observation, `is_predefined = true`).
+- Worker rollback does not revert this migration (per `infrastructure.md`'s rollback caveat) — a future down-migration would be needed to undo it.
+
 ## Approval record
 
 - First production deploy: plan reviewed with user per `infrastructure.md`'s approval policy. Explicit go-ahead given immediately before `npx wrangler deploy` (step 9), 2026-09-20. Deploy executed and verified successfully.
