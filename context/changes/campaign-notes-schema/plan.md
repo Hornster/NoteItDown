@@ -380,15 +380,15 @@ This is the first schema migration in the project, but production `auth.users` a
 - [x] 1.6 Duplicate case-insensitive note name within a campaign is rejected — d703d9b
 - [x] 1.7 Out-of-order relation insert (note_a_id > note_b_id) is rejected — d703d9b
 - [x] 1.8 Cross-campaign type_id and cross-tenant relation inserts are rejected — d703d9b
-- [x] 1.9 Migration pushed to production; every existing user has a backfilled default campaign
+- [x] 1.9 Migration pushed to production; every existing user has a backfilled default campaign — f1bbe61
 
 ### Phase 2: Shared types and documentation sync
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npx astro check` passes
-- [ ] 2.3 `src/types.ts` and `docs/reference/contract-surfaces.md` exist
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npx astro check` passes
+- [x] 2.3 `src/types.ts` and `docs/reference/contract-surfaces.md` exist
 
 #### Manual
 
