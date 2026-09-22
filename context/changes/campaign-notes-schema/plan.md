@@ -386,11 +386,11 @@ This is the first schema migration in the project, but production `auth.users` a
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npx astro check` passes
-- [x] 2.3 `src/types.ts` and `docs/reference/contract-surfaces.md` exist
+- [x] 2.1 `npm run lint` passes — 847aba6
+- [x] 2.2 `npx astro check` passes — 847aba6
+- [x] 2.3 `src/types.ts` and `docs/reference/contract-surfaces.md` exist — 847aba6
 
 #### Manual
 
-- [ ] 2.4 `src/types.ts` fields match migration columns exactly
-- [ ] 2.5 README local-dev section reads correctly end-to-end
+- [x] 2.4 `src/types.ts` fields match migration columns exactly — 847aba6
+- [x] 2.5 README local-dev section reads correctly end-to-end — 847aba6
