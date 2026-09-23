@@ -47,7 +47,7 @@ Executed deploy record for `context/changes/deployment/deployment-plan.md`. This
 
 ## Schema migration — campaign-notes-schema (F-01)
 
-- Migration `supabase/migrations/20260922120000_campaign_notes_schema.sql` pushed to production, 2026-09-22 (user-performed `supabase link --project-ref xxnftruwtalhjmhblmlq` + `supabase db push`, using a personal access token; ref/token not stored here).
+- Migration `supabase/migrations/20260922120000_campaign_notes_schema.sql` pushed to production, 2026-09-22 (user-performed `supabase link --project-ref xxnftruwtalhjmhblmlq` + `supabase db push`, using a personal access token; token not stored here).
 - `supabase migration list` against the linked remote confirms `20260922120000` applied on both `local` and `remote`.
 - Backfill verified in production Studio: 2/2 existing `auth.users` rows each own exactly 1 `campaigns` row and 4 `note_types` rows (NPC, Place, Quest, Observation, `is_predefined = true`).
 - Worker rollback does not revert this migration (per `infrastructure.md`'s rollback caveat) — a future down-migration would be needed to undo it.

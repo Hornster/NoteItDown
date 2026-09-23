@@ -101,6 +101,17 @@ See `@ToolkitTutorialSections.md` for the full skill router table (when to use `
 - `context/foundation/prd.md`, `context/foundation/tech-stack.md` — inputs from earlier lessons, still present
 - `docs/reference/contract-surfaces.md` — load-bearing names registry (scaffolded by `/10x-init`)
 
+## Triage
 
+### Triage discipline
 
+- Severity says how bad the finding is. Impact says how much the decision matters now.
+- Valid outcomes: fix now, fix differently, skip, accept as risk, record as recurring rule (`/10x-lesson`), disagree.
+- Fix critical findings. Do not burn hours on low-impact observations just because the agent found them.
+- Conscious skipping of low-impact findings is a valid review outcome, not negligence.
+- If you disagree with a finding, record why. Wrong agent reasoning is also signal.
+
+## Subagents usage
+
+For implementation purposes with subagents aim to use Sonnet with Medium effort. For research and planning use Sonnet with High effort. Inform which subagent do you plan to instantiate.
 <!-- END @przeprogramowani/10x-cli -->

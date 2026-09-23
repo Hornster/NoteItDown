@@ -128,6 +128,8 @@ SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_KEY=<anon-key>
 ```
 
+A hosted project does not pick up the schema automatically. Apply the migrations once with `npx supabase link --project-ref <project-ref>` followed by `npx supabase db push`, and again whenever a new file lands in `supabase/migrations/`.
+
 ### Email confirmation in local development
 
 By default Supabase requires email confirmation before a user can sign in. To skip this during local development:
