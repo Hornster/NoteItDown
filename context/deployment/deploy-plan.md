@@ -51,6 +51,7 @@ Executed deploy record for `context/changes/deployment/deployment-plan.md`. This
 - `supabase migration list` against the linked remote confirms `20260922120000` applied on both `local` and `remote`.
 - Backfill verified in production Studio: 2/2 existing `auth.users` rows each own exactly 1 `campaigns` row and 4 `note_types` rows (NPC, Place, Quest, Observation, `is_predefined = true`).
 - Worker rollback does not revert this migration (per `infrastructure.md`'s rollback caveat) — a future down-migration would be needed to undo it.
+- Follow-up migration `supabase/migrations/20260923120000_restrict_update_columns.sql` (impl-review F1, Fix A: column-level UPDATE grants on `campaigns`/`notes`) pushed to production by the user, 2026-09-23. `supabase migration list --linked` confirms `20260923120000` applied on both `local` and `remote`. F1 is fully closed.
 
 ## Approval record
 
