@@ -453,17 +453,17 @@ One additive migration: a new function plus two length check constraints on `not
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Type check passes: `npx astro check`
-- [x] 3.3 Production build succeeds: `npm run build`
-- [x] 3.4 All tests pass: `npm test`
-- [x] 3.5 Existing smoke check still passes against the preview: `npm run smoke`
+- [x] 3.1 Lint passes: `npm run lint` — 36b9f18
+- [x] 3.2 Type check passes: `npx astro check` — 36b9f18
+- [x] 3.3 Production build succeeds: `npm run build` — 36b9f18
+- [x] 3.4 All tests pass: `npm test` — 36b9f18
+- [x] 3.5 Existing smoke check still passes against the preview: `npm run smoke` — 36b9f18
 
 #### Manual
 
-- [x] 3.6 Fresh signup lands on an empty dashboard showing "My Campaign" and a create call to action
-- [x] 3.7 Creating NPC note "Bob the Blacksmith" navigates to its detail page and appears on the dashboard with an "NPC" badge
-- [x] 3.8 New type "Faction" is created and offered next time; new type "faction"/"npc" reuses the existing type with no duplicate
-- [x] 3.9 Duplicate name "bob the blacksmith" shows the name-field error and the typed content is kept
-- [x] 3.10 Multi-line content keeps line breaks; `<script>` content renders as literal text
-- [x] 3.11 Another user's note URL returns 404; `/notes/new` while signed out redirects to sign-in
+- [x] 3.6 Fresh signup lands on an empty dashboard showing "My Campaign" and a create call to action — 36b9f18
+- [x] 3.7 Creating NPC note "Bob the Blacksmith" navigates to its detail page and appears on the dashboard with an "NPC" badge — 36b9f18
+- [x] 3.8 New type "Faction" is created and offered next time; new type "faction"/"npc" reuses the existing type with no duplicate — 36b9f18
+- [x] 3.9 Duplicate name "bob the blacksmith" shows the name-field error and the typed content is kept — 36b9f18
+- [x] 3.10 Multi-line content keeps line breaks; `<script>` content renders as literal text — 36b9f18
+- [x] 3.11 Another user's note URL returns 404; `/notes/new` while signed out redirects to sign-in — 36b9f18
