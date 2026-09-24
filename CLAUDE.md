@@ -89,11 +89,6 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs two jobs on every push
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
-### Task Router — Where to start
-
-See `@ToolkitTutorialSections.md` for the full skill router table (when to use `/10x-agents-md`, `/10x-rule-review`, `/10x-lesson`, or the upstream re-run skills) and how the chain hands off between them — this content mirrors the skills' own descriptions, already available to the agent at session start.
-
-
 ### Foundation paths used by this lesson
 
 - `AGENTS.md` / `CLAUDE.md` (and per-area variants) — `/10x-agents-md` output
