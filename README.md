@@ -56,6 +56,9 @@ npm run dev
 - `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Run Prettier
 - `npm run smoke` - Smoke test the auth flow against a running server (`BASE_URL`, defaults to `http://localhost:4321`)
+- `npm run test:unit` - Run the unit test suite (Vitest, no external services required)
+- `npm run test:integration` - Run the integration test suite against local Supabase (needs `npx supabase start`)
+- `npm run test` - Run both suites
 
 ## Project Structure
 
@@ -142,12 +145,14 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 
 ### Auth routes
 
-| Route                 | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                                             |
-| `/auth/signup`        | Email/password sign-up form                                             |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
+| Route                 | Description                                              |
+| --------------------- | -------------------------------------------------------- |
+| `/auth/signin`        | Email/password sign-in form                              |
+| `/auth/signup`        | Email/password sign-up form                              |
+| `/auth/confirm-email` | Post-signup "check your inbox" page                      |
+| `/dashboard`          | The active campaign's notes list (protected)             |
+| `/notes/new`          | Create-note form (protected)                             |
+| `/notes/[id]`         | Read-only note detail page (protected; 404 if not yours) |
 
 Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
 
@@ -169,6 +174,20 @@ npx wrangler deploy
 
 Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or via `npx wrangler secret put`.
 
+## Testing
+
+Vitest runs two separate suites:
+
+- **Unit** (`npm run test:unit`) — `src/**/*.test.ts`. No external services required; runs anywhere, including CI without Supabase.
+- **Integration** (`npm run test:integration`) — `tests/integration/**/*.test.ts`. Exercises real service/DB calls against **local** Supabase only. Requires `npx supabase start` and `SUPABASE_URL` / `SUPABASE_KEY` in `.env` pointed at `127.0.0.1`/`localhost` — the suite refuses to run against anything else, and fails loudly (not silently) if Supabase isn't reachable.
+- `npm test` runs both.
+
+```bash
+npx supabase start     # once, if not already running
+npm run test:unit
+npm run test:integration
+```
+
 ## Smoke test
 
 `scripts/smoke.mjs` is a dependency-free Node script that walks the whole auth flow (sign-up, sign-in, protected page, sign-out) over HTTP. Run it against the dev server or the production preview after dependency upgrades:
@@ -180,14 +199,14 @@ BASE_URL=http://localhost:4321 npm run smoke
 
 It needs a reachable Supabase instance (local or cloud) with email confirmation disabled.
 
-> **Note:** this script exists primarily to guard the development of the starter itself — it is a fast sanity check that dependency upgrades did not break the build, the Cloudflare adapter or the Supabase auth flow. It is **not** a substitute for a real test suite. Once you build your own product on top of this starter, add proper tests (unit, integration, end-to-end) suited to your application.
+> **Note:** this script exists primarily to guard the development of the starter itself — it is a fast sanity check that dependency upgrades did not break the build, the Cloudflare adapter or the Supabase auth flow. It is **not** a substitute for the Vitest suites above.
 
 ## CI
 
 GitHub Actions runs two jobs on every push and PR to `master`:
 
-- **ci** — lint, `astro check` and build. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets for the build step.
-- **smoke** — starts a local Supabase via the Supabase CLI, builds, serves the production preview on the Cloudflare runtime and runs `npm run smoke` against it. No secrets required.
+- **ci** — lint, `astro check`, `npm run test:unit` and build. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets for the build step.
+- **smoke** — starts a local Supabase via the Supabase CLI, runs `npm run test:integration`, builds, serves the production preview on the Cloudflare runtime and runs `npm run smoke` against it. No secrets required.
 
 ## License
 

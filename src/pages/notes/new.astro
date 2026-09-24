@@ -1,0 +1,40 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
+import CreateNoteForm from "@/components/notes/CreateNoteForm";
+import { createClient } from "@/lib/supabase";
+import { getActiveCampaign } from "@/lib/services/campaigns";
+import { listNoteTypes } from "@/lib/services/notes";
+import type { NoteType } from "@/types";
+
+// A top-level `return` in Astro frontmatter crashes this project's ESLint
+// (@typescript-eslint/no-misused-promises); use Astro.response.status + conditional
+// rendering instead (see the additional guidance in context/changes/create-notes/plan.md).
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+const campaign = supabase ? await getActiveCampaign(supabase) : null;
+
+let noteTypes: NoteType[] = [];
+if (!campaign) {
+  Astro.response.status = 404;
+} else if (supabase) {
+  noteTypes = await listNoteTypes(supabase, campaign.id);
+}
+---
+
+<Layout title="New note">
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <div class="mx-auto max-w-lg">
+      <Topbar />
+      <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+        <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+          New note
+        </h1>
+        {campaign ? (
+          <CreateNoteForm noteTypes={noteTypes} client:load />
+        ) : (
+          <p class="text-blue-100/70">No campaign found for this account.</p>
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>

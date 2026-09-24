@@ -36,8 +36,11 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `npm run lint:fix` — auto-fix lint issues
 - `npm run format` — Prettier (includes prettier-plugin-astro + prettier-plugin-tailwindcss)
 - `npm run smoke` — dependency-free auth-flow smoke test (`scripts/smoke.mjs`) against a running server, `BASE_URL` env (default `http://localhost:4321`). Run after dependency upgrades; CI runs it against the production preview with a local Supabase.
+- `npm run test:unit` — Vitest unit suite (`src/**/*.test.ts`). No external services required.
+- `npm run test:integration` — Vitest integration suite (`tests/integration/**/*.test.ts`). Requires local Supabase running (`npx supabase start`); refuses to run against a non-local `SUPABASE_URL` and fails loudly (not silently) if Supabase isn't reachable.
+- `npm test` — runs both suites.
 
-No unit/integration/e2e test framework is configured. `scripts/smoke.mjs` is a smoke check only, not a substitute (README says so explicitly) — don't assume a test runner exists.
+`scripts/smoke.mjs` remains a smoke check only, not a substitute for the Vitest suites above (README says so explicitly). There is still no e2e test framework.
 
 Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
 
