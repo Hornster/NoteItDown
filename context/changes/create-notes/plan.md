@@ -424,30 +424,30 @@ One additive migration: a new function plus two length check constraints on `not
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [x] 1.2 Integration tests for `create_note` pass: `npm run test:integration`
-- [x] 1.3 Unit suite runs (may be empty or contain a trivial check) and exits 0: `npm run test:unit`
-- [x] 1.4 Lint passes: `npm run lint`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset` — 7a36060
+- [x] 1.2 Integration tests for `create_note` pass: `npm run test:integration` — 7a36060
+- [x] 1.3 Unit suite runs (may be empty or contain a trivial check) and exits 0: `npm run test:unit` — 7a36060
+- [x] 1.4 Lint passes: `npm run lint` — 7a36060
 
 #### Manual
 
-- [x] 1.5 In Supabase Studio or psql, as `anon`, `create_note` is not executable; as `authenticated`, it is
-- [x] 1.6 Stopping local Supabase and running `npm run test:integration` fails with a clear message, not a silent skip
+- [x] 1.5 In Supabase Studio or psql, as `anon`, `create_note` is not executable; as `authenticated`, it is — 7a36060
+- [x] 1.6 Stopping local Supabase and running `npm run test:integration` fails with a clear message, not a silent skip — 7a36060
 
 ### Phase 2: Services + API
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test:unit`
-- [ ] 2.2 Integration tests pass: `npm run test:integration`
-- [ ] 2.3 Lint passes: `npm run lint`
-- [ ] 2.4 Type check passes: `npx astro check`
-- [ ] 2.5 Production build succeeds: `npm run build`
+- [x] 2.1 Unit tests pass: `npm run test:unit`
+- [x] 2.2 Integration tests pass: `npm run test:integration`
+- [x] 2.3 Lint passes: `npm run lint`
+- [x] 2.4 Type check passes: `npx astro check`
+- [x] 2.5 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.6 curl `POST /api/notes`: valid body returns 201, repeat returns 409 with `field: "name"`, a `campaign_id` key returns 400
-- [ ] 2.7 Without a session, `POST /api/notes` returns 401 JSON, not a redirect
+- [x] 2.6 curl `POST /api/notes`: valid body returns 201, repeat returns 409 with `field: "name"`, a `campaign_id` key returns 400
+- [x] 2.7 Without a session, `POST /api/notes` returns 401 JSON, not a redirect
 
 ### Phase 3: UI + docs
 

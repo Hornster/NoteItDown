@@ -39,3 +39,35 @@ export interface Relation {
   note_b_id: string;
   created_at: string;
 }
+
+/**
+ * DTOs shared by the API, services and the React form. Unlike the entity interfaces
+ * above, these do not mirror a table field for field.
+ */
+
+/**
+ * Command for POST /api/notes. Deliberately has no campaign id: the active campaign is
+ * always resolved on the server via getActiveCampaign (see src/lib/services/campaigns.ts,
+ * the S-03 handoff).
+ */
+export interface CreateNoteCommand {
+  name: string;
+  content: string;
+  type: { kind: "existing"; id: string } | { kind: "new"; name: string };
+}
+
+export interface NoteListItem {
+  id: string;
+  name: string;
+  type_name: string;
+  created_at: string;
+}
+
+export interface NoteDetail extends Note {
+  type_name: string;
+}
+
+export interface ApiError {
+  error: string;
+  field?: "name" | "content" | "type";
+}
