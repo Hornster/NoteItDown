@@ -284,6 +284,8 @@ The user-visible slice: notes list on the dashboard, the create form, and the de
 
 **Contract**: `PROTECTED_ROUTES` gains `"/notes"`. `/api/notes` is not added: it returns its own 401 JSON.
 
+**Addendum (impl-review F1)**: `src/pages/api/auth/signin.ts` now redirects to `/dashboard` (was `/`) after a successful sign-in, so users land on the notes list. Implemented in 36b9f18; not in the original plan.
+
 #### 2. Dashboard as notes list
 
 **File**: `src/pages/dashboard.astro`, optional `src/components/notes/NoteList.astro` (new)
