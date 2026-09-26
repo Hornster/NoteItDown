@@ -13,8 +13,10 @@ import type { MemoryMapRelation, NoteListItem } from "@/types";
 // src/pages/notes/[id].astro).
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 const campaign = supabase ? await getActiveCampaign(supabase) : null;
-const notes: NoteListItem[] = campaign && supabase ? await listNotes(supabase, campaign.id) : [];
-const relations: MemoryMapRelation[] = campaign && supabase ? await listRelations(supabase, campaign.id) : [];
+const [notes, relations]: [NoteListItem[], MemoryMapRelation[]] =
+  campaign && supabase
+    ? await Promise.all([listNotes(supabase, campaign.id), listRelations(supabase, campaign.id)])
+    : [[], []];
 ---
 
 <Layout title="Memory map">

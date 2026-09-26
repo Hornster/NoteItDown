@@ -248,6 +248,11 @@ describe("relation detection", () => {
     expect(error).toBeNull();
 
     expect(await getRelation(tenantA.client, tenantA.campaignId, renamed.id, mentioner.id)).not.toBeNull();
+
+    const renamedBack = await tenantA.client.from("notes").update({ name: "Original Name Gamma" }).eq("id", renamed.id);
+    expect(renamedBack.error).toBeNull();
+
+    expect(await getRelation(tenantA.client, tenantA.campaignId, renamed.id, mentioner.id)).toBeNull();
   });
 
   it("creates no relation across tenants when tenant B's note names tenant A's note", async () => {
@@ -334,13 +339,18 @@ describe("relation detection", () => {
     });
 
     it("returns an empty list when tenant A queries tenant B's campaign id", async () => {
-      await createNote(tenantB.client, tenantB.campaignId, "Foreign Listing Target", "");
-      await createNote(
+      const target = await createNote(tenantB.client, tenantB.campaignId, "Foreign Listing Target", "");
+      const mentioner = await createNote(
         tenantB.client,
         tenantB.campaignId,
         "Foreign Listing Mentioner",
         "Refers to Foreign Listing Target here.",
       );
+
+      // Positive control: the relation exists for its owner, so the empty result below is RLS, not a missed detection.
+      const ownRelations = await listRelations(tenantB.client, tenantB.campaignId);
+      const [expectedA, expectedB] = sortIds(target.id, mentioner.id);
+      expect(ownRelations.find((r) => r.note_a_id === expectedA && r.note_b_id === expectedB)).toBeDefined();
 
       const relations = await listRelations(tenantA.client, tenantB.campaignId);
       expect(relations).toEqual([]);

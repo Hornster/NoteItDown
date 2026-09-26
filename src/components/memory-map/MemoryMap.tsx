@@ -23,13 +23,17 @@ function buildNodes(data: MemoryMapData): NoteFlowNode[] {
   }));
 }
 
+// Mirrors layoutMemoryMap's filter: drop relations whose endpoints aren't among the notes.
 function buildEdges(data: MemoryMapData): Edge[] {
-  return data.relations.map((relation) => ({
-    id: relation.id,
-    type: "straight",
-    source: relation.note_a_id,
-    target: relation.note_b_id,
-  }));
+  const noteIds = new Set(data.notes.map((note) => note.id));
+  return data.relations
+    .filter((relation) => noteIds.has(relation.note_a_id) && noteIds.has(relation.note_b_id))
+    .map((relation) => ({
+      id: relation.id,
+      type: "straight",
+      source: relation.note_a_id,
+      target: relation.note_b_id,
+    }));
 }
 
 /**

@@ -43,7 +43,7 @@ Load-bearing names that downstream changes must not silently rename without upda
 - **Canonical ordering invariant**: `relations_canonical_order` check requires `note_a_id < note_b_id`. Undirected edges are stored exactly once; any future insert/query logic (e.g. S-02's relation detection) must sort the pair before insert/lookup.
 - Uniqueness: `relations_unique_pair (note_a_id, note_b_id)` — relies on the canonical ordering above to prevent duplicate edges in either direction.
 - RLS policies: `relations_select_own_campaign`, `relations_insert_own_campaign`, `relations_delete_own_campaign`. **No `UPDATE` policy** — rows are only ever created by detection or removed by re-detection (FR-011).
-- **Rows are written only by `public.detect_note_relations()` and `public.recompute_campaign_relations()`** (`supabase/migrations/20260926120000_relation_detection.sql`) — see "Relation detection" below. No other code path inserts into or deletes from `relations`.
+- **Rows are written only by `public.detect_note_relations()` and `public.recompute_campaign_relations()`** (`supabase/migrations/20260926120000_relation_detection.sql`) — see "Relation detection" below. No app code inserts into or deletes from `relations`. **Not enforced at the DB level:** `relations_insert_own_campaign` / `relations_delete_own_campaign` still let an authenticated user write their own campaign's rows directly via PostgREST (the `security invoker` detection functions depend on those policies). Such hand-written rows self-heal: the next write of either endpoint note, or `recompute_campaign_relations`, restores the matched set. FR-011 is therefore a UI/app-code guarantee, not a DB invariant.
 
 ## Trigger functions
 
