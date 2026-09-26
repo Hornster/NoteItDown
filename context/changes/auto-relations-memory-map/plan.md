@@ -404,17 +404,17 @@ Each note write runs about 2N regex checks over content of at most 20k chars, se
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Types check: `npx astro check`
-- [x] 3.3 Production build succeeds: `npm run build`
-- [x] 3.4 All tests pass: `npm test`
-- [x] 3.5 Smoke passes against a local preview, including the new `/map` rows: `npm run smoke`
+- [x] 3.1 Lint passes: `npm run lint` — 994b7a5
+- [x] 3.2 Types check: `npx astro check` — 994b7a5
+- [x] 3.3 Production build succeeds: `npm run build` — 994b7a5
+- [x] 3.4 All tests pass: `npm test` — 994b7a5
+- [x] 3.5 Smoke passes against a local preview, including the new `/map` rows: `npm run smoke` — 994b7a5
 
 #### Manual
 
-- [x] 3.6 Connected notes show undirected lines; isolated notes appear
-- [x] 3.7 Node click navigates; dragging does not navigate
-- [x] 3.8 No way to create, delete, reconnect or select an edge on the map
-- [x] 3.9 Map renders dark on a light-mode OS; empty state shown with no notes
-- [x] 3.10 New note mentioning an existing one shows its connection on reload
-- [ ] 3.11 Migration pushed to production; backfilled relations visible on production `/map`
+- [x] 3.6 Connected notes show undirected lines; isolated notes appear — 994b7a5
+- [x] 3.7 Node click navigates; dragging does not navigate — 994b7a5
+- [x] 3.8 No way to create, delete, reconnect or select an edge on the map — 994b7a5
+- [x] 3.9 Map renders dark on a light-mode OS; empty state shown with no notes — 994b7a5
+- [x] 3.10 New note mentioning an existing one shows its connection on reload — 994b7a5
+- [x] 3.11 Migration pushed to production; backfilled relations visible on production `/map`
