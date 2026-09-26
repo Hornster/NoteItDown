@@ -417,4 +417,4 @@ Each note write runs about 2N regex checks over content of at most 20k chars, se
 - [x] 3.8 No way to create, delete, reconnect or select an edge on the map — 994b7a5
 - [x] 3.9 Map renders dark on a light-mode OS; empty state shown with no notes — 994b7a5
 - [x] 3.10 New note mentioning an existing one shows its connection on reload — 994b7a5
-- [x] 3.11 Migration pushed to production; backfilled relations visible on production `/map`
+- [x] 3.11 Migration pushed to production; backfilled relations visible on production `/map` — 994b7a5
