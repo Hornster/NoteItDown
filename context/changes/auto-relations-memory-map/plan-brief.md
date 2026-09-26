@@ -63,7 +63,7 @@ Any note write, whether through the RPC, a direct insert or a direct update, rec
 
 ## Open Risks & Assumptions
 
-- The hosted DB ctype is unverified. If it is `C`/`POSIX`, non-ASCII word boundaries degrade. There is a documented fallback (`collate "und-x-icu"`) and a manual check before the production push.
+- How the hosted DB classifies non-ASCII letters is unverified. If `'Ł' ~ '[[:alnum:]]'` or `'ŁÓDŹ' ~* 'łódź'` is false there, non-ASCII word boundaries degrade. There is a documented fallback (`collate "und-x-icu"`) and a manual behaviour probe before the production push.
 - Detection cost is about 2N sequential regex checks per note write. That is fine at the PRD's small scale but grows linearly.
 - Two notes committed at the same instant can miss each other. This is accepted; `recompute_campaign_relations` repairs it.
 

@@ -59,7 +59,7 @@ Detection comes first and stands alone in the DB. It is verifiable through the i
 ## Critical Implementation Details
 
 - **Function EXECUTE grants cascade.** `security invoker` functions called from the trigger run as the calling `authenticated` user, and Postgres checks EXECUTE on every nested function. So `note_mentions` and `detect_note_relations` must be granted to `authenticated`, not only revoked from `anon`. Otherwise every note insert fails.
-- **Hosted ctype.** `[:alnum:]` classification of non-ASCII letters (Ł, é) depends on the database ctype. Local is `en_US.UTF-8`. The hosted value must be checked before the production push (Phase 1 manual step). If it is exactly `C` or `POSIX`, add an explicit `collate "und-x-icu"` to the content operand in `note_mentions` before pushing, and re-run the Łódź test. ASCII behaviour is unaffected either way.
+- **Hosted locale behaviour.** How `[:alnum:]` and `~*` classify non-ASCII letters (Ł, é) depends on the database's default locale provider: ICU/builtin or libc `datctype`. Local uses ICU (`datlocprovider = 'i'`, `en_US.UTF-8`), so `datctype` alone is not a reliable proxy. Before the production push (Phase 1 manual step), probe the behaviour on the hosted DB: `select 'Ł' ~ '[[:alnum:]]' as alnum_ok, 'ŁÓDŹ' ~* 'łódź' as icase_ok;`. If either is false, add an explicit `collate "und-x-icu"` to the content operand in `note_mentions` before pushing, and re-run the Łódź test. ASCII behaviour is unaffected either way.
 
 ## Phase 1: Relation detection in the database
 
@@ -134,7 +134,7 @@ A new migration adds the matcher, per-note detection, per-campaign recompute and
 - the ctype dependency;
 - that the concurrent-create race is accepted.
 
-Also update the `relations` section to say rows are written **only** by `detect_note_relations` and `recompute_campaign_relations`. Add the new migration to "Migration file".
+Also update the `relations` section to say rows are written **only** by `detect_note_relations` and `recompute_campaign_relations`. Add `public.notes_detect_relations()` (security invoker, `after insert or update of name, content` on `public.notes` via `notes_detect_relations`) to "Trigger functions". Add the new migration to "Migration file".
 
 ### Success Criteria:
 
@@ -147,7 +147,7 @@ Also update the `relations` section to say rows are written **only** by `detect_
 
 #### Manual Verification:
 
-- Hosted DB ctype checked with `select datctype from pg_database where datname = current_database();`, and the result recorded in the PR (a UTF-8 locale means no change; `C`/`POSIX` means apply the ICU-collation fallback from Critical Implementation Details)
+- Hosted DB locale behaviour checked with `select 'Ł' ~ '[[:alnum:]]' as alnum_ok, 'ŁÓDŹ' ~* 'łódź' as icase_ok;`, and the result recorded in the PR (both true means no change; either false means apply the ICU-collation fallback from Critical Implementation Details). Progress row 1.5 keeps its original "ctype" title, but this probe is the check.
 - In local Supabase Studio, creating two notes where one mentions the other shows exactly one `relations` row with sorted ids
 
 **Implementation Note**: After automated verification passes, pause for manual confirmation before Phase 2.
@@ -256,7 +256,7 @@ Render the map on `/map` with React Flow, wire node-click navigation, lock down 
 - `MemoryMap` props are `MemoryMapData`. It maps notes to `Node<{ name: string; typeName: string }, "note">` with positions from `layoutMemoryMap` (computed once, from the initial props), and relations to `Edge` with `type: "straight"`, no `markerEnd`, source `note_a_id` and target `note_b_id`. `nodeTypes`/`edgeTypes` are defined at module scope.
 - `ReactFlow` props:
   - nodes via `useNodesState` + `onNodesChange` (for dragging only), with static `edges` and no `onEdgesChange`;
-  - `nodesConnectable={false}`, `elementsSelectable={false}`, `deleteKeyCode={null}`, `edgesFocusable={false}`;
+  - `nodesConnectable={false}`, `elementsSelectable={false}`, `deleteKeyCode={null}`, `edgesFocusable={false}`, `edgesReconnectable={false}` (it defaults to true even with no `onReconnect`);
   - no `onConnect`, `onReconnect`, `onDelete`, `onNodesDelete` or `onEdgesDelete`;
   - `colorMode="dark"`, `fitView`;
   - `onNodeClick` → `window.location.assign(\`/notes/${node.id}\`)`;
@@ -307,6 +307,7 @@ Render the map on `/map` with React Flow, wire node-click navigation, lock down 
 **Contract**:
 
 - Add `/map` to "Routes": notes plus relations for the active campaign, read-only, with node-click navigating to `/notes/[id]`.
+- Add `/map` to "Active campaign resolution → Callers".
 - Add `listRelations` next to the note services.
 - Add `MemoryMapData` / `MemoryMapRelation` to "Shared TypeScript types".
 
