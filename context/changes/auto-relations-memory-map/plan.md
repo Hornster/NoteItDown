@@ -381,24 +381,24 @@ Each note write runs about 2N regex checks over content of at most 20k chars, se
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [x] 1.2 Relation detection integration tests pass: `npm run test:integration`
-- [x] 1.3 Existing integration tests still pass (create_note, notes service) under the new trigger: `npm run test:integration`
-- [x] 1.4 Lint passes: `npm run lint`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset` — 9e7b21e
+- [x] 1.2 Relation detection integration tests pass: `npm run test:integration` — 9e7b21e
+- [x] 1.3 Existing integration tests still pass (create_note, notes service) under the new trigger: `npm run test:integration` — 9e7b21e
+- [x] 1.4 Lint passes: `npm run lint` — 9e7b21e
 
 #### Manual
 
-- [x] 1.5 Hosted DB ctype checked and result recorded
-- [x] 1.6 Local Studio shows exactly one sorted relations row for two mutually-referenced notes
+- [x] 1.5 Hosted DB ctype checked and result recorded — 9e7b21e
+- [x] 1.6 Local Studio shows exactly one sorted relations row for two mutually-referenced notes — 9e7b21e
 
 ### Phase 2: Map data and layout (enabler for Phase 3's `/map`)
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test:unit`
-- [ ] 2.2 Integration tests pass: `npm run test:integration`
-- [ ] 2.3 Lint passes (strict + React Compiler rules): `npm run lint`
-- [ ] 2.4 Types check: `npx astro check`
+- [x] 2.1 Unit tests pass: `npm run test:unit`
+- [x] 2.2 Integration tests pass: `npm run test:integration`
+- [x] 2.3 Lint passes (strict + React Compiler rules): `npm run lint`
+- [x] 2.4 Types check: `npx astro check`
 
 ### Phase 3: Memory map UI
 

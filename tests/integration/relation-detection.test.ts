@@ -3,6 +3,7 @@ import type { PostgrestMaybeSingleResponse, PostgrestSingleResponse, SupabaseCli
 
 import { createTestUser } from "./helpers";
 
+import { listRelations } from "@/lib/services/relations";
 import type { Note, Relation } from "@/types";
 
 async function findTypeId(client: SupabaseClient, campaignId: string, name: string): Promise<string> {
@@ -314,5 +315,35 @@ describe("relation detection", () => {
     });
     expect(secondCall.error).toBeNull();
     expect(await countRelationsInvolving(tenantA.client, tenantA.campaignId, noteU.id)).toBe(1);
+  });
+
+  describe("listRelations", () => {
+    it("returns tenant A's relation for A's campaign", async () => {
+      const target = await createNote(tenantA.client, tenantA.campaignId, "Listing Relations Target", "");
+      const mentioner = await createNote(
+        tenantA.client,
+        tenantA.campaignId,
+        "Listing Relations Mentioner",
+        "Refers to Listing Relations Target here.",
+      );
+
+      const relations = await listRelations(tenantA.client, tenantA.campaignId);
+      const [expectedA, expectedB] = sortIds(target.id, mentioner.id);
+      const found = relations.find((r) => r.note_a_id === expectedA && r.note_b_id === expectedB);
+      expect(found).toBeDefined();
+    });
+
+    it("returns an empty list when tenant A queries tenant B's campaign id", async () => {
+      await createNote(tenantB.client, tenantB.campaignId, "Foreign Listing Target", "");
+      await createNote(
+        tenantB.client,
+        tenantB.campaignId,
+        "Foreign Listing Mentioner",
+        "Refers to Foreign Listing Target here.",
+      );
+
+      const relations = await listRelations(tenantA.client, tenantB.campaignId);
+      expect(relations).toEqual([]);
+    });
   });
 });

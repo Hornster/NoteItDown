@@ -71,3 +71,12 @@ export interface ApiError {
   error: string;
   field?: "name" | "content" | "type";
 }
+
+/** A relation as needed by the memory map: no `campaign_id`, since the caller already scoped the query to one. */
+export type MemoryMapRelation = Pick<Relation, "id" | "note_a_id" | "note_b_id">;
+
+/** Domain-level payload for the memory map, free of React Flow types (mapped to nodes/edges in the island). */
+export interface MemoryMapData {
+  notes: NoteListItem[];
+  relations: MemoryMapRelation[];
+}
