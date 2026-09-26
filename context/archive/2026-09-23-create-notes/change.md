@@ -1,10 +1,10 @@
 ---
 change_id: create-notes
 title: User can add notes (predefined or custom type) to a campaign
-status: impl_reviewed
+status: archived
 created: 2026-09-23
 updated: 2026-09-26
-archived_at: null
+archived_at: 2026-09-26T15:34:54Z
 ---
 
 ## Notes
