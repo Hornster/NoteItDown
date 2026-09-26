@@ -381,15 +381,15 @@ Each note write runs about 2N regex checks over content of at most 20k chars, se
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [ ] 1.2 Relation detection integration tests pass: `npm run test:integration`
-- [ ] 1.3 Existing integration tests still pass (create_note, notes service) under the new trigger: `npm run test:integration`
-- [ ] 1.4 Lint passes: `npm run lint`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
+- [x] 1.2 Relation detection integration tests pass: `npm run test:integration`
+- [x] 1.3 Existing integration tests still pass (create_note, notes service) under the new trigger: `npm run test:integration`
+- [x] 1.4 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 1.5 Hosted DB ctype checked and result recorded
-- [ ] 1.6 Local Studio shows exactly one sorted relations row for two mutually-referenced notes
+- [x] 1.5 Hosted DB ctype checked and result recorded
+- [x] 1.6 Local Studio shows exactly one sorted relations row for two mutually-referenced notes
 
 ### Phase 2: Map data and layout (enabler for Phase 3's `/map`)
 

@@ -43,6 +43,7 @@ Load-bearing names that downstream changes must not silently rename without upda
 - **Canonical ordering invariant**: `relations_canonical_order` check requires `note_a_id < note_b_id`. Undirected edges are stored exactly once; any future insert/query logic (e.g. S-02's relation detection) must sort the pair before insert/lookup.
 - Uniqueness: `relations_unique_pair (note_a_id, note_b_id)` — relies on the canonical ordering above to prevent duplicate edges in either direction.
 - RLS policies: `relations_select_own_campaign`, `relations_insert_own_campaign`, `relations_delete_own_campaign`. **No `UPDATE` policy** — rows are only ever created by detection or removed by re-detection (FR-011).
+- **Rows are written only by `public.detect_note_relations()` and `public.recompute_campaign_relations()`** (`supabase/migrations/20260926120000_relation_detection.sql`) — see "Relation detection" below. No other code path inserts into or deletes from `relations`.
 
 ## Trigger functions
 
@@ -50,6 +51,7 @@ Load-bearing names that downstream changes must not silently rename without upda
 - `public.seed_default_note_types()` — `security definer`, fires `after insert` on `public.campaigns` via `campaigns_seed_note_types`. Inserts the 4 predefined `note_types` rows.
 - `public.handle_new_user()` — `security definer`, fires `after insert` on `auth.users` via `on_auth_user_created`. Creates the default `'My Campaign'` row for every new signup, which in turn fires `campaigns_seed_note_types`.
 - **Signup coupling**: `handle_new_user()` → `seed_default_note_types()` run inside GoTrue's `auth.users` insert transaction. Any error there (e.g. a new constraint on `campaigns` or `note_types` that the default rows violate) aborts signup with "Database error saving new user". Check new constraints on those two tables against the seeded values.
+- `public.notes_detect_relations()` — `security invoker`, `set search_path = ''`, fires `after insert or update of name, content` on `public.notes` via the trigger `notes_detect_relations`. Calls `detect_note_relations(new.id)`; skips on `UPDATE` when both `name` and `content` are unchanged. See "Relation detection" below.
 
 ## `create_note` function
 
@@ -60,6 +62,20 @@ Load-bearing names that downstream changes must not silently rename without upda
 - With `p_new_type_name`: `insert ... on conflict (campaign_id, lower(name)) do nothing`; if no row returns, the existing type is looked up case-insensitively. A predefined type counts as a match (`'npc'` resolves to `NPC`) — no duplicate custom type is ever created for a name that collides with a predefined one.
 - Propagated SQLSTATEs the caller maps: `23505` (duplicate note name), `23514` (name/content length check), `23503` (type not in this campaign — composite FK), `42501` (RLS denial, e.g. a foreign campaign id).
 - Grants: `revoke execute ... from public, anon; grant execute ... to authenticated`.
+
+## Relation detection
+
+Relations are the automatic, atomic output of every note write (FR-007, FR-011). All matching logic lives in one function (`note_mentions`) so S-04 reuses the exact same engine and no TS copy can drift from it. Defined in `supabase/migrations/20260926120000_relation_detection.sql`.
+
+- `public.note_mentions(p_content text, p_name text) returns boolean` — `language sql immutable strict`, `set search_path = ''`. True when `p_name` occurs in `p_content` case-insensitively, with a non-word character (anything but `[[:alnum:]_]`) or the start/end of the text on each side. Regex metacharacters in `p_name` are escaped so it matches literally.
+- `public.detect_note_relations(p_note_id uuid) returns void` — `plpgsql`, `security invoker`, `set search_path = ''`. Loads the note (returns quietly if RLS hides it or it's missing), computes the full desired pair set against every other note in the same campaign (`note_mentions(o.content, note.name) or note_mentions(note.content, o.name)`, stored as `(least(ids), greatest(ids))`), deletes this note's stale relations, and inserts the missing ones (`on conflict (note_a_id, note_b_id) do nothing`).
+- `public.recompute_campaign_relations(p_campaign_id uuid) returns void` — `plpgsql`, `security invoker`, `set search_path = ''`. Recomputes every note's relations in one campaign. Idempotent; serves as both the backfill for pre-existing notes and the repair path for the accepted concurrent-create race.
+- `public.notes_detect_relations() returns trigger` — `plpgsql`, `security invoker`, `set search_path = ''`. Calls `detect_note_relations(new.id)`; skips on `UPDATE` when both `name` and `content` are unchanged. Returns `null`.
+- Trigger: `notes_detect_relations`, `after insert or update of name, content on public.notes for each row`.
+- Grants: `revoke execute … from public, anon` and `grant execute … to authenticated` on `note_mentions`, `detect_note_relations` and `recompute_campaign_relations`. **Function EXECUTE grants cascade** — the trigger's `security invoker` functions run as the calling `authenticated` user, and Postgres checks EXECUTE on every nested call, so all three must be granted to `authenticated`, not only revoked from `anon`. The trigger function `notes_detect_relations` itself is revoke-only (no grant) — trigger invocation doesn't require direct EXECUTE privilege.
+- **Matching rule**: case-insensitive; a relation exists iff A's name occurs in B's content, or B's name occurs in A's content (checked both directions, stored as one undirected edge); a note never relates to itself; names are matched literally (metacharacters escaped) with non-word-character guards on both sides (or start/end of text).
+- **ctype dependency**: how `[:alnum:]` and `~*` classify non-ASCII letters (Ł, é) depends on the database's default locale provider (ICU vs libc). Local Supabase uses ICU (`en_US.UTF-8`). Before pushing to a hosted project, probe its behaviour with `select 'Ł' ~ '[[:alnum:]]' as alnum_ok, 'ŁÓDŹ' ~* 'łódź' as icase_ok;`; if either is false, add an explicit `collate "und-x-icu"` to the content operand in `note_mentions`.
+- **Concurrent-create race accepted**: two notes committed at the same instant in one campaign can each miss the other's uncommitted row. This is accepted as a risk for a single-user tool; `recompute_campaign_relations` is the repair path.
 
 ## `POST /api/notes`
 
@@ -86,6 +102,7 @@ Load-bearing names that downstream changes must not silently rename without upda
 - `supabase/migrations/20260922120000_campaign_notes_schema.sql` — first schema migration in the project. Includes an idempotent backfill (`insert ... where not exists`) that provisions a default campaign for any pre-existing `auth.users` row. Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 - `supabase/migrations/20260923120000_restrict_update_columns.sql` — column-level `UPDATE` grants for `authenticated` on `campaigns` and `notes` (see above). A new updatable column on those tables must be added to the grant explicitly.
 - `supabase/migrations/20260924120000_create_note_function.sql` — adds the `create_note` function (see above) and the `notes_name_length_check` / `notes_content_length_check` constraints. Applied to production manually (`npx supabase db push`) — CI does not run migrations.
+- `supabase/migrations/20260926120000_relation_detection.sql` — adds relation detection (see "Relation detection" above): `note_mentions`, `detect_note_relations`, `recompute_campaign_relations`, the `notes_detect_relations` trigger, and a backfill (`select public.recompute_campaign_relations(id) from public.campaigns;`). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 
 ## Shared TypeScript types
 
