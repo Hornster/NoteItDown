@@ -38,6 +38,7 @@ async function request(path, { method = "GET", form } = {}) {
 const steps = [
   ["home renders", () => request("/"), { status: 200 }],
   ["dashboard redirects anonymous user", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
+  ["map redirects anonymous user", () => request("/map"), { status: 302, location: "/auth/signin" }],
   [
     "signup creates account",
     () => request("/api/auth/signup", { method: "POST", form: { email, password } }),
@@ -54,6 +55,7 @@ const steps = [
     { status: 302, location: "/" },
   ],
   ["dashboard renders for signed-in user", () => request("/dashboard"), { status: 200 }],
+  ["map renders for signed-in user", () => request("/map"), { status: 200 }],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
 ];

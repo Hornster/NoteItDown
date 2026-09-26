@@ -3,7 +3,7 @@ import type { SimulationLinkDatum, SimulationNodeDatum } from "d3-force";
 
 /** Fixed node box shared with the map's node component. */
 export const MAP_NODE_WIDTH = 160;
-export const MAP_NODE_HEIGHT = 72;
+export const MAP_NODE_HEIGHT = 80;
 
 /** Enough ticks for the simulation to settle from alpha=1 without relying on the auto-stop timer. */
 const SIMULATION_TICKS = 300;

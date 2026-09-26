@@ -88,7 +88,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 ## Active campaign resolution
 
 - `getActiveCampaign(supabase)` (`src/lib/services/campaigns.ts`) is the **single** resolver of "which campaign does this request act on." In this slice it returns the caller's oldest campaign (`order by created_at asc, id asc limit 1`).
-- Callers: `POST /api/notes`, `/dashboard`, `/notes/new`.
+- Callers: `POST /api/notes`, `/dashboard`, `/notes/new`, `/map`.
 - **S-03 must revisit this function** when multiple campaigns per user arrive (e.g. a cookie or a campaign id in the URL). If a campaign id ever starts coming from the client, the server **must re-check ownership** before using it — there is currently no client-supplied campaign id anywhere in this slice, so no such check exists yet.
 
 ## Routes
@@ -96,6 +96,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - `/dashboard` — the active campaign's notes list (`getActiveCampaign` + `listNotes`), a "New note" link, an empty-state call to action. Protected (`PROTECTED_ROUTES` in `src/middleware.ts`).
 - `/notes/new` — the create-note form (`CreateNoteForm` island + `useCreateNote` hook). Loads `listNoteTypes` for the active campaign. Protected.
 - `/notes/[id]` — read-only note detail: name, type badge, content (`whitespace-pre-wrap`, escaped text only, no `set:html`). Returns a real 404 (`Astro.response.status = 404` + conditional rendering — a top-level `return` in Astro frontmatter crashes this project's `@typescript-eslint/no-misused-promises` lint rule) for a non-uuid id or another tenant's note (RLS makes it come back as `null` from `getNote`, indistinguishable from "doesn't exist"). This is S-02's FR-010 map-navigation target. Protected.
+- `/map` — the active campaign's memory map: every note as a node plus every relation as an undirected edge (`getActiveCampaign` + `listNotes` + `listRelations`), read-only (FR-011 — no way to create, delete, reconnect or select an edge). Clicking a node navigates to `/notes/[id]`. Renders a `MemoryMap` React Flow island (`client:only="react"`) with a one-shot `layoutMemoryMap` force layout; dragging a node only moves it locally, never persisted. Empty state (no notes) shows a "Create your first note" CTA and doesn't mount the island. Protected (`PROTECTED_ROUTES`).
 
 ## Migration file
 
@@ -108,3 +109,4 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 
 - `src/types.ts` — `Campaign`, `NoteType`, `Note`, `Relation` interfaces mirror the tables above field-for-field (snake_case, no camelCase mapping layer).
 - `src/types.ts` also holds non-table DTOs shared by the API, services and the React form: `CreateNoteCommand`, `NoteListItem`, `NoteDetail`, `ApiError`. Unlike the entity interfaces above, these do **not** mirror a table field for field.
+- `MemoryMapRelation` (`Pick<Relation, "id" | "note_a_id" | "note_b_id">`) and `MemoryMapData` (`{ notes: NoteListItem[]; relations: MemoryMapRelation[] }`) are the `/map` page's domain DTOs, free of any `@xyflow/react` types — the mapping to React Flow `Node`/`Edge` happens inside `MemoryMap.tsx`.

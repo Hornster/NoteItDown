@@ -395,26 +395,26 @@ Each note write runs about 2N regex checks over content of at most 20k chars, se
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test:unit`
-- [x] 2.2 Integration tests pass: `npm run test:integration`
-- [x] 2.3 Lint passes (strict + React Compiler rules): `npm run lint`
-- [x] 2.4 Types check: `npx astro check`
+- [x] 2.1 Unit tests pass: `npm run test:unit` — 5dd07a7
+- [x] 2.2 Integration tests pass: `npm run test:integration` — 5dd07a7
+- [x] 2.3 Lint passes (strict + React Compiler rules): `npm run lint` — 5dd07a7
+- [x] 2.4 Types check: `npx astro check` — 5dd07a7
 
 ### Phase 3: Memory map UI
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Types check: `npx astro check`
-- [ ] 3.3 Production build succeeds: `npm run build`
-- [ ] 3.4 All tests pass: `npm test`
-- [ ] 3.5 Smoke passes against a local preview, including the new `/map` rows: `npm run smoke`
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Types check: `npx astro check`
+- [x] 3.3 Production build succeeds: `npm run build`
+- [x] 3.4 All tests pass: `npm test`
+- [x] 3.5 Smoke passes against a local preview, including the new `/map` rows: `npm run smoke`
 
 #### Manual
 
-- [ ] 3.6 Connected notes show undirected lines; isolated notes appear
-- [ ] 3.7 Node click navigates; dragging does not navigate
-- [ ] 3.8 No way to create, delete, reconnect or select an edge on the map
-- [ ] 3.9 Map renders dark on a light-mode OS; empty state shown with no notes
-- [ ] 3.10 New note mentioning an existing one shows its connection on reload
+- [x] 3.6 Connected notes show undirected lines; isolated notes appear
+- [x] 3.7 Node click navigates; dragging does not navigate
+- [x] 3.8 No way to create, delete, reconnect or select an edge on the map
+- [x] 3.9 Map renders dark on a light-mode OS; empty state shown with no notes
+- [x] 3.10 New note mentioning an existing one shows its connection on reload
 - [ ] 3.11 Migration pushed to production; backfilled relations visible on production `/map`
