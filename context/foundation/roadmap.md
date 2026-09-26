@@ -43,7 +43,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | ---- | ----------------------------------- | ------------------------------------------------------------------ | -------------- | ----------------------------------------- | -------- |
 | F-01 | campaign-notes-schema               | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —              | FR-002, Access Control                    | done |
 | S-01 | create-notes                        | add notes (predefined or custom type) to a campaign                | F-01           | FR-001, FR-003                            | done |
-| S-02 | auto-relations-memory-map           | see notes auto-connected on the memory map and navigate between them | S-01           | FR-007, FR-009, FR-010, FR-011, US-01     | proposed |
+| S-02 | auto-relations-memory-map           | see notes auto-connected on the memory map and navigate between them | S-01           | FR-007, FR-009, FR-010, FR-011, US-01     | planning |
 | S-03 | multi-campaign-support              | create and switch between multiple campaigns                       | F-01           | FR-002                                    | proposed |
 | S-04 | note-edit-delete-relation-refresh   | edit or delete a note and see a notice of relations changed        | S-02           | FR-005, FR-006, FR-008                    | proposed |
 | S-05 | note-image-attachment               | attach an image to a note                                          | S-01           | FR-004                                    | proposed |
@@ -109,7 +109,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** This is the north star — placed as early as its one real prerequisite (S-01) allows, since it's the earliest point the core hypothesis can be tested against real notes. FR-011's no-manual-override constraint applies directly here: the map UI must never expose a way to hand-create or edit a relation.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-03: User can create and switch between multiple campaigns
 

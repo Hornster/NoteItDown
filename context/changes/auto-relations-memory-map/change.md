@@ -1,7 +1,7 @@
 ---
 change_id: auto-relations-memory-map
 title: User can see notes auto-connected on a memory map and navigate between them
-status: preparing
+status: planned
 created: 2026-09-26
 updated: 2026-09-26
 archived_at: null
