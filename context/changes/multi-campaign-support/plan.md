@@ -361,16 +361,16 @@ Each signed-in page adds one small `listCampaigns` query (for the Topbar) and on
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [ ] 1.2 Unit tests pass: `npm run test:unit`
-- [ ] 1.3 Integration tests pass (including existing suites, proving signup still works): `npm run test:integration`
-- [ ] 1.4 Linting passes: `npm run lint`
-- [ ] 1.5 Type checking passes: `npx astro check`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
+- [x] 1.2 Unit tests pass: `npm run test:unit`
+- [x] 1.3 Integration tests pass (including existing suites, proving signup still works): `npm run test:integration`
+- [x] 1.4 Linting passes: `npm run lint`
+- [x] 1.5 Type checking passes: `npx astro check`
 
 #### Manual
 
-- [ ] 1.6 Applying the migration against a copy of production data (or `supabase db push --dry-run` against the linked project) reports no constraint violation for existing campaigns
-- [ ] 1.7 Signing up a new user in the running dev app still succeeds and lands on the dashboard
+- [x] 1.6 Applying the migration against a copy of production data (or `supabase db push --dry-run` against the linked project) reports no constraint violation for existing campaigns
+- [x] 1.7 Signing up a new user in the running dev app still succeeds and lands on the dashboard
 
 ### Phase 2: Campaign-scoped routing
 

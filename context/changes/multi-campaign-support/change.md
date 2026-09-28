@@ -1,7 +1,7 @@
 ---
 change_id: multi-campaign-support
 title: Create and switch between multiple campaigns
-status: plan_reviewed
+status: implementing
 created: 2026-09-28
 updated: 2026-09-28
 archived_at: null

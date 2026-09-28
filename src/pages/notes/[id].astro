@@ -3,14 +3,13 @@ import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
 import { getNote } from "@/lib/services/notes";
+import { isUuid } from "@/lib/utils";
 
 // A top-level `return` in Astro frontmatter crashes this project's ESLint
 // (@typescript-eslint/no-misused-promises); use Astro.response.status + conditional
 // rendering instead (see the additional guidance in context/changes/create-notes/plan.md).
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 const { id } = Astro.params;
-const idIsValid = typeof id === "string" && UUID_RE.test(id);
+const idIsValid = typeof id === "string" && isUuid(id);
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 // RLS makes another tenant's note come back as null too, so this also 404s for it.

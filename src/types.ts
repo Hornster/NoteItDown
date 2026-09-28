@@ -56,6 +56,14 @@ export interface CreateNoteCommand {
   type: { kind: "existing"; id: string } | { kind: "new"; name: string };
 }
 
+/** Command for POST /api/campaigns (create) and PATCH /api/campaigns/:id (rename). */
+export interface SaveCampaignCommand {
+  name: string;
+}
+
+/** The subset of a campaign shown in the campaign switcher. */
+export type CampaignSummary = Pick<Campaign, "id" | "name">;
+
 export interface NoteListItem {
   id: string;
   name: string;
