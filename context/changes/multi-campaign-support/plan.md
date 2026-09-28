@@ -396,19 +396,19 @@ Each signed-in page adds one small `listCampaigns` query (for the Topbar) and on
 
 #### Automated
 
-- [x] 3.1 Unit tests pass (incl. `campaign-paths.test.ts`, `campaigns.test.ts`): `npm run test:unit`
-- [x] 3.2 Integration tests pass: `npm run test:integration`
-- [x] 3.3 Linting passes: `npm run lint`
-- [x] 3.4 Type checking passes: `npx astro check`
-- [x] 3.5 Production build succeeds: `npm run build`
-- [x] 3.6 Smoke test passes against the preview build: `npm run smoke`
+- [x] 3.1 Unit tests pass (incl. `campaign-paths.test.ts`, `campaigns.test.ts`): `npm run test:unit` — 12f7f0c
+- [x] 3.2 Integration tests pass: `npm run test:integration` — 12f7f0c
+- [x] 3.3 Linting passes: `npm run lint` — 12f7f0c
+- [x] 3.4 Type checking passes: `npx astro check` — 12f7f0c
+- [x] 3.5 Production build succeeds: `npm run build` — 12f7f0c
+- [x] 3.6 Smoke test passes against the preview build: `npm run smoke` — 12f7f0c
 
 #### Manual
 
-- [x] 3.7 Creating "Curse of Strahd" from "New campaign" lands on its empty notes list; the switcher now lists both campaigns
-- [x] 3.8 Creating a campaign named "my campaign" (case variant of an existing one) shows the duplicate error under the name field
-- [x] 3.9 Renaming a campaign updates the heading and the switcher entry; renaming to an existing name shows the duplicate error
-- [x] 3.10 Switching on the map opens the other campaign's map; switching on a note detail opens the other campaign's notes list
-- [x] 3.11 Notes and map connections of one campaign never appear in the other
-- [x] 3.12 After switching to the second campaign, signing out and back in lands on the second campaign
-- [x] 3.13 Layout is usable at phone width (switcher does not overflow the Topbar)
+- [x] 3.7 Creating "Curse of Strahd" from "New campaign" lands on its empty notes list; the switcher now lists both campaigns — 12f7f0c
+- [x] 3.8 Creating a campaign named "my campaign" (case variant of an existing one) shows the duplicate error under the name field — 12f7f0c
+- [x] 3.9 Renaming a campaign updates the heading and the switcher entry; renaming to an existing name shows the duplicate error — 12f7f0c
+- [x] 3.10 Switching on the map opens the other campaign's map; switching on a note detail opens the other campaign's notes list — 12f7f0c
+- [x] 3.11 Notes and map connections of one campaign never appear in the other — 12f7f0c
+- [x] 3.12 After switching to the second campaign, signing out and back in lands on the second campaign — 12f7f0c
+- [x] 3.13 Layout is usable at phone width (switcher does not overflow the Topbar) — 12f7f0c
