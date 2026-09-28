@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-09-26
+updated: 2026-09-28
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -44,7 +44,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | F-01 | campaign-notes-schema               | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —              | FR-002, Access Control                    | done |
 | S-01 | create-notes                        | add notes (predefined or custom type) to a campaign                | F-01           | FR-001, FR-003                            | done |
 | S-02 | auto-relations-memory-map           | see notes auto-connected on the memory map and navigate between them | S-01           | FR-007, FR-009, FR-010, FR-011, US-01     | done        |
-| S-03 | multi-campaign-support              | create and switch between multiple campaigns                       | F-01           | FR-002                                    | proposed |
+| S-03 | multi-campaign-support              | create and switch between multiple campaigns                       | F-01           | FR-002                                    | planning |
 | S-04 | note-edit-delete-relation-refresh   | edit or delete a note and see a notice of relations changed        | S-02           | FR-005, FR-006, FR-008                    | proposed |
 | S-05 | note-image-attachment               | attach an image to a note                                          | S-01           | FR-004                                    | proposed |
 
@@ -121,7 +121,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Sequenced alongside the north star chain rather than blocking it — a single default campaign already exercises the full note+relation+map loop, so multi-campaign support doesn't reduce core-hypothesis risk and doesn't need to precede S-01/S-02.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-04: User can edit or delete a note and see relations update with a visible notice
 
