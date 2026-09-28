@@ -376,39 +376,39 @@ Each signed-in page adds one small `listCampaigns` query (for the Topbar) and on
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test:unit`
-- [x] 2.2 Integration tests pass: `npm run test:integration`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Type checking passes: `npx astro check`
-- [x] 2.5 Production build succeeds: `npm run build`
-- [x] 2.6 Smoke test passes against the preview build: `npm run smoke`
-- [x] 2.7 No references to `getActiveCampaign` or `/api/notes` remain in `src/`: `grep -rn "getActiveCampaign\|/api/notes" src` returns nothing
+- [x] 2.1 Unit tests pass: `npm run test:unit` — 972f2b7
+- [x] 2.2 Integration tests pass: `npm run test:integration` — 972f2b7
+- [x] 2.3 Linting passes: `npm run lint` — 972f2b7
+- [x] 2.4 Type checking passes: `npx astro check` — 972f2b7
+- [x] 2.5 Production build succeeds: `npm run build` — 972f2b7
+- [x] 2.6 Smoke test passes against the preview build: `npm run smoke` — 972f2b7
+- [x] 2.7 No references to `getActiveCampaign` or `/api/notes` remain in `src/`: `grep -rn "getActiveCampaign\|/api/notes" src` returns nothing — 972f2b7
 
 #### Manual
 
-- [x] 2.8 Signing in lands on `/campaigns/<default id>` showing the notes list
-- [x] 2.9 Creating a note from `/campaigns/<id>/notes/new` lands on its nested detail page; the back link shows the campaign name
-- [x] 2.10 Clicking a node on `/campaigns/<id>/map` opens the nested note URL
-- [x] 2.11 Old `/dashboard`, `/map`, `/notes/new` and `/notes/<id>` links redirect to the right nested URLs
-- [x] 2.12 Another user's campaign id in the URL, a malformed id, and a note id under the wrong campaign all show 404
+- [x] 2.8 Signing in lands on `/campaigns/<default id>` showing the notes list — 972f2b7
+- [x] 2.9 Creating a note from `/campaigns/<id>/notes/new` lands on its nested detail page; the back link shows the campaign name — 972f2b7
+- [x] 2.10 Clicking a node on `/campaigns/<id>/map` opens the nested note URL — 972f2b7
+- [x] 2.11 Old `/dashboard`, `/map`, `/notes/new` and `/notes/<id>` links redirect to the right nested URLs — 972f2b7
+- [x] 2.12 Another user's campaign id in the URL, a malformed id, and a note id under the wrong campaign all show 404 — 972f2b7
 
 ### Phase 3: Create, rename and switch UI
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass (incl. `campaign-paths.test.ts`, `campaigns.test.ts`): `npm run test:unit`
-- [ ] 3.2 Integration tests pass: `npm run test:integration`
-- [ ] 3.3 Linting passes: `npm run lint`
-- [ ] 3.4 Type checking passes: `npx astro check`
-- [ ] 3.5 Production build succeeds: `npm run build`
-- [ ] 3.6 Smoke test passes against the preview build: `npm run smoke`
+- [x] 3.1 Unit tests pass (incl. `campaign-paths.test.ts`, `campaigns.test.ts`): `npm run test:unit`
+- [x] 3.2 Integration tests pass: `npm run test:integration`
+- [x] 3.3 Linting passes: `npm run lint`
+- [x] 3.4 Type checking passes: `npx astro check`
+- [x] 3.5 Production build succeeds: `npm run build`
+- [x] 3.6 Smoke test passes against the preview build: `npm run smoke`
 
 #### Manual
 
-- [ ] 3.7 Creating "Curse of Strahd" from "New campaign" lands on its empty notes list; the switcher now lists both campaigns
-- [ ] 3.8 Creating a campaign named "my campaign" (case variant of an existing one) shows the duplicate error under the name field
-- [ ] 3.9 Renaming a campaign updates the heading and the switcher entry; renaming to an existing name shows the duplicate error
-- [ ] 3.10 Switching on the map opens the other campaign's map; switching on a note detail opens the other campaign's notes list
-- [ ] 3.11 Notes and map connections of one campaign never appear in the other
-- [ ] 3.12 After switching to the second campaign, signing out and back in lands on the second campaign
-- [ ] 3.13 Layout is usable at phone width (switcher does not overflow the Topbar)
+- [x] 3.7 Creating "Curse of Strahd" from "New campaign" lands on its empty notes list; the switcher now lists both campaigns
+- [x] 3.8 Creating a campaign named "my campaign" (case variant of an existing one) shows the duplicate error under the name field
+- [x] 3.9 Renaming a campaign updates the heading and the switcher entry; renaming to an existing name shows the duplicate error
+- [x] 3.10 Switching on the map opens the other campaign's map; switching on a note detail opens the other campaign's notes list
+- [x] 3.11 Notes and map connections of one campaign never appear in the other
+- [x] 3.12 After switching to the second campaign, signing out and back in lands on the second campaign
+- [x] 3.13 Layout is usable at phone width (switcher does not overflow the Topbar)

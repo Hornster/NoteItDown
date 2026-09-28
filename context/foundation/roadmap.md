@@ -169,6 +169,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Fuzzy/NLP-based relation matching** — Why parked: PRD Non-Goals — only exact-name string matching is used (FR-007), a deliberate MVP scope choice, not a placeholder for a "better" algorithm later.
 - **Shared/collaborative campaigns** — Why parked: PRD Non-Goals — a campaign's notes are private to the owning account; no sharing between a GM and players, or between any two accounts, in v1.
 - **Native mobile/desktop app** — Why parked: PRD Non-Goals — v1 ships as a web app only.
+- **Full mobile (phone-width) support for the web UI** — Why parked: user decision 2026-09-28 (during S-03) — the MVP targets desktop browsers and does not aim to fully support mobile layouts. The UI is expected to change in the next version, so responsive and mobile polish is deferred until then, and phone-width checks are not MVP acceptance criteria.
 
 ## Milestone History
 

@@ -29,14 +29,22 @@ if (!campaign) {
 <Layout title="Dashboard">
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
-      <Topbar campaignId={campaignId} />
+      <Topbar campaignId={campaignId} view="notes" />
       <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
         {campaign ? (
           <>
             <div class="mb-6 flex items-center justify-between gap-4">
-              <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-                {campaign.name}
-              </h1>
+              <div class="flex min-w-0 flex-wrap items-baseline gap-2">
+                <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+                  {campaign.name}
+                </h1>
+                <a
+                  href={`/campaigns/${campaign.id}/edit`}
+                  class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+                >
+                  Rename
+                </a>
+              </div>
               <div class="flex shrink-0 items-center gap-2">
                 <a
                   href={`/campaigns/${campaign.id}/map`}

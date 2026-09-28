@@ -145,15 +145,17 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 
 ### Auth routes
 
-| Route                 | Description                                              |
-| --------------------- | -------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                              |
-| `/auth/signup`        | Email/password sign-up form                              |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                      |
-| `/campaigns/[campaignId]`             | A campaign's notes list (protected; 404 if not yours)          |
-| `/campaigns/[campaignId]/notes/new`   | Create-note form (protected; 404 if not yours)                 |
-| `/campaigns/[campaignId]/notes/[id]`  | Read-only note detail page (protected; 404 if not yours)       |
-| `/campaigns/[campaignId]/map`         | The campaign's memory map (protected; 404 if not yours)        |
+| Route                                                           | Description                                              |
+| --------------------------------------------------------------- | -------------------------------------------------------- |
+| `/auth/signin`                                                  | Email/password sign-in form                              |
+| `/auth/signup`                                                  | Email/password sign-up form                              |
+| `/auth/confirm-email`                                           | Post-signup "check your inbox" page                      |
+| `/campaigns/[campaignId]`                                       | A campaign's notes list (protected; 404 if not yours)    |
+| `/campaigns/[campaignId]/notes/new`                             | Create-note form (protected; 404 if not yours)           |
+| `/campaigns/[campaignId]/notes/[id]`                            | Read-only note detail page (protected; 404 if not yours) |
+| `/campaigns/[campaignId]/map`                                   | The campaign's memory map (protected; 404 if not yours)  |
+| `/campaigns/new`                                                | Create-campaign form (protected)                         |
+| `/campaigns/[campaignId]/edit`                                  | Rename-campaign form (protected; 404 if not yours)       |
 | `/dashboard`, `/campaigns`, `/map`, `/notes/new`, `/notes/[id]` | Redirects to the resolved-campaign URL above (protected) |
 
 Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.

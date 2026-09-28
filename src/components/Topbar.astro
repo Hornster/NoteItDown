@@ -1,20 +1,39 @@
 ---
+import { createClient } from "@/lib/supabase";
+import { listCampaigns } from "@/lib/services/campaigns";
+import CampaignSwitcher from "@/components/campaigns/CampaignSwitcher";
+import type { CampaignView } from "@/lib/campaign-paths";
+import type { CampaignSummary } from "@/types";
+
 interface Props {
   campaignId?: string;
+  view?: CampaignView;
 }
 
-const { campaignId } = Astro.props;
+const { campaignId, view = "none" } = Astro.props;
 const { user } = Astro.locals;
 
 const dashboardHref = campaignId ? `/campaigns/${campaignId}` : "/dashboard";
 const mapHref = campaignId ? `/campaigns/${campaignId}/map` : "/map";
+
+let campaigns: CampaignSummary[] = [];
+if (user) {
+  const supabase = createClient(Astro.request.headers, Astro.cookies);
+  if (supabase) {
+    campaigns = await listCampaigns(supabase);
+  }
+}
 ---
 
-<div class="mb-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
   {user ? (
     <>
-      <span class="text-blue-100/70">{user.email}</span>
-      <div class="flex items-center gap-3">
+      <span class="truncate text-blue-100/70">{user.email}</span>
+      <div class="flex flex-wrap items-center gap-3">
+        <CampaignSwitcher client:load campaigns={campaigns} campaignId={campaignId} view={view} />
+        <a href="/campaigns/new" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+          New campaign
+        </a>
         <a href={dashboardHref} class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
           Dashboard
         </a>
