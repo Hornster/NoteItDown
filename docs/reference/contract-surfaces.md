@@ -11,6 +11,8 @@ Load-bearing names that downstream changes must not silently rename without upda
 - Column UPDATE grant: `authenticated` may update only `name` — `id` and `owner_id` are immutable via the API (`20260923120000_restrict_update_columns.sql`).
 - Trigger: `campaigns_set_updated_at` (before update, via `public.set_updated_at()`)
 - Trigger: `campaigns_seed_note_types` (after insert, via `public.seed_default_note_types()`) — seeds the 4 predefined note types on every campaign, not just the signup default.
+- Name check constraint: `campaigns_name_check (name = btrim(name) and name <> '' and char_length(name) <= 80)` (`20260928120000_campaign_name_rules.sql`) — trimmed, non-empty, at most 80 chars. Must stay in sync with `CAMPAIGN_NAME_MAX_LENGTH` in `src/lib/schemas/campaigns.ts`.
+- Uniqueness: `campaigns_owner_name_key` unique index on `(owner_id, lower(name))` — case-insensitive per owner (`20260928120000_campaign_name_rules.sql`).
 
 ## note_types
 
@@ -77,26 +79,27 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - **ctype dependency**: how `[:alnum:]` and `~*` classify non-ASCII letters (Ł, é) depends on the database's default locale provider (ICU vs libc). Local Supabase uses ICU (`en_US.UTF-8`). Before pushing to a hosted project, probe its behaviour with `select 'Ł' ~ '[[:alnum:]]' as alnum_ok, 'ŁÓDŹ' ~* 'łódź' as icase_ok;`; if either is false, add an explicit `collate "und-x-icu"` to the content operand in `note_mentions`.
 - **Concurrent-create race accepted**: two notes committed at the same instant in one campaign can each miss the other's uncommitted row. This is accepted as a risk for a single-user tool; `recompute_campaign_relations` is the repair path.
 
-## `POST /api/notes`
+## `POST /api/campaigns/[campaignId]/notes`
 
-- File: `src/pages/api/notes/index.ts`. `export const prerender = false`.
+- File: `src/pages/api/campaigns/[campaignId]/notes.ts`. `export const prerender = false`.
 - Request body (`CreateNoteCommand`, zod-validated by `createNoteSchema`, `.strict()`): `{ name: string; content: string; type: { kind: "existing"; id: string } | { kind: "new"; name: string } }`.
-- **No campaign id is accepted from the client, ever.** The active campaign is resolved server-side via `getActiveCampaign` (see below) — the schema's `.strict()` rejects an unknown `campaign_id` key outright.
-- Responses: 201 `{ id }` on success. 401 `ApiError` if unauthenticated (JSON, not a redirect). 400 `ApiError` with `field` on a non-JSON body or a zod failure, and on `invalid_type` (foreign/missing type). 404 `ApiError` if `getActiveCampaign` returns null. 409 `ApiError` with `field: "name"` on a duplicate note name. 500 generic `ApiError` on any other DB failure (logged server-side via `console.error`, never passed through to the client).
+- **No campaign id is accepted from the body, ever.** The campaign comes from the URL path and is ownership-checked server-side via `getCampaign` before use — the schema's `.strict()` rejects an unknown `campaign_id` body key outright.
+- Order: 401 `ApiError` if unauthenticated (JSON, not a redirect) → 500 `ApiError` if Supabase isn't configured → 404 `ApiError` if `getCampaign` returns null for the path's `campaignId` → 400 `ApiError` with `field` on a non-JSON body or a zod failure → `createNote` with the existing 409 (`field: "name"`, duplicate) / 400 (`field: "type"`, invalid type) / 500 (generic, logged server-side via `console.error`) mapping → 201 `{ id }` on success.
 - `ApiError`: `{ error: string; field?: "name" | "content" | "type" }` (`src/types.ts`).
 
-## Active campaign resolution
+## Campaign resolution
 
-- `getActiveCampaign(supabase)` (`src/lib/services/campaigns.ts`) is the **single** resolver of "which campaign does this request act on." In this slice it returns the caller's oldest campaign (`order by created_at asc, id asc limit 1`).
-- Callers: `POST /api/notes`, `/dashboard`, `/notes/new`, `/map`.
-- **S-03 must revisit this function** when multiple campaigns per user arrive (e.g. a cookie or a campaign id in the URL). If a campaign id ever starts coming from the client, the server **must re-check ownership** before using it — there is currently no client-supplied campaign id anywhere in this slice, so no such check exists yet.
+- The URL is authoritative: every campaign-scoped page and API route resolves its campaign from the path (`[campaignId]`) via `getCampaign(supabase, id)` (`src/lib/services/campaigns.ts`), which re-checks ownership (RLS) and returns `null` for a malformed id, a nonexistent id, or another tenant's campaign — callers 404 on `null`.
+- `resolveLandingCampaign(supabase, lastCampaignId)` (`src/lib/services/campaigns.ts`) is the **single** resolver of "which campaign does a request with no campaign id in the URL land on" — used only by the old top-level redirect routes (`/dashboard`, `/campaigns`, `/map`, `/notes/new`, `/notes/[id]`). It returns the caller's last-visited campaign (from the `last_campaign_id` cookie) when they still own it, otherwise their oldest campaign (`order by created_at asc, id asc limit 1`), otherwise `null`.
+- `last_campaign_id` (`src/lib/campaign-cookie.ts`, `LAST_CAMPAIGN_COOKIE`) — `httpOnly`, `sameSite: "lax"`, 1-year max-age, set by every nested campaign page (`rememberCampaign`) after its `getCampaign` ownership check succeeds. **The cookie value is never trusted directly** — it only picks a redirect target for `resolveLandingCampaign`, which re-checks ownership via `getCampaign` before returning anything.
 
 ## Routes
 
-- `/dashboard` — the active campaign's notes list (`getActiveCampaign` + `listNotes`), a "New note" link, an empty-state call to action. Protected (`PROTECTED_ROUTES` in `src/middleware.ts`).
-- `/notes/new` — the create-note form (`CreateNoteForm` island + `useCreateNote` hook). Loads `listNoteTypes` for the active campaign. Protected.
-- `/notes/[id]` — read-only note detail: name, type badge, content (`whitespace-pre-wrap`, escaped text only, no `set:html`). Returns a real 404 (`Astro.response.status = 404` + conditional rendering — a top-level `return` in Astro frontmatter crashes this project's `@typescript-eslint/no-misused-promises` lint rule) for a non-uuid id or another tenant's note (RLS makes it come back as `null` from `getNote`, indistinguishable from "doesn't exist"). This is S-02's FR-010 map-navigation target. Protected.
-- `/map` — the active campaign's memory map: every note as a node plus every relation as an undirected edge (`getActiveCampaign` + `listNotes` + `listRelations`), read-only (FR-011 — no way to create, delete, reconnect or select an edge). Clicking a node navigates to `/notes/[id]`. Renders a `MemoryMap` React Flow island (`client:only="react"`) with a one-shot `layoutMemoryMap` force layout; dragging a node only moves it locally, never persisted. Empty state (no notes) shows a "Create your first note" CTA and doesn't mount the island. Protected (`PROTECTED_ROUTES`).
+- `/campaigns/[campaignId]` — the campaign's notes list (`getCampaign` + `listNotes`), a "New note" link, an empty-state call to action. 404s (via `Astro.response.status` + conditional rendering, never a frontmatter `return`) when `getCampaign` returns `null`. Protected (`PROTECTED_ROUTES` in `src/middleware.ts`).
+- `/campaigns/[campaignId]/notes/new` — the create-note form (`CreateNoteForm` island + `useCreateNote` hook, both campaign-scoped). Loads `listNoteTypes` for the resolved campaign. 404s when `getCampaign` returns `null`. Protected.
+- `/campaigns/[campaignId]/notes/[noteId]` — read-only note detail: name, type badge, content (`whitespace-pre-wrap`, escaped text only, no `set:html`). Checks `isUuid(noteId)` before any query; 404s (same conditional-rendering pattern) when the campaign is missing, the note is missing, or `note.campaign_id !== campaign.id` (RLS already makes another tenant's note come back as `null`, indistinguishable from "doesn't exist"). Back link reads "← Back to {campaign.name}", targets `/campaigns/[campaignId]`. Protected.
+- `/campaigns/[campaignId]/map` — the campaign's memory map: every note as a node plus every relation as an undirected edge (`getCampaign` + `listNotes` + `listRelations`), read-only (FR-011 — no way to create, delete, reconnect or select an edge). Clicking a node navigates to `/campaigns/[campaignId]/notes/[noteId]`. Renders a `MemoryMap` React Flow island (`client:only="react"`, `campaignId` prop) with a one-shot `layoutMemoryMap` force layout; dragging a node only moves it locally, never persisted. Empty state (no notes) shows a "Create your first note" CTA and doesn't mount the island. 404s when `getCampaign` returns `null`. Protected.
+- `/dashboard`, `/campaigns`, `/map`, `/notes/new`, `/notes/[id]` — thin redirect endpoints (`.ts`, `export const GET`, `prerender = false`) that keep bookmarks and the sign-in redirect working. `/dashboard` and `/campaigns` → 302 to `/campaigns/{landing.id}`; `/map` → `/campaigns/{landing.id}/map`; `/notes/new` → `/campaigns/{landing.id}/notes/new`, where `landing = resolveLandingCampaign(supabase, readRememberedCampaign(cookies))`; 404 (plain text) if there's no landing campaign or Supabase isn't configured. `/notes/[id]` → 302 to `/campaigns/{note.campaign_id}/notes/{id}` when `isUuid(id)` and `getNote` finds it, else 404. Unauthenticated requests to any of these are already redirected to `/auth/signin` by middleware before the handler runs. Static routes (`/notes/new`, `/campaigns`) win over their sibling dynamic routes (`/notes/[id]`, `/campaigns/[campaignId]`).
 
 ## Migration file
 
@@ -104,6 +107,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - `supabase/migrations/20260923120000_restrict_update_columns.sql` — column-level `UPDATE` grants for `authenticated` on `campaigns` and `notes` (see above). A new updatable column on those tables must be added to the grant explicitly.
 - `supabase/migrations/20260924120000_create_note_function.sql` — adds the `create_note` function (see above) and the `notes_name_length_check` / `notes_content_length_check` constraints. Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 - `supabase/migrations/20260926120000_relation_detection.sql` — adds relation detection (see "Relation detection" above): `note_mentions`, `detect_note_relations`, `recompute_campaign_relations`, the `notes_detect_relations` trigger, and a backfill (`select public.recompute_campaign_relations(id) from public.campaigns;`). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
+- `supabase/migrations/20260928120000_campaign_name_rules.sql` — adds `campaigns_name_check` and the `campaigns_owner_name_key` unique index (see above). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 
 ## Shared TypeScript types
 

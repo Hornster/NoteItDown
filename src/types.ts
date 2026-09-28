@@ -46,9 +46,9 @@ export interface Relation {
  */
 
 /**
- * Command for POST /api/notes. Deliberately has no campaign id: the active campaign is
- * always resolved on the server via getActiveCampaign (see src/lib/services/campaigns.ts,
- * the S-03 handoff).
+ * Command for POST /api/campaigns/[campaignId]/notes. Deliberately has no campaign id in
+ * the body: the campaign comes from the URL path and is ownership-checked server-side via
+ * getCampaign (see src/lib/services/campaigns.ts) before it's used.
  */
 export interface CreateNoteCommand {
   name: string;

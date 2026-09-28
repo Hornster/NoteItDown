@@ -13,9 +13,9 @@ export const NOTE_CONTENT_MAX_LENGTH = 20000;
 export const NOTE_TYPE_NAME_MAX_LENGTH = 60;
 
 /**
- * Validates POST /api/notes bodies. `.strict()` rejects unknown top-level keys —
- * in particular `campaign_id`, which must never be accepted from the client
- * (see the S-03 handoff in context/changes/create-notes/plan.md).
+ * Validates POST /api/campaigns/[campaignId]/notes bodies. `.strict()` rejects unknown
+ * top-level keys — in particular `campaign_id`, which must never be accepted from the
+ * client; the campaign comes from the URL path and is ownership-checked server-side.
  *
  * name/content limits mirror notes_name_length_check / notes_content_length_check
  * in supabase/migrations/20260924120000_create_note_function.sql. Keep them in sync.

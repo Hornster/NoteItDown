@@ -35,6 +35,8 @@ async function request(path, { method = "GET", form } = {}) {
   return { status: response.status, location: response.headers.get("location") ?? "" };
 }
 
+let dashboardLocation = "";
+
 const steps = [
   ["home renders", () => request("/"), { status: 200 }],
   ["dashboard redirects anonymous user", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
@@ -54,10 +56,29 @@ const steps = [
     () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
     { status: 302, location: "/" },
   ],
-  ["dashboard renders for signed-in user", () => request("/dashboard"), { status: 200 }],
-  ["map renders for signed-in user", () => request("/map"), { status: 200 }],
+  [
+    "dashboard redirects signed-in user to their campaign",
+    async () => {
+      const result = await request("/dashboard");
+      dashboardLocation = result.location;
+      return result;
+    },
+    { status: 302, location: "/campaigns/" },
+  ],
+  ["campaign page renders for signed-in user", () => request(dashboardLocation), { status: 200 }],
+  [
+    "map redirects signed-in user to their campaign's map",
+    () => request("/map"),
+    { status: 302, location: "/campaigns/" },
+  ],
+  ["unknown campaign id 404s", () => request("/campaigns/00000000-0000-0000-0000-000000000000"), { status: 404 }],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
+  [
+    "campaigns route redirects anonymous user",
+    () => request("/campaigns/00000000-0000-0000-0000-000000000000"),
+    { status: 302, location: "/auth/signin" },
+  ],
 ];
 
 let failed = 0;

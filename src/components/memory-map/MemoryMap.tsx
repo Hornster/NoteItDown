@@ -36,13 +36,17 @@ function buildEdges(data: MemoryMapData): Edge[] {
     }));
 }
 
+interface Props extends MemoryMapData {
+  campaignId: string;
+}
+
 /**
  * Read-only graph of the active campaign (FR-011: nothing here can create, delete,
  * reconnect or select a relation). Nodes and edges are computed once, from the initial
  * props, with a one-shot force layout — dragging a node only moves it locally, it is
  * never persisted. Clicking a node navigates to its note.
  */
-export function MemoryMap(props: MemoryMapData) {
+export function MemoryMap(props: Props) {
   // Lazy initializers run exactly once, so the layout simulation and the edge list are
   // never recomputed on re-render (e.g. while dragging a node).
   const [initialNodes] = useState(() => buildNodes(props));
@@ -65,7 +69,7 @@ export function MemoryMap(props: MemoryMapData) {
         colorMode="dark"
         fitView
         onNodeClick={(_event, node) => {
-          window.location.assign(`/notes/${node.id}`);
+          window.location.assign(`/campaigns/${props.campaignId}/notes/${node.id}`);
         }}
       >
         <Background />

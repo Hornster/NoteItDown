@@ -2,19 +2,34 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
-import { getActiveCampaign } from "@/lib/services/campaigns";
+import { getCampaign } from "@/lib/services/campaigns";
 import { listNotes } from "@/lib/services/notes";
+import { rememberCampaign } from "@/lib/campaign-cookie";
 import type { NoteListItem } from "@/types";
 
+// A top-level `return` in Astro frontmatter crashes this project's ESLint
+// (@typescript-eslint/no-misused-promises); use Astro.response.status + conditional
+// rendering instead (see src/pages/notes/[id].astro).
+const { campaignId } = Astro.params;
+
 const supabase = createClient(Astro.request.headers, Astro.cookies);
-const campaign = supabase ? await getActiveCampaign(supabase) : null;
-const notes: NoteListItem[] = campaign && supabase ? await listNotes(supabase, campaign.id) : [];
+const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId) : null;
+
+let notes: NoteListItem[] = [];
+if (!campaign) {
+  Astro.response.status = 404;
+} else {
+  rememberCampaign(Astro.cookies, campaign.id);
+  if (supabase) {
+    notes = await listNotes(supabase, campaign.id);
+  }
+}
 ---
 
 <Layout title="Dashboard">
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
-      <Topbar />
+      <Topbar campaignId={campaignId} />
       <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
         {campaign ? (
           <>
@@ -24,13 +39,13 @@ const notes: NoteListItem[] = campaign && supabase ? await listNotes(supabase, c
               </h1>
               <div class="flex shrink-0 items-center gap-2">
                 <a
-                  href="/map"
+                  href={`/campaigns/${campaign.id}/map`}
                   class="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
                 >
                   Memory map
                 </a>
                 <a
-                  href="/notes/new"
+                  href={`/campaigns/${campaign.id}/notes/new`}
                   class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
                 >
                   New note
@@ -42,7 +57,7 @@ const notes: NoteListItem[] = campaign && supabase ? await listNotes(supabase, c
               <div class="rounded-xl border border-dashed border-white/20 bg-white/5 p-8 text-center">
                 <p class="text-blue-100/70">No notes yet.</p>
                 <a
-                  href="/notes/new"
+                  href={`/campaigns/${campaign.id}/notes/new`}
                   class="mt-3 inline-block rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
                 >
                   Create your first note
@@ -53,7 +68,7 @@ const notes: NoteListItem[] = campaign && supabase ? await listNotes(supabase, c
                 {notes.map((note) => (
                   <li>
                     <a
-                      href={`/notes/${note.id}`}
+                      href={`/campaigns/${campaign.id}/notes/${note.id}`}
                       class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 transition-colors hover:bg-white/10"
                     >
                       <span class="truncate font-medium text-white">{note.name}</span>
@@ -67,7 +82,7 @@ const notes: NoteListItem[] = campaign && supabase ? await listNotes(supabase, c
             )}
           </>
         ) : (
-          <p class="text-blue-100/70">No campaign found for this account.</p>
+          <p class="text-blue-100/70">This campaign doesn't exist or isn't yours.</p>
         )}
       </div>
     </div>

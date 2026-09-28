@@ -361,36 +361,36 @@ Each signed-in page adds one small `listCampaigns` query (for the Topbar) and on
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [x] 1.2 Unit tests pass: `npm run test:unit`
-- [x] 1.3 Integration tests pass (including existing suites, proving signup still works): `npm run test:integration`
-- [x] 1.4 Linting passes: `npm run lint`
-- [x] 1.5 Type checking passes: `npx astro check`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset` — 95df049
+- [x] 1.2 Unit tests pass: `npm run test:unit` — 95df049
+- [x] 1.3 Integration tests pass (including existing suites, proving signup still works): `npm run test:integration` — 95df049
+- [x] 1.4 Linting passes: `npm run lint` — 95df049
+- [x] 1.5 Type checking passes: `npx astro check` — 95df049
 
 #### Manual
 
-- [x] 1.6 Applying the migration against a copy of production data (or `supabase db push --dry-run` against the linked project) reports no constraint violation for existing campaigns
-- [x] 1.7 Signing up a new user in the running dev app still succeeds and lands on the dashboard
+- [x] 1.6 Applying the migration against a copy of production data (or `supabase db push --dry-run` against the linked project) reports no constraint violation for existing campaigns — 95df049
+- [x] 1.7 Signing up a new user in the running dev app still succeeds and lands on the dashboard — 95df049
 
 ### Phase 2: Campaign-scoped routing
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test:unit`
-- [ ] 2.2 Integration tests pass: `npm run test:integration`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Type checking passes: `npx astro check`
-- [ ] 2.5 Production build succeeds: `npm run build`
-- [ ] 2.6 Smoke test passes against the preview build: `npm run smoke`
-- [ ] 2.7 No references to `getActiveCampaign` or `/api/notes` remain in `src/`: `grep -rn "getActiveCampaign\|/api/notes" src` returns nothing
+- [x] 2.1 Unit tests pass: `npm run test:unit`
+- [x] 2.2 Integration tests pass: `npm run test:integration`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Type checking passes: `npx astro check`
+- [x] 2.5 Production build succeeds: `npm run build`
+- [x] 2.6 Smoke test passes against the preview build: `npm run smoke`
+- [x] 2.7 No references to `getActiveCampaign` or `/api/notes` remain in `src/`: `grep -rn "getActiveCampaign\|/api/notes" src` returns nothing
 
 #### Manual
 
-- [ ] 2.8 Signing in lands on `/campaigns/<default id>` showing the notes list
-- [ ] 2.9 Creating a note from `/campaigns/<id>/notes/new` lands on its nested detail page; the back link shows the campaign name
-- [ ] 2.10 Clicking a node on `/campaigns/<id>/map` opens the nested note URL
-- [ ] 2.11 Old `/dashboard`, `/map`, `/notes/new` and `/notes/<id>` links redirect to the right nested URLs
-- [ ] 2.12 Another user's campaign id in the URL, a malformed id, and a note id under the wrong campaign all show 404
+- [x] 2.8 Signing in lands on `/campaigns/<default id>` showing the notes list
+- [x] 2.9 Creating a note from `/campaigns/<id>/notes/new` lands on its nested detail page; the back link shows the campaign name
+- [x] 2.10 Clicking a node on `/campaigns/<id>/map` opens the nested note URL
+- [x] 2.11 Old `/dashboard`, `/map`, `/notes/new` and `/notes/<id>` links redirect to the right nested URLs
+- [x] 2.12 Another user's campaign id in the URL, a malformed id, and a note id under the wrong campaign all show 404
 
 ### Phase 3: Create, rename and switch UI
 

@@ -2,32 +2,50 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
+import { getCampaign } from "@/lib/services/campaigns";
 import { getNote } from "@/lib/services/notes";
 import { isUuid } from "@/lib/utils";
+import { rememberCampaign } from "@/lib/campaign-cookie";
+import type { NoteDetail } from "@/types";
 
 // A top-level `return` in Astro frontmatter crashes this project's ESLint
 // (@typescript-eslint/no-misused-promises); use Astro.response.status + conditional
 // rendering instead (see the additional guidance in context/changes/create-notes/plan.md).
-const { id } = Astro.params;
-const idIsValid = typeof id === "string" && isUuid(id);
+const { campaignId, noteId } = Astro.params;
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
-// RLS makes another tenant's note come back as null too, so this also 404s for it.
-const note = idIsValid && supabase ? await getNote(supabase, id) : null;
+const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId) : null;
 
-if (!note) {
+let note: NoteDetail | null = null;
+if (!campaign) {
   Astro.response.status = 404;
+} else {
+  rememberCampaign(Astro.cookies, campaign.id);
+
+  const noteIdIsValid = typeof noteId === "string" && isUuid(noteId);
+  // RLS makes another tenant's note come back as null too, so this also 404s for it.
+  const found = noteIdIsValid && supabase ? await getNote(supabase, noteId) : null;
+  note = found?.campaign_id === campaign.id ? found : null;
+
+  if (!note) {
+    Astro.response.status = 404;
+  }
 }
 ---
 
 <Layout title={note ? note.name : "Note not found"}>
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
-      <Topbar />
+      <Topbar campaignId={campaignId} />
       <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
-        <a href="/dashboard" class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-          &larr; Back to notes
-        </a>
+        {campaign && (
+          <a
+            href={`/campaigns/${campaign.id}`}
+            class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+          >
+            &larr; Back to {campaign.name}
+          </a>
+        )}
 
         {note ? (
           <>

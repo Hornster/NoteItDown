@@ -10,15 +10,11 @@ export type SaveCampaignResult =
   | { success: false; reason: "unexpected"; error: unknown };
 
 /**
- * Resolves the campaign the current request acts on.
- *
- * S-03 handoff: this slice supports exactly one campaign per user, so the "active"
- * campaign is simply the caller's oldest one. When S-03 adds multiple campaigns and a
- * way to switch between them, this function (and only this function) must change —
- * for example to read a campaign id from a cookie or the URL — and any campaign id that
- * then arrives from the client must be re-checked for ownership on the server before use.
+ * The caller's oldest campaign (RLS scopes this to their own), or null if they have none.
+ * Private: the only public entry point for "which campaign does this request act on" is
+ * resolveLandingCampaign below.
  */
-export async function getActiveCampaign(supabase: SupabaseClient): Promise<Campaign | null> {
+async function getOldestCampaign(supabase: SupabaseClient): Promise<Campaign | null> {
   const { data, error } = await supabase
     .from("campaigns")
     .select("*")
@@ -28,7 +24,7 @@ export async function getActiveCampaign(supabase: SupabaseClient): Promise<Campa
     .maybeSingle<Campaign>();
 
   if (error) {
-    throw new Error(`getActiveCampaign: query failed: ${error.message}`);
+    throw new Error(`getOldestCampaign: query failed: ${error.message}`);
   }
 
   return data ?? null;
@@ -152,5 +148,5 @@ export async function resolveLandingCampaign(
     }
   }
 
-  return getActiveCampaign(supabase);
+  return getOldestCampaign(supabase);
 }

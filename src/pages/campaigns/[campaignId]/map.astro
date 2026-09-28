@@ -3,26 +3,36 @@ import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import MemoryMap from "@/components/memory-map/MemoryMap";
 import { createClient } from "@/lib/supabase";
-import { getActiveCampaign } from "@/lib/services/campaigns";
+import { getCampaign } from "@/lib/services/campaigns";
 import { listNotes } from "@/lib/services/notes";
 import { listRelations } from "@/lib/services/relations";
+import { rememberCampaign } from "@/lib/campaign-cookie";
 import type { MemoryMapRelation, NoteListItem } from "@/types";
 
 // A top-level `return` in Astro frontmatter crashes this project's ESLint
 // (@typescript-eslint/no-misused-promises); use conditional rendering instead (see
 // src/pages/notes/[id].astro).
+const { campaignId } = Astro.params;
+
 const supabase = createClient(Astro.request.headers, Astro.cookies);
-const campaign = supabase ? await getActiveCampaign(supabase) : null;
-const [notes, relations]: [NoteListItem[], MemoryMapRelation[]] =
-  campaign && supabase
-    ? await Promise.all([listNotes(supabase, campaign.id), listRelations(supabase, campaign.id)])
-    : [[], []];
+const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId) : null;
+
+let notes: NoteListItem[] = [];
+let relations: MemoryMapRelation[] = [];
+if (!campaign) {
+  Astro.response.status = 404;
+} else {
+  rememberCampaign(Astro.cookies, campaign.id);
+  if (supabase) {
+    [notes, relations] = await Promise.all([listNotes(supabase, campaign.id), listRelations(supabase, campaign.id)]);
+  }
+}
 ---
 
 <Layout title="Memory map">
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-6xl">
-      <Topbar />
+      <Topbar campaignId={campaignId} />
       <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
         {campaign ? (
           <>
@@ -38,7 +48,7 @@ const [notes, relations]: [NoteListItem[], MemoryMapRelation[]] =
               <div class="rounded-xl border border-dashed border-white/20 bg-white/5 p-8 text-center">
                 <p class="text-blue-100/70">No notes yet.</p>
                 <a
-                  href="/notes/new"
+                  href={`/campaigns/${campaign.id}/notes/new`}
                   class="mt-3 inline-block rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
                 >
                   Create your first note
@@ -52,7 +62,7 @@ const [notes, relations]: [NoteListItem[], MemoryMapRelation[]] =
                   </p>
                 )}
                 <div class="h-[70vh] overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                  <MemoryMap client:only="react" notes={notes} relations={relations}>
+                  <MemoryMap client:only="react" campaignId={campaign.id} notes={notes} relations={relations}>
                     <div slot="fallback" class="flex h-full items-center justify-center text-blue-100/70">
                       Loading map&hellip;
                     </div>
@@ -62,7 +72,7 @@ const [notes, relations]: [NoteListItem[], MemoryMapRelation[]] =
             )}
           </>
         ) : (
-          <p class="text-blue-100/70">No campaign found for this account.</p>
+          <p class="text-blue-100/70">This campaign doesn't exist or isn't yours.</p>
         )}
       </div>
     </div>

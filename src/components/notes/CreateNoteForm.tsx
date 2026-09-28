@@ -13,6 +13,7 @@ import type { NoteType } from "@/types";
 const NEW_TYPE_VALUE = "__new__";
 
 interface Props {
+  campaignId: string;
   noteTypes: NoteType[];
 }
 
@@ -22,14 +23,14 @@ interface FieldErrors {
   content?: string;
 }
 
-export default function CreateNoteForm({ noteTypes }: Props) {
+export default function CreateNoteForm({ campaignId, noteTypes }: Props) {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [typeChoice, setTypeChoice] = useState<string>(noteTypes[0]?.id ?? NEW_TYPE_VALUE);
   const [newTypeName, setNewTypeName] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  const { submit, pending, error: serverError } = useCreateNote();
+  const { submit, pending, error: serverError } = useCreateNote(campaignId);
 
   const predefinedTypes = noteTypes.filter((t) => t.is_predefined);
   const customTypes = noteTypes.filter((t) => !t.is_predefined);

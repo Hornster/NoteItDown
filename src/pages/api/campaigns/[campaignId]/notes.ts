@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 
 import { createClient } from "@/lib/supabase";
-import { getActiveCampaign } from "@/lib/services/campaigns";
+import { getCampaign } from "@/lib/services/campaigns";
 import { createNote } from "@/lib/services/notes";
 import { createNoteSchema } from "@/lib/schemas/notes";
 import type { ApiError } from "@/types";
@@ -29,6 +29,12 @@ export const POST: APIRoute = async (context) => {
     return jsonError({ error: "Supabase is not configured." }, 500);
   }
 
+  const { campaignId } = context.params;
+  const campaign = campaignId ? await getCampaign(supabase, campaignId) : null;
+  if (!campaign) {
+    return jsonError({ error: "This campaign doesn't exist or isn't yours." }, 404);
+  }
+
   let body: unknown;
   try {
     body = await context.request.json();
@@ -48,11 +54,6 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
-  const campaign = await getActiveCampaign(supabase);
-  if (!campaign) {
-    return jsonError({ error: "No active campaign found." }, 404);
-  }
-
   const result = await createNote(supabase, campaign.id, parsed.data);
 
   if (!result.success) {
@@ -66,7 +67,7 @@ export const POST: APIRoute = async (context) => {
       return jsonError({ error: "The selected type is not valid for this campaign.", field: "type" }, 400);
     }
     // eslint-disable-next-line no-console -- surface unexpected DB failures for operators; the client only sees a generic message.
-    console.error("POST /api/notes: unexpected createNote failure", result.error);
+    console.error("POST /api/campaigns/[campaignId]/notes: unexpected createNote failure", result.error);
     return jsonError({ error: "Something went wrong while creating the note. Please try again." }, 500);
   }
 

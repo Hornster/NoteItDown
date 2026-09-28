@@ -1,5 +1,13 @@
 ---
+interface Props {
+  campaignId?: string;
+}
+
+const { campaignId } = Astro.props;
 const { user } = Astro.locals;
+
+const dashboardHref = campaignId ? `/campaigns/${campaignId}` : "/dashboard";
+const mapHref = campaignId ? `/campaigns/${campaignId}/map` : "/map";
 ---
 
 <div class="mb-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
@@ -7,10 +15,10 @@ const { user } = Astro.locals;
     <>
       <span class="text-blue-100/70">{user.email}</span>
       <div class="flex items-center gap-3">
-        <a href="/dashboard" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href={dashboardHref} class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
           Dashboard
         </a>
-        <a href="/map" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href={mapHref} class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
           Map
         </a>
         <form method="POST" action="/api/auth/signout">

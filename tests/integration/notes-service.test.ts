@@ -3,7 +3,6 @@ import type { PostgrestMaybeSingleResponse, SupabaseClient } from "@supabase/sup
 
 import { createTestUser } from "./helpers";
 
-import { getActiveCampaign } from "@/lib/services/campaigns";
 import { createNote, getNote, listNotes } from "@/lib/services/notes";
 import type { CreateNoteCommand } from "@/types";
 
@@ -27,13 +26,6 @@ describe("notes service", () => {
   beforeAll(async () => {
     tenantA = await createTestUser();
     tenantB = await createTestUser();
-  });
-
-  it("getActiveCampaign returns the signup default campaign", async () => {
-    const campaign = await getActiveCampaign(tenantA.client);
-    expect(campaign).not.toBeNull();
-    expect(campaign?.id).toBe(tenantA.campaignId);
-    expect(campaign?.name).toBe("My Campaign");
   });
 
   it("createNote maps a duplicate name to duplicate_name", async () => {
