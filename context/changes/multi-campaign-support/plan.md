@@ -100,7 +100,7 @@ Enforce campaign-name rules in the DB and zod, and add the campaign service func
 **Contract**:
 - `listCampaigns(supabase): Promise<CampaignSummary[]>` — oldest first (`created_at asc, id asc`).
 - `getCampaign(supabase, id): Promise<Campaign | null>` — `null` for a malformed UUID (checked before querying), a nonexistent id, or another tenant's campaign.
-- `createCampaign(supabase, ownerId, name): Promise<SaveCampaignResult>` and `renameCampaign(supabase, id, name): Promise<SaveCampaignResult>` where `SaveCampaignResult = { success: true; campaign: Campaign } | { success: false; reason: "duplicate_name" | "not_found" } | { success: false; reason: "unexpected"; error: unknown }`. `23505` → `duplicate_name`; a rename that updates zero rows (RLS-hidden or missing) → `not_found`. Raw DB errors never leave the service except in `unexpected` for logging (same pattern as `createNote`).
+- `createCampaign(supabase, ownerId, name): Promise<SaveCampaignResult>` and `renameCampaign(supabase, id, name): Promise<SaveCampaignResult>` where `SaveCampaignResult = { success: true; campaign: Campaign } | { success: false; reason: "duplicate_name" | "not_found" } | { success: false; reason: "unexpected"; error: unknown }`. `23505` → `duplicate_name`; a rename that updates zero rows (RLS-hidden or missing) → `not_found`; `renameCampaign` returns `not_found` for a malformed id (`!isUuid(id)`) before querying, so PostgREST's `22P02` never surfaces as `unexpected`/500. Raw DB errors never leave the service except in `unexpected` for logging (same pattern as `createNote`).
 - `resolveLandingCampaign(supabase, lastCampaignId: string | undefined): Promise<Campaign | null>` — returns `getCampaign(lastCampaignId)` when that is non-null, else the oldest campaign, else `null`.
 - A shared `UUID_RE` / `isUuid()` helper moves to `src/lib/utils.ts` (currently private to `src/pages/notes/[id].astro`).
 
@@ -110,7 +110,7 @@ Enforce campaign-name rules in the DB and zod, and add the campaign service func
 
 **Intent**: Prove the DB rules, the ownership boundary and campaign-scoped relation isolation against a real local Supabase.
 
-**Contract**: Two tenants via `createTestUser()` in `beforeAll`. Cases: `createCampaign` creates a campaign seeded with the 4 predefined note types; duplicate name differing only in case → `duplicate_name`; a direct `from("campaigns").insert` with `" padded"` and with an 81-char name fails with `23514`; `renameCampaign` succeeds and trims are enforced by the DB check; renaming to another own campaign's name → `duplicate_name`; renaming tenant B's campaign as tenant A → `not_found`; `getCampaign` returns `null` for tenant B's id and for `"not-a-uuid"`; `listCampaigns` returns oldest first with the signup default first; `resolveLandingCampaign` returns the cookie campaign when owned, and falls back to the oldest for `undefined`, a foreign id and a malformed id; a note in campaign 2 whose content mentions a note name from campaign 1 produces no relation in either campaign.
+**Contract**: Two tenants via `createTestUser()` in `beforeAll`. Cases: `createCampaign` creates a campaign seeded with the 4 predefined note types; duplicate name differing only in case → `duplicate_name`; a direct `from("campaigns").insert` with `" padded"` and with an 81-char name fails with `23514`; `renameCampaign` succeeds and trims are enforced by the DB check; renaming to another own campaign's name → `duplicate_name`; renaming tenant B's campaign as tenant A → `not_found`; renaming `"not-a-uuid"` → `not_found`; `getCampaign` returns `null` for tenant B's id and for `"not-a-uuid"`; `listCampaigns` returns oldest first with the signup default first; `resolveLandingCampaign` returns the cookie campaign when owned, and falls back to the oldest for `undefined`, a foreign id and a malformed id; a note in campaign 2 whose content mentions a note name from campaign 1 produces no relation in either campaign.
 
 ### Success Criteria:
 
@@ -155,10 +155,10 @@ Move every campaign-scoped page and the create-note API under `/campaigns/[campa
 
 **Contract**:
 - Notes list: heading is the campaign name; links to `./map` and `./notes/new` equivalents under `/campaigns/${campaign.id}`.
-- Note detail: loads the note with `getNote`; 404 when the note is `null` **or** `note.campaign_id !== campaign.id`; the back link reads "← Back to {campaign.name}" and targets `/campaigns/${campaign.id}`.
+- Note detail: checks `isUuid(noteId)` first (404 when malformed, no query), then loads the note with `getNote`; 404 when the note is `null` **or** `note.campaign_id !== campaign.id`; the back link reads "← Back to {campaign.name}" and targets `/campaigns/${campaign.id}`.
 - Map: passes `campaignId` to `MemoryMap`.
 - New note: passes `campaignId` to `CreateNoteForm`.
-- All pass `campaignId` and a `view` value (see Phase 3) to `Topbar` — in this phase `Topbar` may ignore them.
+- All pass `campaignId` to `Topbar` (declared as `interface Props { campaignId?: string }`). The `view` prop and its `CampaignView` type are added in Phase 3 §5 — passing an undeclared `view` now would fail `astro check`.
 
 #### 3. Old routes become redirect endpoints
 
@@ -186,11 +186,11 @@ Move every campaign-scoped page and the create-note API under `/campaigns/[campa
 
 #### 6. Middleware, sign-in, Topbar links, removal of the old resolver
 
-**Files**: `src/middleware.ts`, `src/pages/api/auth/signin.ts`, `src/components/Topbar.astro`, `src/lib/services/campaigns.ts`, `tests/integration/notes-service.test.ts`
+**Files**: `src/middleware.ts`, `src/pages/api/auth/signin.ts`, `src/components/Topbar.astro`, `src/lib/services/campaigns.ts`, `tests/integration/notes-service.test.ts`, `src/types.ts`, `src/lib/supabase.ts`
 
 **Intent**: Protect the new prefix and remove the now-unused single-campaign resolver.
 
-**Contract**: `PROTECTED_ROUTES` adds `"/campaigns"`. Sign-in keeps redirecting to `/dashboard` (which resolves the landing campaign). Topbar's Dashboard/Map links point to `/campaigns/{campaignId}` and `/campaigns/{campaignId}/map` when a `campaignId` prop is given, otherwise to `/dashboard` and `/map`. `getActiveCampaign` is deleted; its test in `notes-service.test.ts` is removed (covered by `resolveLandingCampaign` tests from Phase 1).
+**Contract**: `PROTECTED_ROUTES` adds `"/campaigns"`. Sign-in keeps redirecting to `/dashboard` (which resolves the landing campaign). Topbar's Dashboard/Map links point to `/campaigns/{campaignId}` and `/campaigns/{campaignId}/map` when a `campaignId` prop is given, otherwise to `/dashboard` and `/map`. `getActiveCampaign` is deleted; its test in `notes-service.test.ts` is removed (covered by `resolveLandingCampaign` tests from Phase 1). Stale comments are updated so criterion 2.7's grep passes: the `CreateNoteCommand` doc comment in `src/types.ts:49-51` (campaign id comes from the path, ownership-checked via `getCampaign`) and the `cookieOptions` comment in `src/lib/supabase.ts:10` (cite `POST /api/campaigns/[campaignId]/notes`).
 
 #### 7. Smoke test
 
@@ -278,7 +278,15 @@ Add the user-visible campaign management: create and rename forms with their API
 
 **Intent**: Every signed-in page shows the user's campaigns and lets them switch in one action.
 
-**Contract**: `Topbar` props become `{ campaignId?: string; view?: CampaignView }`; when a user is signed in it loads `listCampaigns` itself and renders a small `CampaignSwitcher` island (`client:load`) — a native `<select>` of campaigns (current one selected; a disabled placeholder when `campaignId` is absent, e.g. on `/campaigns/new`) whose `onChange` calls `window.location.assign(campaignSwitchPath(view ?? "none", selectedId))` — plus a "New campaign" link to `/campaigns/new`. Pages pass their `view`: notes list `"notes"`, map `"map"`, new note `"new-note"`, note detail `"note"`, edit `"edit"`, `/campaigns/new` none.
+**Contract**: `Topbar` props become `{ campaignId?: string; view?: CampaignView }`; when a user is signed in it loads `listCampaigns` itself and renders a small `CampaignSwitcher` island (`client:load`) — a native `<select>` of campaigns (current one selected; a disabled placeholder when `campaignId` is absent, e.g. on `/campaigns/new`) whose `onChange` calls `window.location.assign(campaignSwitchPath(view ?? "none", selectedId))` — plus a "New campaign" link to `/campaigns/new`. Each campaign page (already passing `campaignId` since Phase 2) now also passes its `view`: notes list `"notes"`, map `"map"`, new note `"new-note"`, note detail `"note"`, edit `"edit"`, `/campaigns/new` none.
+
+#### 6. Docs
+
+**Files**: `docs/reference/contract-surfaces.md`, `README.md`
+
+**Intent**: Register the surfaces this phase (and Phase 1's DTOs) introduce.
+
+**Contract**: contract-surfaces.md gains `POST /api/campaigns` and `PATCH /api/campaigns/[campaignId]` entries (body `campaignNameSchema`, `.strict()`; 201/200 `{ id }`, 400/401/404/409/500 mapping); the Routes section adds `/campaigns/new` and `/campaigns/[campaignId]/edit`; "Shared TypeScript types" adds `SaveCampaignCommand` and `CampaignSummary`; "Campaign resolution" names the `last_campaign_id` cookie (`src/lib/campaign-cookie.ts`) if Phase 2 §8 didn't already. README route table adds the two pages.
 
 ### Success Criteria:
 
