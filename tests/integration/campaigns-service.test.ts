@@ -134,10 +134,16 @@ describe("campaigns service", () => {
   });
 
   it("listCampaigns returns oldest first with the signup default first", async () => {
+    const first = await createCampaign(tenantA.client, tenantA.userId, "List Order First");
+    const second = await createCampaign(tenantA.client, tenantA.userId, "List Order Second");
+    expect(first.success).toBe(true);
+    expect(second.success).toBe(true);
+    if (!first.success || !second.success) return;
+
     const campaigns = await listCampaigns(tenantA.client);
-    expect(campaigns.length).toBeGreaterThan(1);
     expect(campaigns[0].id).toBe(tenantA.campaignId);
     expect(campaigns[0].name).toBe("My Campaign");
+    expect(campaigns.slice(-2).map((c) => c.id)).toEqual([first.campaign.id, second.campaign.id]);
   });
 
   it("resolveLandingCampaign returns the cookie campaign when owned", async () => {

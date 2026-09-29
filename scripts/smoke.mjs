@@ -72,6 +72,13 @@ const steps = [
     { status: 302, location: "/campaigns/" },
   ],
   ["unknown campaign id 404s", () => request("/campaigns/00000000-0000-0000-0000-000000000000"), { status: 404 }],
+  ["malformed campaign id 404s", () => request("/campaigns/not-a-uuid"), { status: 404 }],
+  [
+    "new-note redirects signed-in user to their campaign's form",
+    () => request("/notes/new"),
+    { status: 302, location: "/campaigns/" },
+  ],
+  ["unknown legacy note id 404s", () => request("/notes/00000000-0000-0000-0000-000000000000"), { status: 404 }],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
   [

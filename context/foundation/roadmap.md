@@ -163,6 +163,12 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 (None — the PRD's own `## Open Questions` section reports no open questions, and the interview resolved all sequencing-relevant anchors with strong Recommends.)
 
+### Observations
+
+Cross-cutting concerns surfaced during implementation reviews. Not blockers for the current milestone; research them properly when planning the next version.
+
+- **No DB-error handling strategy (server errors surface as the framework 500 page)** — Surfaced 2026-09-29 in S-03 Phase 2 review (`context/changes/multi-campaign-support/reviews/impl-review-phase-2.md`, F1). Services in `src/lib/services/` throw on any PostgREST error, and neither pages nor redirect endpoints (`src/pages/dashboard.ts`, `map.ts`, `notes/new.ts`, `notes/[id].ts`, `campaigns/index.ts`) catch it, so a transient Supabase failure — including on `/dashboard`, the post-sign-in target — shows a raw 500. Accepted as risk for the MVP because it is the consistent project-wide convention. Open question for next version: adopt a shared error boundary / error page (and a 503 response helper for endpoints) applied uniformly, rather than patching individual routes.
+
 ## Parked
 
 - **Manual relation-setting or alias system** — Why parked: PRD Non-Goals — relations are exclusively the output of automatic exact-name matching (FR-011); a real alias system is a natural v2 feature, not a v1 shortcut.

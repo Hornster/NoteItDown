@@ -12,7 +12,7 @@ export const prerender = false;
 export const GET: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return new Response("Supabase is not configured.", { status: 404 });
+    return new Response("Supabase is not configured.", { status: 500 });
   }
 
   const landing = await resolveLandingCampaign(supabase, readRememberedCampaign(context.cookies));
