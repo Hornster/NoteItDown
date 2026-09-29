@@ -39,24 +39,24 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 
 ## At a glance
 
-| ID   | Change ID                         | Outcome (user can …)                                           | Prerequisites | PRD refs                               | Status   |
-| ---- | ----------------------------------- | ------------------------------------------------------------------ | -------------- | ----------------------------------------- | -------- |
-| F-01 | campaign-notes-schema               | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —              | FR-002, Access Control                    | done |
-| S-01 | create-notes                        | add notes (predefined or custom type) to a campaign                | F-01           | FR-001, FR-003                            | done |
-| S-02 | auto-relations-memory-map           | see notes auto-connected on the memory map and navigate between them | S-01           | FR-007, FR-009, FR-010, FR-011, US-01     | done        |
-| S-03 | multi-campaign-support              | create and switch between multiple campaigns                       | F-01           | FR-002                                    | done |
-| S-04 | note-edit-delete-relation-refresh   | edit or delete a note and see a notice of relations changed        | S-02           | FR-005, FR-006, FR-008                    | proposed |
-| S-05 | note-image-attachment               | attach an image to a note                                          | S-01           | FR-004                                    | proposed |
+| ID   | Change ID                         | Outcome (user can …)                                                             | Prerequisites | PRD refs                              | Status   |
+| ---- | --------------------------------- | -------------------------------------------------------------------------------- | ------------- | ------------------------------------- | -------- |
+| F-01 | campaign-notes-schema             | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —             | FR-002, Access Control                | done     |
+| S-01 | create-notes                      | add notes (predefined or custom type) to a campaign                              | F-01          | FR-001, FR-003                        | done     |
+| S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done     |
+| S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done     |
+| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | proposed |
+| S-05 | note-image-attachment             | attach an image to a note                                                        | S-01          | FR-004                                | proposed |
 
 ## Streams
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
-| Stream | Theme                     | Chain                                | Note                                                                                    |
-| ------ | -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
-| A      | Note lifecycle & relations | `F-01` → `S-01` → `S-02` → `S-04`      | The core-hypothesis validation chain — main reading order given `market-feedback`.         |
-| B      | Campaign management        | `S-03`                                 | Joins Stream A at `F-01` — independent of the matching hypothesis, can run alongside S-01. |
-| C      | Note media                 | `S-05`                                 | Joins Stream A at `S-01` — nice-to-have polish, doesn't gate the hypothesis.                |
+| Stream | Theme                      | Chain                             | Note                                                                                       |
+| ------ | -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
+| A      | Note lifecycle & relations | `F-01` → `S-01` → `S-02` → `S-04` | The core-hypothesis validation chain — main reading order given `market-feedback`.         |
+| B      | Campaign management        | `S-03`                            | Joins Stream A at `F-01` — independent of the matching hypothesis, can run alongside S-01. |
+| C      | Note media                 | `S-05`                            | Joins Stream A at `S-01` — nice-to-have polish, doesn't gate the hypothesis.               |
 
 ## Baseline
 
@@ -150,14 +150,14 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                         | Suggested issue title                                                      | Ready for `/10x-plan` | Notes                          |
-| ---------- | ------------------------------------ | -------------------------------------------------------------------------------- | ----------------------- | --------------------------------- |
-| F-01       | campaign-notes-schema               | Data foundation: campaigns/notes/relations schema + RLS + default campaign        | yes                     | —                                  |
-| S-01       | create-notes                        | Add notes to a campaign                                                          | no                      | Blocked on F-01                    |
-| S-02       | auto-relations-memory-map           | Auto-detected relations on a memory map, with navigation                          | no                      | Blocked on S-01                    |
-| S-03       | multi-campaign-support              | Create and switch between multiple campaigns                                     | no                      | Blocked on F-01                    |
-| S-04       | note-edit-delete-relation-refresh   | Edit/delete a note with visible relation-change notice                           | no                      | Blocked on S-02                    |
-| S-05       | note-image-attachment               | Attach an image to a note                                                        | no                      | Blocked on S-01; nice-to-have      |
+| Roadmap ID | Change ID                         | Suggested issue title                                                      | Ready for `/10x-plan` | Notes                                                              |
+| ---------- | --------------------------------- | -------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------ |
+| F-01       | campaign-notes-schema             | Data foundation: campaigns/notes/relations schema + RLS + default campaign | done                  | Archived → `context/archive/2026-09-22-campaign-notes-schema/`     |
+| S-01       | create-notes                      | Add notes to a campaign                                                    | done                  | Archived → `context/archive/2026-09-23-create-notes/`              |
+| S-02       | auto-relations-memory-map         | Auto-detected relations on a memory map, with navigation                   | done                  | Archived → `context/archive/2026-09-26-auto-relations-memory-map/` |
+| S-03       | multi-campaign-support            | Create and switch between multiple campaigns                               | done                  | Archived → `context/archive/2026-09-28-multi-campaign-support/`    |
+| S-04       | note-edit-delete-relation-refresh | Edit/delete a note with visible relation-change notice                     | yes                   | Unblocked — S-02 done                                              |
+| S-05       | note-image-attachment             | Attach an image to a note                                                  | yes                   | Unblocked — S-01 done; nice-to-have                                |
 
 ## Open Roadmap Questions
 
@@ -167,7 +167,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 Cross-cutting concerns surfaced during implementation reviews. Not blockers for the current milestone; research them properly when planning the next version.
 
-- **No DB-error handling strategy (server errors surface as the framework 500 page)** — Surfaced 2026-09-29 in S-03 Phase 2 review (`context/changes/multi-campaign-support/reviews/impl-review-phase-2.md`, F1). Services in `src/lib/services/` throw on any PostgREST error, and neither pages nor redirect endpoints (`src/pages/dashboard.ts`, `map.ts`, `notes/new.ts`, `notes/[id].ts`, `campaigns/index.ts`) catch it, so a transient Supabase failure — including on `/dashboard`, the post-sign-in target — shows a raw 500. Accepted as risk for the MVP because it is the consistent project-wide convention. Open question for next version: adopt a shared error boundary / error page (and a 503 response helper for endpoints) applied uniformly, rather than patching individual routes.
+- **No DB-error handling strategy (server errors surface as the framework 500 page)** — Surfaced 2026-09-29 in S-03 Phase 2 review (`context/archive/2026-09-28-multi-campaign-support/reviews/impl-review-phase-2.md`, F1). Services in `src/lib/services/` throw on any PostgREST error, and neither pages nor redirect endpoints (`src/pages/dashboard.ts`, `map.ts`, `notes/new.ts`, `notes/[id].ts`, `campaigns/index.ts`) catch it, so a transient Supabase failure — including on `/dashboard`, the post-sign-in target — shows a raw 500. Accepted as risk for the MVP because it is the consistent project-wide convention. Open question for next version: adopt a shared error boundary / error page (and a 503 response helper for endpoints) applied uniformly, rather than patching individual routes.
 
 ## Parked
 
