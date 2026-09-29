@@ -1,23 +1,14 @@
 import type { APIRoute } from "astro";
 
+import { jsonError, fieldFromPath } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { createNote } from "@/lib/services/notes";
 import { createNoteSchema } from "@/lib/schemas/notes";
-import type { ApiError } from "@/types";
 
 export const prerender = false;
 
-function jsonError(body: ApiError, status: number): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-}
-
 const FIELDS = new Set(["name", "content", "type"]);
-
-function fieldFromPath(path: (string | number | symbol)[]): ApiError["field"] {
-  const first = path[0];
-  return typeof first === "string" && FIELDS.has(first) ? (first as ApiError["field"]) : undefined;
-}
 
 export const POST: APIRoute = async (context) => {
   if (!context.locals.user) {
@@ -48,7 +39,7 @@ export const POST: APIRoute = async (context) => {
     return jsonError(
       {
         error: firstIssue.message,
-        field: fieldFromPath(firstIssue.path),
+        field: fieldFromPath(firstIssue.path, FIELDS),
       },
       400,
     );

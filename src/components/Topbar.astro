@@ -20,7 +20,13 @@ let campaigns: CampaignSummary[] = [];
 if (user) {
   const supabase = createClient(Astro.request.headers, Astro.cookies);
   if (supabase) {
-    campaigns = await listCampaigns(supabase);
+    try {
+      campaigns = await listCampaigns(supabase);
+    } catch (error) {
+      // Topbar is navigation chrome: a failed lookup must not turn the whole page into a 500.
+      // eslint-disable-next-line no-console -- surface the DB failure for operators; the switcher just renders empty.
+      console.error("Topbar: listCampaigns failed", error);
+    }
   }
 }
 ---

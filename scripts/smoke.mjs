@@ -20,7 +20,7 @@ function storeCookies(response) {
   }
 }
 
-async function request(path, { method = "GET", form } = {}) {
+async function request(path, { method = "GET", form, json } = {}) {
   const response = await fetch(BASE_URL + path, {
     method,
     redirect: "manual",
@@ -28,8 +28,9 @@ async function request(path, { method = "GET", form } = {}) {
       Cookie: cookieHeader(),
       Origin: BASE_URL,
       ...(form ? { "Content-Type": "application/x-www-form-urlencoded" } : {}),
+      ...(json ? { "Content-Type": "application/json" } : {}),
     },
-    body: form ? new URLSearchParams(form).toString() : undefined,
+    body: form ? new URLSearchParams(form).toString() : json ? JSON.stringify(json) : undefined,
   });
   storeCookies(response);
   return { status: response.status, location: response.headers.get("location") ?? "" };
@@ -79,6 +80,16 @@ const steps = [
     { status: 302, location: "/campaigns/" },
   ],
   ["unknown legacy note id 404s", () => request("/notes/00000000-0000-0000-0000-000000000000"), { status: 404 }],
+  [
+    "create-campaign API creates a campaign",
+    () => request("/api/campaigns", { method: "POST", json: { name: "Smoke campaign" } }),
+    { status: 201 },
+  ],
+  [
+    "rename-campaign API 404s a malformed id",
+    () => request("/api/campaigns/not-a-uuid", { method: "PATCH", json: { name: "Renamed" } }),
+    { status: 404 },
+  ],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
   [

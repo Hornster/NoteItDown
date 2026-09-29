@@ -1,22 +1,14 @@
 import type { APIRoute } from "astro";
 
+import { jsonError, fieldFromPath } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 import { renameCampaign } from "@/lib/services/campaigns";
 import { campaignNameSchema } from "@/lib/schemas/campaigns";
-import type { ApiError } from "@/types";
+import { isUuid } from "@/lib/utils";
 
 export const prerender = false;
 
-function jsonError(body: ApiError, status: number): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-}
-
 const FIELDS = new Set(["name"]);
-
-function fieldFromPath(path: (string | number | symbol)[]): ApiError["field"] {
-  const first = path[0];
-  return typeof first === "string" && FIELDS.has(first) ? (first as ApiError["field"]) : undefined;
-}
 
 export const PATCH: APIRoute = async (context) => {
   if (!context.locals.user) {
@@ -29,6 +21,9 @@ export const PATCH: APIRoute = async (context) => {
   }
 
   const { campaignId } = context.params;
+  if (!campaignId || !isUuid(campaignId)) {
+    return jsonError({ error: "This campaign doesn't exist or isn't yours." }, 404);
+  }
 
   let body: unknown;
   try {
@@ -43,14 +38,10 @@ export const PATCH: APIRoute = async (context) => {
     return jsonError(
       {
         error: firstIssue.message,
-        field: fieldFromPath(firstIssue.path),
+        field: fieldFromPath(firstIssue.path, FIELDS),
       },
       400,
     );
-  }
-
-  if (!campaignId) {
-    return jsonError({ error: "This campaign doesn't exist or isn't yours." }, 404);
   }
 
   const result = await renameCampaign(supabase, campaignId, parsed.data.name);

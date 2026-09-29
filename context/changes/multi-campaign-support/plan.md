@@ -411,4 +411,4 @@ Each signed-in page adds one small `listCampaigns` query (for the Topbar) and on
 - [x] 3.10 Switching on the map opens the other campaign's map; switching on a note detail opens the other campaign's notes list — 12f7f0c
 - [x] 3.11 Notes and map connections of one campaign never appear in the other — 12f7f0c
 - [x] 3.12 After switching to the second campaign, signing out and back in lands on the second campaign — 12f7f0c
-- [x] 3.13 Layout is usable at phone width (switcher does not overflow the Topbar) — 12f7f0c
+- [x] 3.13 Layout is usable at phone width (switcher does not overflow the Topbar) (waived: mobile support parked, roadmap 2026-09-28; basic flex-wrap/truncate in place) — 12f7f0c
