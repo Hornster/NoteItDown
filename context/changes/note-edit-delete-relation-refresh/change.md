@@ -1,7 +1,7 @@
 ---
 change_id: note-edit-delete-relation-refresh
 title: Note edit delete relation refresh
-status: new
+status: planned
 created: 2026-09-29
 updated: 2026-09-29
 archived_at: null
