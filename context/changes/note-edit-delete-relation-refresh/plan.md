@@ -101,7 +101,7 @@ Add `resolve_note_type`, `update_note` and `delete_note`, and refactor `create_n
 
 **File**: `docs/reference/contract-surfaces.md`
 
-**Intent**: Register the new load-bearing names. Add sections for `resolve_note_type`, `update_note` and `delete_note` (signatures, return shapes, SQLSTATEs). In the `create_note` section, note that type resolution now delegates to `resolve_note_type`. In the "relations" section, note that edit/delete reporting reads relations but never writes them.
+**Intent**: Register the new load-bearing names. Add sections for `resolve_note_type`, `update_note` and `delete_note` (signatures, return shapes, SQLSTATEs). In the `create_note` section, note that type resolution now delegates to `resolve_note_type`. In the "relations" section, note that edit/delete reporting reads relations but never writes them. Add the new migration to the "Migration file" list.
 
 ### Success Criteria:
 
@@ -135,7 +135,7 @@ Typed service wrappers and `PATCH`/`DELETE /api/campaigns/[campaignId]/notes/[no
 
 **Contract**:
 - `RelationChange { note_id: string; name: string }`
-- `UpdateNoteResponse { id: string; rechecked: boolean; added: RelationChange[]; removed: RelationChange[] }`
+- `UpdateNoteResponse { id: string; name: string; rechecked: boolean; added: RelationChange[]; removed: RelationChange[] }`
 - `DeleteNoteResponse { name: string; removed: RelationChange[] }`
 - `UpdateNoteCommand`, the same shape as `CreateNoteCommand` (alias it)
 
@@ -176,6 +176,18 @@ Typed service wrappers and `PATCH`/`DELETE /api/campaigns/[campaignId]/notes/[no
   - `duplicate_name` → 409, `field: "name"`. `invalid_type` → 400, `field: "type"`. `not_found` → 404. `unexpected` → `console.error` and a generic 500.
 - **`DELETE`:** no body. Success returns 200 with `DeleteNoteResponse`. `not_found` → 404. `unexpected` → 500.
 
+#### 5. Service tests
+
+**File**: `tests/integration/notes-service.test.ts`
+
+**Intent**: Cover the `updateNote`/`deleteNote` reason mapping (`not_found`, `duplicate_name`, `invalid_type`) and `countNoteRelations`, as listed under Testing Strategy → Integration Tests. Reuse the file's existing tenantA/tenantB `beforeAll` setup.
+
+#### 6. Contract registry
+
+**File**: `docs/reference/contract-surfaces.md`
+
+**Intent**: Add a `PATCH /api/campaigns/[campaignId]/notes/[noteId]` / `DELETE …` section with its guard order (it uses `isUuid` rather than `getCampaign`, and the 404 for a missing or foreign note comes from `P0002`), its status mapping and its response DTOs. Under "Shared TypeScript types", add `RelationChange`, `UpdateNoteCommand`, `UpdateNoteResponse` and `DeleteNoteResponse`.
+
 ### Success Criteria:
 
 #### Automated Verification:
@@ -186,6 +198,7 @@ Typed service wrappers and `PATCH`/`DELETE /api/campaigns/[campaignId]/notes/[no
 #### Manual Verification:
 
 - `curl`/devtools against a running dev server: PATCH returns the change set; DELETE returns `removed`; a foreign note id returns 404
+- `contract-surfaces.md` has the new API route section and DTOs, matching the implemented route
 
 **Implementation Note**: Pause for human confirmation before Phase 3.
 
@@ -213,7 +226,7 @@ Edit page, a two-mode note form, the notice helper and island, and an Edit link 
 - In edit mode the fields are pre-filled, the type select defaults to `note.type_id`, and the button reads "Save changes" / "Saving…".
 - `useSaveNote(mode, campaignId, noteId?)`:
   - Create mode: POST, then navigate to the new note, exactly as today.
-  - Edit mode: PATCH. On 200, write an edit notice (below), then `window.location.assign` to the note page.
+  - Edit mode: PATCH. On 200, write an edit notice (below) with `noteName` taken from the response's `name`, which is the stored, trimmed value, not the form input, then `window.location.replace` to the note page, so Back skips the finished edit form. Create mode keeps `assign`.
   - Same error surfacing as today.
 
 #### 2. Notice helper
@@ -255,6 +268,12 @@ The note page gets:
 
 **Contract**: Route `/campaigns/[campaignId]/notes/[noteId]/edit`.
 
+#### 5. Contract registry
+
+**File**: `docs/reference/contract-surfaces.md`
+
+**Intent**: In "Routes", change the `/notes/new` entry's `CreateNoteForm` + `useCreateNote` to `NoteForm mode="create"` + `useSaveNote`. Add a `/campaigns/[campaignId]/notes/[noteId]/edit` entry (guards, `NoteForm mode="edit"`, `Topbar view="note"`). Extend the note-page entry with the Edit link and the `RelationChangeNotice` island, and in Phase 4 with the Delete dialog. Register the `noteitdown:relation-notice` sessionStorage key and its payload shape.
+
 ### Success Criteria:
 
 #### Automated Verification:
@@ -272,6 +291,7 @@ The note page gets:
 - Renaming to an existing note's name in different case shows the name-field duplicate error and stays on the form
 - Reloading the note page after the notice appeared shows no notice
 - Opening `/…/notes/<foreign-or-bad-id>/edit` shows the 404 message
+- `contract-surfaces.md` "Routes" names `NoteForm`/`useSaveNote`, lists the edit page, and registers the notice storage key
 
 **Implementation Note**: Check for a running dev server before manual testing (lessons.md). Pause for human confirmation before Phase 4.
 
@@ -301,7 +321,7 @@ A confirmation dialog on the note page, the delete hook, and the notice on the n
 
 **Contract**:
 - `useDeleteNote(campaignId, noteId)` returns `{ remove, pending, error }`.
-  - On 200 it writes a `delete` notice and assigns `/campaigns/{campaignId}`.
+  - On 200 it writes a `delete` notice and calls `window.location.replace("/campaigns/{campaignId}")`. Using `replace` keeps the deleted note's page out of history, so Back doesn't land on a 404.
   - Errors surface as `ApiError`. A 404 shows "This note doesn't exist or isn't yours."
 - `DeleteNoteButton` props: `{ campaignId; noteId; noteName; relationCount }`.
   - The dialog title is `Delete "<noteName>"?`.
@@ -398,13 +418,13 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [ ] 1.2 New RPC integration tests pass: `npm run test:integration -- note-edit-delete-functions`
-- [ ] 1.3 Existing `create_note` and relation-detection integration tests still pass: `npm run test:integration`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
+- [x] 1.2 New RPC integration tests pass: `npm run test:integration -- note-edit-delete-functions`
+- [x] 1.3 Existing `create_note` and relation-detection integration tests still pass: `npm run test:integration`
 
 #### Manual
 
-- [ ] 1.4 `contract-surfaces.md` entries match the migration's final signatures and return shapes
+- [x] 1.4 `contract-surfaces.md` entries match the migration's final signatures and return shapes
 
 ### Phase 2: Services and API routes
 
@@ -416,6 +436,7 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 #### Manual
 
 - [ ] 2.3 `curl`/devtools against a running dev server: PATCH returns the change set; DELETE returns `removed`; a foreign note id returns 404
+- [ ] 2.4 `contract-surfaces.md` has the new API route section and DTOs, matching the implemented route
 
 ### Phase 3: Edit flow and relation-change notice
 
@@ -434,6 +455,7 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 - [ ] 3.8 Renaming to an existing note's name in different case shows the name-field duplicate error and stays on the form
 - [ ] 3.9 Reloading the note page after the notice appeared shows no notice
 - [ ] 3.10 Opening `/…/notes/<foreign-or-bad-id>/edit` shows the 404 message
+- [ ] 3.11 `contract-surfaces.md` "Routes" names `NoteForm`/`useSaveNote`, lists the edit page, and registers the notice storage key
 
 ### Phase 4: Delete flow with confirmation
 

@@ -60,10 +60,19 @@ Load-bearing names that downstream changes must not silently rename without upda
 - `public.create_note(p_campaign_id uuid, p_name text, p_content text, p_type_id uuid default null, p_new_type_name text default null) returns public.notes` — defined in `supabase/migrations/20260924120000_create_note_function.sql`.
 - `language plpgsql`, `security invoker` (RLS applies as the calling user — this grants no more than direct table access already allows), `set search_path = ''`.
 - Atomically resolves-or-creates the note's type, then inserts the note, so a failed note insert (e.g. a duplicate name) can never leave behind a custom `note_types` row the user can't delete (`note_types` has no `DELETE` policy).
+- Type resolution delegates to `public.resolve_note_type` (redefined via `create or replace` in `20260930120000_note_edit_delete_functions.sql`; behaviour unchanged). The rules below describe that shared resolution.
 - Exactly one of `p_type_id` / `p_new_type_name` must be non-null, else `raise exception` with SQLSTATE `22023`.
 - With `p_new_type_name`: `insert ... on conflict (campaign_id, lower(name)) do nothing`; if no row returns, the existing type is looked up case-insensitively. A predefined type counts as a match (`'npc'` resolves to `NPC`) — no duplicate custom type is ever created for a name that collides with a predefined one.
 - Propagated SQLSTATEs the caller maps: `23505` (duplicate note name), `23514` (name/content length check), `23503` (type not in this campaign — composite FK), `42501` (RLS denial, e.g. a foreign campaign id).
 - Grants: `revoke execute ... from public, anon; grant execute ... to authenticated`.
+
+## `resolve_note_type`, `update_note`, `delete_note` functions
+
+Defined in `supabase/migrations/20260930120000_note_edit_delete_functions.sql`. All are `language plpgsql`, `security invoker`, `set search_path = ''`, with `revoke execute ... from public, anon; grant execute ... to authenticated`.
+
+- `public.resolve_note_type(p_campaign_id uuid, p_type_id uuid, p_new_type_name text) returns uuid` — the type resolution moved out of `create_note` and shared by `create_note` and `update_note`. Exactly one of `p_type_id` / `p_new_type_name` must be non-null, else SQLSTATE `22023`. With a name: `insert ... on conflict (campaign_id, lower(name)) do nothing`, then case-insensitive lookup of the existing type.
+- `public.update_note(p_campaign_id uuid, p_note_id uuid, p_name text, p_content text, p_type_id uuid default null, p_new_type_name text default null) returns jsonb` — locks the note (`where id = p_note_id and campaign_id = p_campaign_id ... for update`); no row (missing, foreign campaign or hidden by RLS) raises SQLSTATE `P0002`. Resolves the type, snapshots the other-note ids of the note's relations, runs the `UPDATE` (the existing `notes_detect_relations` trigger re-detects), snapshots again in a separate statement. Returns `{ "note": <notes row>, "rechecked": boolean, "added": [{ "note_id", "name" }], "removed": [{ "note_id", "name" }] }`; arrays ordered by `lower(name)`, `name` is the other note's current name. `rechecked` is `new.name <> old.name or new.content <> old.content` (case-sensitive, mirrors the trigger's skip rule; a case-only rename counts). Propagated SQLSTATEs: `P0002`, `23505`, `23514`, `23503`, `42501`, `22023`.
+- `public.delete_note(p_campaign_id uuid, p_note_id uuid) returns jsonb` — same `P0002` rule. Snapshots the note's relations with the other notes' names, then `DELETE`s the note (the composite FK cascade removes the relations). Returns `{ "name": <deleted note name>, "removed": [{ "note_id", "name" }] }`, ordered by `lower(name)`.
 
 ## Relation detection
 
@@ -77,6 +86,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - Grants: `revoke execute … from public, anon` and `grant execute … to authenticated` on `note_mentions`, `detect_note_relations` and `recompute_campaign_relations`. **Function EXECUTE grants cascade** — the trigger's `security invoker` functions run as the calling `authenticated` user, and Postgres checks EXECUTE on every nested call, so all three must be granted to `authenticated`, not only revoked from `anon`. The trigger function `notes_detect_relations` itself is revoke-only (no grant) — trigger invocation doesn't require direct EXECUTE privilege.
 - **Matching rule**: case-insensitive; a relation exists iff A's name occurs in B's content, or B's name occurs in A's content (checked both directions, stored as one undirected edge); a note never relates to itself; names are matched literally (metacharacters escaped) with non-word-character guards on both sides (or start/end of text).
 - **ctype dependency**: how `[:alnum:]` and `~*` classify non-ASCII letters (Ł, é) depends on the database's default locale provider (ICU vs libc). Local Supabase uses ICU (`en_US.UTF-8`). Before pushing to a hosted project, probe its behaviour with `select 'Ł' ~ '[[:alnum:]]' as alnum_ok, 'ŁÓDŹ' ~* 'łódź' as icase_ok;`; if either is false, add an explicit `collate "und-x-icu"` to the content operand in `note_mentions`.
+- **Edit/delete reporting reads, never writes**: `update_note` / `delete_note` only read `relations` (before/after snapshots) to report the diff; the rows are still written only by detection (trigger) or removed by the FK cascade.
 - **Concurrent-create race accepted**: two notes committed at the same instant in one campaign can each miss the other's uncommitted row. This is accepted as a risk for a single-user tool; `recompute_campaign_relations` is the repair path.
 
 ## `POST /api/campaigns/[campaignId]/notes`
@@ -118,6 +128,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - `supabase/migrations/20260924120000_create_note_function.sql` — adds the `create_note` function (see above) and the `notes_name_length_check` / `notes_content_length_check` constraints. Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 - `supabase/migrations/20260926120000_relation_detection.sql` — adds relation detection (see "Relation detection" above): `note_mentions`, `detect_note_relations`, `recompute_campaign_relations`, the `notes_detect_relations` trigger, and a backfill (`select public.recompute_campaign_relations(id) from public.campaigns;`). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 - `supabase/migrations/20260928120000_campaign_name_rules.sql` — adds `campaigns_name_check` and the `campaigns_owner_name_key` unique index (see above). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
+- `supabase/migrations/20260930120000_note_edit_delete_functions.sql` — adds `resolve_note_type`, `update_note`, `delete_note` and redefines `create_note` to use `resolve_note_type` (see above). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 
 ## Shared TypeScript types
 

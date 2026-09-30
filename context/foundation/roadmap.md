@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-09-29
+updated: 2026-09-30
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -45,7 +45,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | S-01 | create-notes                      | add notes (predefined or custom type) to a campaign                              | F-01          | FR-001, FR-003                        | done     |
 | S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done     |
 | S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done     |
-| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | planning |
+| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | in-progress |
 | S-05 | note-image-attachment             | attach an image to a note                                                        | S-01          | FR-004                                | proposed |
 
 ## Streams
@@ -133,7 +133,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Depends on S-02's relation-detection engine already existing — re-detection reuses that same engine, so building this after S-02 avoids duplicating the matching logic. This is also the PRD's secondary success criterion, so it's the first thing sequenced after the north star resolves.
-- **Status:** planning
+- **Status:** in-progress
 
 ### S-05: User can attach an image to a note
 
