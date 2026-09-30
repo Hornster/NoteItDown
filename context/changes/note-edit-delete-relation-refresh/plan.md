@@ -418,25 +418,25 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset`
-- [x] 1.2 New RPC integration tests pass: `npm run test:integration -- note-edit-delete-functions`
-- [x] 1.3 Existing `create_note` and relation-detection integration tests still pass: `npm run test:integration`
+- [x] 1.1 Migration applies cleanly on a fresh local DB: `npx supabase db reset` — fdc33d2
+- [x] 1.2 New RPC integration tests pass: `npm run test:integration -- note-edit-delete-functions` — fdc33d2
+- [x] 1.3 Existing `create_note` and relation-detection integration tests still pass: `npm run test:integration` — fdc33d2
 
 #### Manual
 
-- [x] 1.4 `contract-surfaces.md` entries match the migration's final signatures and return shapes
+- [x] 1.4 `contract-surfaces.md` entries match the migration's final signatures and return shapes — fdc33d2
 
 ### Phase 2: Services and API routes
 
 #### Automated
 
-- [ ] 2.1 Types, Astro check and lint pass: `npx astro check && npm run lint`
-- [ ] 2.2 Service integration tests pass: `npm run test:integration -- notes-service`
+- [x] 2.1 Types, Astro check and lint pass: `npx astro check && npm run lint`
+- [x] 2.2 Service integration tests pass: `npm run test:integration -- notes-service`
 
 #### Manual
 
-- [ ] 2.3 `curl`/devtools against a running dev server: PATCH returns the change set; DELETE returns `removed`; a foreign note id returns 404
-- [ ] 2.4 `contract-surfaces.md` has the new API route section and DTOs, matching the implemented route
+- [x] 2.3 `curl`/devtools against a running dev server: PATCH returns the change set; DELETE returns `removed`; a foreign note id returns 404
+- [x] 2.4 `contract-surfaces.md` has the new API route section and DTOs, matching the implemented route
 
 ### Phase 3: Edit flow and relation-change notice
 

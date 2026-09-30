@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { CreateNoteCommand } from "@/types";
+import type { CreateNoteCommand, UpdateNoteCommand } from "@/types";
 
 /**
  * Limits shared with the create-note form (CreateNoteForm) so client-side checks mirror
@@ -59,3 +59,15 @@ export type CreateNoteInput = z.infer<typeof createNoteSchema>;
 // (a type-only assertion, so it costs nothing at runtime and never goes "unused")
 type _AssertAssignableToCommand<T extends CreateNoteCommand> = T;
 export type _SchemaMatchesCommand = _AssertAssignableToCommand<CreateNoteInput>;
+
+/**
+ * Validates PATCH /api/campaigns/[campaignId]/notes/[noteId] bodies. The edit body has the
+ * same shape and rules as create (full replacement of name, content and type), so the
+ * schema is reused rather than forked.
+ */
+export const updateNoteSchema = createNoteSchema;
+
+export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
+
+type _AssertAssignableToUpdateCommand<T extends UpdateNoteCommand> = T;
+export type _SchemaMatchesUpdateCommand = _AssertAssignableToUpdateCommand<UpdateNoteInput>;

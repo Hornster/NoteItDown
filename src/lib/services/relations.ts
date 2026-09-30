@@ -18,3 +18,20 @@ export async function listRelations(supabase: SupabaseClient, campaignId: string
 
   return data;
 }
+
+/**
+ * Number of relations a note takes part in (as either side), for the delete dialog.
+ * RLS scopes this to the caller's own notes, so a foreign note id counts 0.
+ */
+export async function countNoteRelations(supabase: SupabaseClient, noteId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("relations")
+    .select("id", { count: "exact", head: true })
+    .or(`note_a_id.eq.${noteId},note_b_id.eq.${noteId}`);
+
+  if (error) {
+    throw new Error(`countNoteRelations: query failed: ${error.message}`);
+  }
+
+  return count ?? 0;
+}

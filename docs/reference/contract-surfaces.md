@@ -97,6 +97,15 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - Order: 401 `ApiError` if unauthenticated (JSON, not a redirect) → 500 `ApiError` if Supabase isn't configured → 404 `ApiError` if `getCampaign` returns null for the path's `campaignId` → 400 `ApiError` with `field` on a non-JSON body or a zod failure → `createNote` with the existing 409 (`field: "name"`, duplicate) / 400 (`field: "type"`, invalid type) / 500 (generic, logged server-side via `console.error`) mapping → 201 `{ id }` on success.
 - `ApiError`: `{ error: string; field?: "name" | "content" | "type" }` (`src/types.ts`).
 
+## `PATCH` / `DELETE /api/campaigns/[campaignId]/notes/[noteId]`
+
+- File: `src/pages/api/campaigns/[campaignId]/notes/[noteId].ts`. `export const prerender = false`. Services: `updateNote` / `deleteNote` (`src/lib/services/notes.ts`), thin wrappers over the `update_note` / `delete_note` RPCs.
+- Guard order (both verbs): 401 `ApiError` if unauthenticated → 500 if Supabase isn't configured → 404 if `campaignId` or `noteId` fails `isUuid`. There is **no `getCampaign` pre-check**: the 404 for a missing, foreign-campaign or other-tenant note comes from the RPC's SQLSTATE `P0002` (`not_found`), which is RLS-indistinguishable from "doesn't exist".
+- `PATCH`: body is `UpdateNoteCommand` (same shape as `CreateNoteCommand`), validated by `updateNoteSchema` (`= createNoteSchema`, `.strict()`). Then 400 `ApiError` with `field` on a non-JSON body or zod failure → `updateNote` mapping: `duplicate_name` (`23505`) → 409 `field: "name"`; `invalid_type` (`23503`/`42501`/`22023`) → 400 `field: "type"`; `not_found` (`P0002`) → 404; `unexpected` → 500 generic (logged via `console.error`) → 200 `UpdateNoteResponse`.
+- `DELETE`: no body. `deleteNote` mapping: `not_found` (`P0002`) → 404; `unexpected` → 500 generic (logged) → 200 `DeleteNoteResponse`.
+- Responses: `UpdateNoteResponse { id, name, rechecked, added: RelationChange[], removed: RelationChange[] }`; `DeleteNoteResponse { name, removed: RelationChange[] }`; `RelationChange { note_id, name }`.
+- `countNoteRelations(supabase, noteId)` (`src/lib/services/relations.ts`) is a head-only exact count of relations where the note is `note_a_id` or `note_b_id` (for the delete dialog); throws on error.
+
 ## `POST /api/campaigns` and `PATCH /api/campaigns/[campaignId]`
 
 - Files: `src/pages/api/campaigns/index.ts` (create), `src/pages/api/campaigns/[campaignId]/index.ts` (rename). Both `export const prerender = false`.
@@ -133,7 +142,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 ## Shared TypeScript types
 
 - `src/types.ts` — `Campaign`, `NoteType`, `Note`, `Relation` interfaces mirror the tables above field-for-field (snake_case, no camelCase mapping layer).
-- `src/types.ts` also holds non-table DTOs shared by the API, services and the React form: `CreateNoteCommand`, `SaveCampaignCommand` (`{ name: string }`, shared by `POST /api/campaigns` and `PATCH /api/campaigns/[campaignId]`), `NoteListItem`, `NoteDetail`, `ApiError`. Unlike the entity interfaces above, these do **not** mirror a table field for field.
+- `src/types.ts` also holds non-table DTOs shared by the API, services and the React form: `CreateNoteCommand`, `UpdateNoteCommand` (alias of `CreateNoteCommand`), `RelationChange` (`{ note_id, name }`), `UpdateNoteResponse` (`{ id, name, rechecked, added, removed }`), `DeleteNoteResponse` (`{ name, removed }`), `SaveCampaignCommand` (`{ name: string }`, shared by `POST /api/campaigns` and `PATCH /api/campaigns/[campaignId]`), `NoteListItem`, `NoteDetail`, `ApiError`. Unlike the entity interfaces above, these do **not** mirror a table field for field.
 - `CampaignSummary` (`Pick<Campaign, "id" | "name">`) is the subset of a campaign shown in the `CampaignSwitcher` island (`src/components/campaigns/CampaignSwitcher.tsx`), loaded via `listCampaigns` (`src/lib/services/campaigns.ts`) inside `Topbar.astro`.
 - `CampaignView` (`src/lib/campaign-paths.ts`) and `campaignSwitchPath(view, targetCampaignId)` are the pure mapping from a page's current view to the equivalent URL in another campaign, used by both `CampaignSwitcher` and every campaign page's `Topbar` call (`view` prop: `notes`, `map`, `new-note`, `note`, `edit`, or `none` on `/campaigns/new`).
 - `MemoryMapRelation` (`Pick<Relation, "id" | "note_a_id" | "note_b_id">`) and `MemoryMapData` (`{ notes: NoteListItem[]; relations: MemoryMapRelation[] }`) are the `/map` page's domain DTOs, free of any `@xyflow/react` types — the mapping to React Flow `Node`/`Edge` happens inside `MemoryMap.tsx`.

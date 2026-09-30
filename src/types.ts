@@ -56,6 +56,30 @@ export interface CreateNoteCommand {
   type: { kind: "existing"; id: string } | { kind: "new"; name: string };
 }
 
+/** Command for PATCH /api/campaigns/:campaignId/notes/:noteId. Same shape and rules as create. */
+export type UpdateNoteCommand = CreateNoteCommand;
+
+/** A relation gained or lost by a note edit/delete: the other note's id and current name. */
+export interface RelationChange {
+  note_id: string;
+  name: string;
+}
+
+/** Response of PATCH /api/campaigns/:campaignId/notes/:noteId. */
+export interface UpdateNoteResponse {
+  id: string;
+  name: string;
+  rechecked: boolean;
+  added: RelationChange[];
+  removed: RelationChange[];
+}
+
+/** Response of DELETE /api/campaigns/:campaignId/notes/:noteId. */
+export interface DeleteNoteResponse {
+  name: string;
+  removed: RelationChange[];
+}
+
 /** Command for POST /api/campaigns (create) and PATCH /api/campaigns/:id (rename). */
 export interface SaveCampaignCommand {
   name: string;

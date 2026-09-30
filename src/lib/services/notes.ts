@@ -5,7 +5,16 @@ import type {
   SupabaseClient,
 } from "@supabase/supabase-js";
 
-import type { CreateNoteCommand, Note, NoteDetail, NoteListItem, NoteType } from "@/types";
+import type {
+  CreateNoteCommand,
+  DeleteNoteResponse,
+  Note,
+  NoteDetail,
+  NoteListItem,
+  NoteType,
+  UpdateNoteCommand,
+  UpdateNoteResponse,
+} from "@/types";
 
 /** Row shape returned by a `notes` select embedding its type's name. */
 interface NoteWithTypeName {
@@ -23,6 +32,26 @@ export type CreateNoteResult =
   | { success: false; reason: "duplicate_name" }
   | { success: false; reason: "invalid_type" }
   | { success: false; reason: "unexpected"; error: unknown };
+
+export type UpdateNoteResult =
+  | { success: true; changes: UpdateNoteResponse }
+  | { success: false; reason: "not_found" }
+  | { success: false; reason: "duplicate_name" }
+  | { success: false; reason: "invalid_type" }
+  | { success: false; reason: "unexpected"; error: unknown };
+
+export type DeleteNoteResult =
+  | { success: true; changes: DeleteNoteResponse }
+  | { success: false; reason: "not_found" }
+  | { success: false; reason: "unexpected"; error: unknown };
+
+/** Shape of the update_note RPC's jsonb result. */
+interface UpdateNoteRpcResult {
+  note: Note;
+  rechecked: boolean;
+  added: UpdateNoteResponse["added"];
+  removed: UpdateNoteResponse["removed"];
+}
 
 /**
  * Predefined types first, then custom types, each alphabetical.
@@ -126,4 +155,66 @@ export async function createNote(
   }
 
   return { success: true, note: response.data };
+}
+
+/**
+ * Calls the update_note RPC (edit plus relation change set) and maps its DB-level failures
+ * to a typed result. P0002 means the note is missing, in another campaign, or hidden by RLS.
+ */
+export async function updateNote(
+  supabase: SupabaseClient,
+  campaignId: string,
+  noteId: string,
+  command: UpdateNoteCommand,
+): Promise<UpdateNoteResult> {
+  const response: PostgrestSingleResponse<UpdateNoteRpcResult> = await supabase.rpc("update_note", {
+    p_campaign_id: campaignId,
+    p_note_id: noteId,
+    p_name: command.name,
+    p_content: command.content,
+    p_type_id: command.type.kind === "existing" ? command.type.id : null,
+    p_new_type_name: command.type.kind === "new" ? command.type.name : null,
+  });
+
+  if (response.error) {
+    const { error } = response;
+    if (error.code === "P0002") {
+      return { success: false, reason: "not_found" };
+    }
+    if (error.code === "23505") {
+      return { success: false, reason: "duplicate_name" };
+    }
+    if (error.code === "23503" || error.code === "42501" || error.code === "22023") {
+      return { success: false, reason: "invalid_type" };
+    }
+    return { success: false, reason: "unexpected", error };
+  }
+
+  const { note, rechecked, added, removed } = response.data;
+  return { success: true, changes: { id: note.id, name: note.name, rechecked, added, removed } };
+}
+
+/**
+ * Calls the delete_note RPC and maps its DB-level failures to a typed result. The result
+ * lists the relations that disappeared with the note.
+ */
+export async function deleteNote(
+  supabase: SupabaseClient,
+  campaignId: string,
+  noteId: string,
+): Promise<DeleteNoteResult> {
+  const response: PostgrestSingleResponse<DeleteNoteResponse> = await supabase.rpc("delete_note", {
+    p_campaign_id: campaignId,
+    p_note_id: noteId,
+  });
+
+  if (response.error) {
+    const { error } = response;
+    if (error.code === "P0002") {
+      return { success: false, reason: "not_found" };
+    }
+    return { success: false, reason: "unexpected", error };
+  }
+
+  return { success: true, changes: response.data };
 }

@@ -3,7 +3,8 @@ import type { PostgrestMaybeSingleResponse, SupabaseClient } from "@supabase/sup
 
 import { createTestUser } from "./helpers";
 
-import { createNote, getNote, listNotes } from "@/lib/services/notes";
+import { createNote, deleteNote, getNote, listNotes, updateNote } from "@/lib/services/notes";
+import { countNoteRelations } from "@/lib/services/relations";
 import type { CreateNoteCommand } from "@/types";
 
 async function findTypeId(client: SupabaseClient, campaignId: string, name: string): Promise<string> {
@@ -107,5 +108,94 @@ describe("notes service", () => {
 
     const asOther = await getNote(tenantB.client, noteId);
     expect(asOther).toBeNull();
+  });
+
+  describe("updateNote / deleteNote / countNoteRelations", () => {
+    async function makeNote(name: string, content = ""): Promise<{ id: string; typeId: string }> {
+      const typeId = await findTypeId(tenantA.client, tenantA.campaignId, "npc");
+      const created = await createNote(tenantA.client, tenantA.campaignId, {
+        name,
+        content,
+        type: { kind: "existing", id: typeId },
+      });
+      if (!created.success) {
+        throw new Error(`makeNote failed: ${created.reason}`);
+      }
+      return { id: created.note.id, typeId };
+    }
+
+    it("updateNote returns the change set on success", async () => {
+      const { id, typeId } = await makeNote("Svc Upd Base");
+      const result = await updateNote(tenantA.client, tenantA.campaignId, id, {
+        name: "Svc Upd Renamed",
+        content: "new body",
+        type: { kind: "existing", id: typeId },
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.changes.id).toBe(id);
+        expect(result.changes.name).toBe("Svc Upd Renamed");
+        expect(result.changes.rechecked).toBe(true);
+        expect(result.changes.added).toEqual([]);
+        expect(result.changes.removed).toEqual([]);
+      }
+    });
+
+    it("updateNote maps a missing or foreign note to not_found", async () => {
+      const { id, typeId } = await makeNote("Svc Upd Foreign");
+      const command = { name: "x", content: "", type: { kind: "existing" as const, id: typeId } };
+
+      const missing = await updateNote(tenantA.client, tenantA.campaignId, crypto.randomUUID(), command);
+      expect(!missing.success && missing.reason).toBe("not_found");
+
+      const foreign = await updateNote(tenantB.client, tenantB.campaignId, id, command);
+      expect(!foreign.success && foreign.reason).toBe("not_found");
+    });
+
+    it("updateNote maps a duplicate name to duplicate_name", async () => {
+      await makeNote("Svc Upd Dup Taken");
+      const { id, typeId } = await makeNote("Svc Upd Dup Other");
+      const result = await updateNote(tenantA.client, tenantA.campaignId, id, {
+        name: "svc upd dup taken",
+        content: "",
+        type: { kind: "existing", id: typeId },
+      });
+      expect(!result.success && result.reason).toBe("duplicate_name");
+    });
+
+    it("updateNote maps a foreign type id to invalid_type", async () => {
+      const { id } = await makeNote("Svc Upd Bad Type");
+      const foreignTypeId = await findTypeId(tenantB.client, tenantB.campaignId, "npc");
+      const result = await updateNote(tenantA.client, tenantA.campaignId, id, {
+        name: "Svc Upd Bad Type",
+        content: "",
+        type: { kind: "existing", id: foreignTypeId },
+      });
+      expect(!result.success && result.reason).toBe("invalid_type");
+    });
+
+    it("deleteNote removes the note, reports its relations, and maps a missing note to not_found", async () => {
+      const target = await makeNote("Svc Del Target");
+      const linker = await makeNote("Svc Del Linker", "mentions Svc Del Target here");
+
+      expect(await countNoteRelations(tenantA.client, target.id)).toBe(1);
+      expect(await countNoteRelations(tenantB.client, target.id)).toBe(0);
+
+      const foreign = await deleteNote(tenantB.client, tenantB.campaignId, target.id);
+      expect(!foreign.success && foreign.reason).toBe("not_found");
+
+      const result = await deleteNote(tenantA.client, tenantA.campaignId, target.id);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.changes.name).toBe("Svc Del Target");
+        expect(result.changes.removed).toEqual([{ note_id: linker.id, name: "Svc Del Linker" }]);
+      }
+
+      expect(await getNote(tenantA.client, target.id)).toBeNull();
+      expect(await countNoteRelations(tenantA.client, linker.id)).toBe(0);
+
+      const again = await deleteNote(tenantA.client, tenantA.campaignId, target.id);
+      expect(!again.success && again.reason).toBe("not_found");
+    });
   });
 });
