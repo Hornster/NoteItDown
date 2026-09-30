@@ -4,8 +4,10 @@ import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { getNote } from "@/lib/services/notes";
+import { countNoteRelations } from "@/lib/services/relations";
 import { isUuid } from "@/lib/utils";
 import RelationChangeNotice from "@/components/notes/RelationChangeNotice";
+import DeleteNoteButton from "@/components/notes/DeleteNoteButton";
 import { rememberCampaign } from "@/lib/campaign-cookie";
 import type { NoteDetail } from "@/types";
 
@@ -18,6 +20,7 @@ const supabase = createClient(Astro.request.headers, Astro.cookies);
 const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId) : null;
 
 let note: NoteDetail | null = null;
+let relationCount = 0;
 if (!campaign) {
   Astro.response.status = 404;
 } else {
@@ -30,6 +33,8 @@ if (!campaign) {
 
   if (!note) {
     Astro.response.status = 404;
+  } else if (supabase) {
+    relationCount = await countNoteRelations(supabase, note.id);
   }
 }
 ---
@@ -61,6 +66,13 @@ if (!campaign) {
                 >
                   Edit
                 </a>
+                <DeleteNoteButton
+                  client:load
+                  campaignId={note.campaign_id}
+                  noteId={note.id}
+                  noteName={note.name}
+                  relationCount={relationCount}
+                />
                 <span class="rounded-full bg-purple-500/30 px-2.5 py-1 text-xs text-purple-200">{note.type_name}</span>
               </div>
             </div>

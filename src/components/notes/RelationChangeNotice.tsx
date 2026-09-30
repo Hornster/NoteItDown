@@ -76,7 +76,7 @@ export default function RelationChangeNotice({ campaignId, target }: Props) {
             {hasRemoved ? (
               <RelationLinks label="Relations removed" changes={notice.removed} campaignId={campaignId} />
             ) : (
-              <p>It had no relations, so none were removed.</p>
+              <p>No relations touched.</p>
             )}
           </>
         )}

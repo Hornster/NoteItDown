@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-09-30
+updated: 2026-10-01
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -176,6 +176,7 @@ Cross-cutting concerns surfaced during implementation reviews. Not blockers for 
 - **Shared/collaborative campaigns** — Why parked: PRD Non-Goals — a campaign's notes are private to the owning account; no sharing between a GM and players, or between any two accounts, in v1.
 - **Native mobile/desktop app** — Why parked: PRD Non-Goals — v1 ships as a web app only.
 - **Full mobile (phone-width) support for the web UI** — Why parked: user decision 2026-09-28 (during S-03) — the MVP targets desktop browsers and does not aim to fully support mobile layouts. The UI is expected to change in the next version, so responsive and mobile polish is deferred until then, and phone-width checks are not MVP acceptance criteria.
+- **Restyle the shadcn alert-dialog to the app's dark theme** — Why parked: user decision 2026-10-01 (during S-04 Phase 4 manual check 4.6) — the note-delete confirmation dialog (`src/components/ui/alert-dialog.tsx`, used by `src/components/notes/DeleteNoteButton.tsx`) keeps shadcn's default light-theme tokens (`bg-background` etc.) and visibly clashes with the dark glass-panel pages. It works correctly, and the UI look is planned to change in the next version, so the restyle is deferred until then.
 
 ## Milestone History
 

@@ -442,35 +442,35 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 
 #### Automated
 
-- [x] 3.1 Unit tests pass, including `relation-notice.test.ts`: `npm run test:unit`
-- [x] 3.2 Types, Astro check and lint pass: `npx astro check && npm run lint`
-- [x] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Unit tests pass, including `relation-notice.test.ts`: `npm run test:unit` — caab4fa
+- [x] 3.2 Types, Astro check and lint pass: `npx astro check && npm run lint` — caab4fa
+- [x] 3.3 Production build succeeds: `npm run build` — caab4fa
 
 #### Manual
 
-- [x] 3.4 Creating a note still works end to end and shows no relation notice
-- [x] 3.5 Editing content so that a new note name is mentioned shows "Relations added: <name>" (linked) on the note page
-- [x] 3.6 Renaming a note so another note's mention no longer matches shows "Relations removed: <name>"
-- [x] 3.7 A content edit that affects no relation shows "Relations unchanged."; a type-only edit shows only "Saved …"
-- [x] 3.8 Renaming to an existing note's name in different case shows the name-field duplicate error and stays on the form
-- [x] 3.9 Reloading the note page after the notice appeared shows no notice
-- [x] 3.10 Opening `/…/notes/<foreign-or-bad-id>/edit` shows the 404 message
-- [x] 3.11 `contract-surfaces.md` "Routes" names `NoteForm`/`useSaveNote`, lists the edit page, and registers the notice storage key
+- [x] 3.4 Creating a note still works end to end and shows no relation notice — caab4fa
+- [x] 3.5 Editing content so that a new note name is mentioned shows "Relations added: <name>" (linked) on the note page — caab4fa
+- [x] 3.6 Renaming a note so another note's mention no longer matches shows "Relations removed: <name>" — caab4fa
+- [x] 3.7 A content edit that affects no relation shows "Relations unchanged."; a type-only edit shows only "Saved …" — caab4fa
+- [x] 3.8 Renaming to an existing note's name in different case shows the name-field duplicate error and stays on the form — caab4fa
+- [x] 3.9 Reloading the note page after the notice appeared shows no notice — caab4fa
+- [x] 3.10 Opening `/…/notes/<foreign-or-bad-id>/edit` shows the 404 message — caab4fa
+- [x] 3.11 `contract-surfaces.md` "Routes" names `NoteForm`/`useSaveNote`, lists the edit page, and registers the notice storage key — caab4fa
 
 ### Phase 4: Delete flow with confirmation
 
 #### Automated
 
-- [ ] 4.1 Unit tests pass: `npm run test:unit`
-- [ ] 4.2 All integration tests pass: `npm run test:integration`
-- [ ] 4.3 Types, Astro check and lint pass: `npx astro check && npm run lint`
-- [ ] 4.4 Production build succeeds: `npm run build`
-- [ ] 4.5 Auth smoke test passes against preview: `npm run smoke`
+- [x] 4.1 Unit tests pass: `npm run test:unit`
+- [x] 4.2 All integration tests pass: `npm run test:integration`
+- [x] 4.3 Types, Astro check and lint pass: `npx astro check && npm run lint`
+- [x] 4.4 Production build succeeds: `npm run build`
+- [x] 4.5 Auth smoke test passes against preview: `npm run smoke`
 
 #### Manual
 
-- [ ] 4.6 Clicking Delete opens a dialog naming the note and its relation count; Cancel and Esc close it without deleting
-- [ ] 4.7 Confirming deletes the note, lands on the note list without it, and shows "Deleted … Relations removed: …" with linked names
-- [ ] 4.8 Deleting a note with no relations shows "It had no relations, so none were removed."
-- [ ] 4.9 The memory map no longer shows the deleted note or its edges after reload
-- [ ] 4.10 Reloading the note list after the notice appeared shows no notice
+- [x] 4.6 Clicking Delete opens a dialog naming the note and its relation count; Cancel and Esc close it without deleting
+- [x] 4.7 Confirming deletes the note, lands on the note list without it, and shows "Deleted … Relations removed: …" with linked names
+- [x] 4.8 Deleting a note with no relations shows "It had no relations, so none were removed."
+- [x] 4.9 The memory map no longer shows the deleted note or its edges after reload
+- [x] 4.10 Reloading the note list after the notice appeared shows no notice

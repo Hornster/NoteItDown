@@ -4,6 +4,7 @@ import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { listNotes } from "@/lib/services/notes";
+import RelationChangeNotice from "@/components/notes/RelationChangeNotice";
 import { rememberCampaign } from "@/lib/campaign-cookie";
 import type { NoteListItem } from "@/types";
 
@@ -60,6 +61,12 @@ if (!campaign) {
                 </a>
               </div>
             </div>
+
+            <RelationChangeNotice
+              client:load
+              campaignId={campaign.id}
+              target={{ kind: "delete", campaignId: campaign.id }}
+            />
 
             {notes.length === 0 ? (
               <div class="rounded-xl border border-dashed border-white/20 bg-white/5 p-8 text-center">
