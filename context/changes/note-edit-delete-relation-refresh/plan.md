@@ -461,16 +461,16 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 
 #### Automated
 
-- [x] 4.1 Unit tests pass: `npm run test:unit`
-- [x] 4.2 All integration tests pass: `npm run test:integration`
-- [x] 4.3 Types, Astro check and lint pass: `npx astro check && npm run lint`
-- [x] 4.4 Production build succeeds: `npm run build`
-- [x] 4.5 Auth smoke test passes against preview: `npm run smoke`
+- [x] 4.1 Unit tests pass: `npm run test:unit` — e9240ea
+- [x] 4.2 All integration tests pass: `npm run test:integration` — e9240ea
+- [x] 4.3 Types, Astro check and lint pass: `npx astro check && npm run lint` — e9240ea
+- [x] 4.4 Production build succeeds: `npm run build` — e9240ea
+- [x] 4.5 Auth smoke test passes against preview: `npm run smoke` — e9240ea
 
 #### Manual
 
-- [x] 4.6 Clicking Delete opens a dialog naming the note and its relation count; Cancel and Esc close it without deleting
-- [x] 4.7 Confirming deletes the note, lands on the note list without it, and shows "Deleted … Relations removed: …" with linked names
-- [x] 4.8 Deleting a note with no relations shows "It had no relations, so none were removed."
-- [x] 4.9 The memory map no longer shows the deleted note or its edges after reload
-- [x] 4.10 Reloading the note list after the notice appeared shows no notice
+- [x] 4.6 Clicking Delete opens a dialog naming the note and its relation count; Cancel and Esc close it without deleting — e9240ea
+- [x] 4.7 Confirming deletes the note, lands on the note list without it, and shows "Deleted … Relations removed: …" with linked names — e9240ea
+- [x] 4.8 Deleting a note with no relations shows "It had no relations, so none were removed." — e9240ea
+- [x] 4.9 The memory map no longer shows the deleted note or its edges after reload — e9240ea
+- [x] 4.10 Reloading the note list after the notice appeared shows no notice — e9240ea
