@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { getNote } from "@/lib/services/notes";
 import { isUuid } from "@/lib/utils";
+import RelationChangeNotice from "@/components/notes/RelationChangeNotice";
 import { rememberCampaign } from "@/lib/campaign-cookie";
 import type { NoteDetail } from "@/types";
 
@@ -53,10 +54,22 @@ if (!campaign) {
               <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
                 {note.name}
               </h1>
-              <span class="shrink-0 rounded-full bg-purple-500/30 px-2.5 py-1 text-xs text-purple-200">
-                {note.type_name}
-              </span>
+              <div class="flex shrink-0 items-center gap-3">
+                <a
+                  href={`/campaigns/${note.campaign_id}/notes/${note.id}/edit`}
+                  class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+                >
+                  Edit
+                </a>
+                <span class="rounded-full bg-purple-500/30 px-2.5 py-1 text-xs text-purple-200">{note.type_name}</span>
+              </div>
             </div>
+
+            <RelationChangeNotice
+              client:load
+              campaignId={note.campaign_id}
+              target={{ kind: "edit", noteId: note.id }}
+            />
 
             <div class="rounded-xl border border-white/10 bg-white/5 p-4 whitespace-pre-wrap text-blue-100/90">
               {note.content}

@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
-import CreateNoteForm from "@/components/notes/CreateNoteForm";
+import NoteForm from "@/components/notes/NoteForm";
 import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { listNoteTypes } from "@/lib/services/notes";
@@ -36,7 +36,7 @@ if (!campaign) {
           New note
         </h1>
         {campaign ? (
-          <CreateNoteForm campaignId={campaign.id} noteTypes={noteTypes} client:load />
+          <NoteForm mode="create" campaignId={campaign.id} noteTypes={noteTypes} client:load />
         ) : (
           <p class="text-blue-100/70">This campaign doesn't exist or isn't yours.</p>
         )}

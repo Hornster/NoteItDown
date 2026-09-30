@@ -14,7 +14,7 @@ interface UseSaveCampaignResult {
  * POSTs to /api/campaigns (create) or PATCHes /api/campaigns/[campaignId] (rename),
  * depending on `mode`. On success it navigates to /campaigns/{id}. On any other response
  * it surfaces an ApiError for the form to render — under the named field when one is
- * given, otherwise as a general server error. Mirrors useCreateNote.
+ * given, otherwise as a general server error. Mirrors useSaveNote.
  */
 export function useSaveCampaign(mode: "create" | "rename", campaignId?: string): UseSaveCampaignResult {
   const [pending, setPending] = useState(false);

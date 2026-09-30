@@ -1,21 +1,25 @@
 import React, { useState } from "react";
-import { FileText, Tag, AlignLeft, Plus } from "lucide-react";
+import { FileText, Tag, AlignLeft, Plus, Save } from "lucide-react";
 import { FormField } from "@/components/auth/FormField";
 import { ServerError } from "@/components/auth/ServerError";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateNote } from "@/components/hooks/useCreateNote";
+import { useSaveNote } from "@/components/hooks/useSaveNote";
 import { NOTE_CONTENT_MAX_LENGTH, NOTE_NAME_MAX_LENGTH, NOTE_TYPE_NAME_MAX_LENGTH } from "@/lib/schemas/notes";
 import type { NoteType } from "@/types";
 
 /** Sentinel select value that reveals the custom-type text input. */
 const NEW_TYPE_VALUE = "__new__";
 
-interface Props {
-  campaignId: string;
-  noteTypes: NoteType[];
-}
+type Props =
+  | { mode: "create"; campaignId: string; noteTypes: NoteType[] }
+  | {
+      mode: "edit";
+      campaignId: string;
+      noteTypes: NoteType[];
+      note: { id: string; name: string; content: string; type_id: string };
+    };
 
 interface FieldErrors {
   name?: string;
@@ -23,14 +27,17 @@ interface FieldErrors {
   content?: string;
 }
 
-export default function CreateNoteForm({ campaignId, noteTypes }: Props) {
-  const [name, setName] = useState("");
-  const [content, setContent] = useState("");
-  const [typeChoice, setTypeChoice] = useState<string>(noteTypes[0]?.id ?? NEW_TYPE_VALUE);
+/** Serves both create and edit: same fields and validation, pre-filled from `note` in edit mode. */
+export default function NoteForm(props: Props) {
+  const { mode, campaignId, noteTypes } = props;
+  const note = props.mode === "edit" ? props.note : null;
+  const [name, setName] = useState(note?.name ?? "");
+  const [content, setContent] = useState(note?.content ?? "");
+  const [typeChoice, setTypeChoice] = useState<string>(note ? note.type_id : (noteTypes[0]?.id ?? NEW_TYPE_VALUE));
   const [newTypeName, setNewTypeName] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  const { submit, pending, error: serverError } = useCreateNote(campaignId);
+  const { submit, pending, error: serverError } = useSaveNote(mode, campaignId, note?.id);
 
   const predefinedTypes = noteTypes.filter((t) => t.is_predefined);
   const customTypes = noteTypes.filter((t) => !t.is_predefined);
@@ -190,12 +197,12 @@ export default function CreateNoteForm({ campaignId, noteTypes }: Props) {
         {pending ? (
           <span className="flex items-center gap-2">
             <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            Creating…
+            {mode === "edit" ? "Saving…" : "Creating…"}
           </span>
         ) : (
           <span className="flex items-center gap-2">
-            <Plus className="size-4" />
-            Create note
+            {mode === "edit" ? <Save className="size-4" /> : <Plus className="size-4" />}
+            {mode === "edit" ? "Save changes" : "Create note"}
           </span>
         )}
       </Button>

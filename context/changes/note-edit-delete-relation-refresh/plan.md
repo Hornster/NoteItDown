@@ -430,32 +430,32 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 
 #### Automated
 
-- [x] 2.1 Types, Astro check and lint pass: `npx astro check && npm run lint`
-- [x] 2.2 Service integration tests pass: `npm run test:integration -- notes-service`
+- [x] 2.1 Types, Astro check and lint pass: `npx astro check && npm run lint` — 05fa19c
+- [x] 2.2 Service integration tests pass: `npm run test:integration -- notes-service` — 05fa19c
 
 #### Manual
 
-- [x] 2.3 `curl`/devtools against a running dev server: PATCH returns the change set; DELETE returns `removed`; a foreign note id returns 404
-- [x] 2.4 `contract-surfaces.md` has the new API route section and DTOs, matching the implemented route
+- [x] 2.3 `curl`/devtools against a running dev server: PATCH returns the change set; DELETE returns `removed`; a foreign note id returns 404 — 05fa19c
+- [x] 2.4 `contract-surfaces.md` has the new API route section and DTOs, matching the implemented route — 05fa19c
 
 ### Phase 3: Edit flow and relation-change notice
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass, including `relation-notice.test.ts`: `npm run test:unit`
-- [ ] 3.2 Types, Astro check and lint pass: `npx astro check && npm run lint`
-- [ ] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Unit tests pass, including `relation-notice.test.ts`: `npm run test:unit`
+- [x] 3.2 Types, Astro check and lint pass: `npx astro check && npm run lint`
+- [x] 3.3 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Creating a note still works end to end and shows no relation notice
-- [ ] 3.5 Editing content so that a new note name is mentioned shows "Relations added: <name>" (linked) on the note page
-- [ ] 3.6 Renaming a note so another note's mention no longer matches shows "Relations removed: <name>"
-- [ ] 3.7 A content edit that affects no relation shows "Relations unchanged."; a type-only edit shows only "Saved …"
-- [ ] 3.8 Renaming to an existing note's name in different case shows the name-field duplicate error and stays on the form
-- [ ] 3.9 Reloading the note page after the notice appeared shows no notice
-- [ ] 3.10 Opening `/…/notes/<foreign-or-bad-id>/edit` shows the 404 message
-- [ ] 3.11 `contract-surfaces.md` "Routes" names `NoteForm`/`useSaveNote`, lists the edit page, and registers the notice storage key
+- [x] 3.4 Creating a note still works end to end and shows no relation notice
+- [x] 3.5 Editing content so that a new note name is mentioned shows "Relations added: <name>" (linked) on the note page
+- [x] 3.6 Renaming a note so another note's mention no longer matches shows "Relations removed: <name>"
+- [x] 3.7 A content edit that affects no relation shows "Relations unchanged."; a type-only edit shows only "Saved …"
+- [x] 3.8 Renaming to an existing note's name in different case shows the name-field duplicate error and stays on the form
+- [x] 3.9 Reloading the note page after the notice appeared shows no notice
+- [x] 3.10 Opening `/…/notes/<foreign-or-bad-id>/edit` shows the 404 message
+- [x] 3.11 `contract-surfaces.md` "Routes" names `NoteForm`/`useSaveNote`, lists the edit page, and registers the notice storage key
 
 ### Phase 4: Delete flow with confirmation
 

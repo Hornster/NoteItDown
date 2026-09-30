@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { CreateNoteCommand, UpdateNoteCommand } from "@/types";
 
 /**
- * Limits shared with the create-note form (CreateNoteForm) so client-side checks mirror
+ * Limits shared with the create-note form (NoteForm) so client-side checks mirror
  * these exactly. Keep in sync with notes_name_length_check / notes_content_length_check
  * in supabase/migrations/20260924120000_create_note_function.sql (name/content) — the
  * type-name limit is zod-only (see "Signup and seeding coupling" in the plan).

@@ -11,7 +11,7 @@ type Props = { mode: "create" } | { mode: "rename"; campaignId: string; initialN
 /**
  * Serves both create and rename: same fields, same client-side validation (mirroring
  * campaignNameSchema via CAMPAIGN_NAME_MAX_LENGTH), same server-error mapping as
- * CreateNoteForm/useCreateNote.
+ * NoteForm/useSaveNote.
  */
 export default function CampaignForm(props: Props) {
   const [name, setName] = useState(props.mode === "rename" ? props.initialName : "");
