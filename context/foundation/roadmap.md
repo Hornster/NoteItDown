@@ -180,6 +180,10 @@ them may as well be in various places at once, and bare numbers say NOTHING. A s
 - **Native mobile/desktop app** — Why parked: PRD Non-Goals — v1 ships as a web app only.
 - **Full mobile (phone-width) support for the web UI** — Why parked: user decision 2026-09-28 (during S-03) — the MVP targets desktop browsers and does not aim to fully support mobile layouts. The UI is expected to change in the next version, so responsive and mobile polish is deferred until then, and phone-width checks are not MVP acceptance criteria.
 - **Restyle the shadcn alert-dialog to the app's dark theme** — Why parked: user decision 2026-10-01 (during S-04 Phase 4 manual check 4.6) — the note-delete confirmation dialog (`src/components/ui/alert-dialog.tsx`, used by `src/components/notes/DeleteNoteButton.tsx`) keeps shadcn's default light-theme tokens (`bg-background` etc.) and visibly clashes with the dark glass-panel pages. It works correctly, and the UI look is planned to change in the next version, so the restyle is deferred until then.
+- **MIT notices for remaining bundled dependencies on the `/licenses` page** — Why parked: user decision 2026-10-01 (during S-05 scoping).
+  - S-05 adds the public `/licenses` page, linked from a new footer in `src/layouts/Layout.astro`. It lists only the libraries S-05 adds: `heic-to`, libheif and libde265 under LGPL-3.0, and `browser-image-compression` under MIT.
+  - The other dependencies that ship to the browser are MIT-licensed too, and their notices also belong on that page. Examples: React, Radix UI / shadcn, Tailwind, clsx, tailwind-merge.
+  - This is deferred to keep S-05 focused. The likely approach is a list generated at build time (e.g. a Vite/Rollup license plugin) rather than one maintained by hand.
 
 ## Milestone History
 
