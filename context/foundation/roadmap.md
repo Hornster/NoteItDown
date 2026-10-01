@@ -45,7 +45,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | S-01 | create-notes                      | add notes (predefined or custom type) to a campaign                              | F-01          | FR-001, FR-003                        | done     |
 | S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done     |
 | S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done     |
-| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | in-progress |
+| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | done     |
 | S-05 | note-image-attachment             | attach an image to a note                                                        | S-01          | FR-004                                | proposed |
 
 ## Streams
@@ -133,7 +133,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Depends on S-02's relation-detection engine already existing — re-detection reuses that same engine, so building this after S-02 avoids duplicating the matching logic. This is also the PRD's secondary success criterion, so it's the first thing sequenced after the north star resolves.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-05: User can attach an image to a note
 
@@ -193,3 +193,4 @@ them may as well be in various places at once, and bare numbers say NOTHING. A s
 - **S-01: User can create a note — a predefined type (NPC/Place/Quest/Observation) or a custom, campaign-unique type — with plain-text content, inside their campaign.** — Archived 2026-09-26 → `context/archive/2026-09-23-create-notes/`. Lesson: —.
 - **S-02: The app automatically detects relations between notes in the same campaign via exact-name matching and renders them as connections on a memory map; the user can click a connection to navigate directly to the connected note.** — Archived 2026-09-26 → `context/archive/2026-09-26-auto-relations-memory-map/`. Lesson: —.
 - **S-03: User can explicitly create additional campaigns beyond the auto-created default, and switch between them; each campaign's notes and relations stay scoped to that campaign only.** — Archived 2026-09-29 → `context/archive/2026-09-28-multi-campaign-support/`. Lesson: —.
+- **S-04: User can edit a note's content (including its name) or delete it (behind an explicit confirmation step), and the app re-runs relation detection automatically, showing a visible notice of which relations were added or removed as a result — never a silent change.** — Archived 2026-10-01 → `context/archive/2026-09-29-note-edit-delete-relation-refresh/`. Lesson: —.

@@ -1,10 +1,10 @@
 ---
 change_id: note-edit-delete-relation-refresh
 title: Note edit delete relation refresh
-status: impl_reviewed
+status: archived
 created: 2026-09-29
 updated: 2026-10-01
-archived_at: null
+archived_at: 2026-10-01T19:14:57Z
 ---
 
 ## Notes
