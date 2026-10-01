@@ -1,5 +1,6 @@
 import type { PostgrestResponse, SupabaseClient } from "@supabase/supabase-js";
 
+import { isUuid } from "@/lib/utils";
 import type { MemoryMapRelation } from "@/types";
 
 /**
@@ -21,9 +22,14 @@ export async function listRelations(supabase: SupabaseClient, campaignId: string
 
 /**
  * Number of relations a note takes part in (as either side), for the delete dialog.
- * RLS scopes this to the caller's own notes, so a foreign note id counts 0.
+ * RLS scopes this to the caller's own notes, so a foreign note id counts 0. A non-uuid id
+ * also counts 0, because it is interpolated into a PostgREST `or` filter string.
  */
 export async function countNoteRelations(supabase: SupabaseClient, noteId: string): Promise<number> {
+  if (!isUuid(noteId)) {
+    return 0;
+  }
+
   const { count, error } = await supabase
     .from("relations")
     .select("id", { count: "exact", head: true })

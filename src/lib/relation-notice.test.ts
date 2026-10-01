@@ -20,7 +20,7 @@ const editNotice: RelationNotice = {
   noteId: "n1",
   noteName: "Bob",
   rechecked: true,
-  added: [{ note_id: "n2", name: "Alice" }],
+  added: [{ note_id: "00000000-0000-4000-8000-000000000002", name: "Alice" }],
   removed: [],
 };
 
@@ -57,6 +57,31 @@ describe("relation notice", () => {
     const storage = fakeStorage({ [RELATION_NOTICE_KEY]: wrong });
     expect(takeRelationNotice(storage, { kind: "edit", noteId: "n1" })).toBeNull();
     expect(storage.data.has(RELATION_NOTICE_KEY)).toBe(false);
+  });
+
+  it("returns null when a relation item is malformed", () => {
+    const target = { kind: "edit", noteId: "n1" } as const;
+    const items: unknown[] = [
+      { name: "Alice" },
+      { note_id: "../x", name: "Alice" },
+      { note_id: editNotice.added[0]?.note_id, name: 1 },
+    ];
+    for (const item of items) {
+      const raw = JSON.stringify({ ...editNotice, added: [item] });
+      expect(takeRelationNotice(fakeStorage({ [RELATION_NOTICE_KEY]: raw }), target)).toBeNull();
+    }
+  });
+
+  it("returns null for a delete notice from another campaign", () => {
+    const storage = fakeStorage();
+    writeRelationNotice(storage, { kind: "delete", campaignId: "c1", noteName: "Bob", removed: [] });
+    expect(takeRelationNotice(storage, { kind: "delete", campaignId: "c2" })).toBeNull();
+  });
+
+  it("returns null when the stored JSON is not an object", () => {
+    expect(
+      takeRelationNotice(fakeStorage({ [RELATION_NOTICE_KEY]: "null" }), { kind: "edit", noteId: "n1" }),
+    ).toBeNull();
   });
 
   it("returns null when there is nothing stored", () => {

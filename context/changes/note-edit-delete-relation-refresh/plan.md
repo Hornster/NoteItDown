@@ -19,7 +19,7 @@ The research doc (`context/changes/note-edit-delete-relation-refresh/research.md
 - **Edit** opens `/campaigns/[campaignId]/notes/[noteId]/edit`, a form pre-filled with name, content and type. The type picker is the same one the create form uses, including "New type…". After a successful save the user lands on the note page and sees a notice:
   - name or content changed → `Saved "<name>".`, then either "Relations added: …" / "Relations removed: …" (the names link to those notes) or `Relations unchanged.`
   - only the type changed (detection doesn't run) → `Saved "<name>".` only
-- **Delete** opens a shadcn alert-dialog that names the note and says how many relations it has. On confirm, the user lands on `/campaigns/[campaignId]` with a notice: `Deleted "<name>".` followed by either "Relations removed: …" (linked) or `It had no relations, so none were removed.`
+- **Delete** opens a shadcn alert-dialog that names the note and says how many relations it has. On confirm, the user lands on `/campaigns/[campaignId]` with a notice: `Deleted "<name>".` followed by either "Relations removed: …" (linked) or `No relations touched.` (changed from "It had no relations, so none were removed." per user, e9240ea)
 - The notice shows once, only on the page it was meant for, and is gone after a reload.
 - Renaming to another note's name (ignoring case) shows the existing field error "A note named … already exists". A missing or foreign note returns 404.
 
@@ -350,7 +350,7 @@ A confirmation dialog on the note page, the delete hook, and the notice on the n
 
 - Clicking Delete opens a dialog naming the note and its relation count; Cancel and Esc close it without deleting
 - Confirming deletes the note, lands on the note list without it, and shows "Deleted … Relations removed: …" with linked names
-- Deleting a note with no relations shows "It had no relations, so none were removed."
+- Deleting a note with no relations shows "No relations touched."
 - The memory map no longer shows the deleted note or its edges after reload
 - Reloading the note list after the notice appeared shows no notice
 
@@ -471,6 +471,6 @@ The new migration is additive, except for `create or replace` of `create_note`, 
 
 - [x] 4.6 Clicking Delete opens a dialog naming the note and its relation count; Cancel and Esc close it without deleting — e9240ea
 - [x] 4.7 Confirming deletes the note, lands on the note list without it, and shows "Deleted … Relations removed: …" with linked names — e9240ea
-- [x] 4.8 Deleting a note with no relations shows "It had no relations, so none were removed." — e9240ea
+- [x] 4.8 Deleting a note with no relations shows "It had no relations, so none were removed." — e9240ea (copy changed to "No relations touched." per user, e9240ea)
 - [x] 4.9 The memory map no longer shows the deleted note or its edges after reload — e9240ea
 - [x] 4.10 Reloading the note list after the notice appeared shows no notice — e9240ea

@@ -90,12 +90,31 @@ const steps = [
     () => request("/api/campaigns/not-a-uuid", { method: "PATCH", json: { name: "Renamed" } }),
     { status: 404 },
   ],
+  [
+    "edit-note API 404s a malformed note id",
+    () =>
+      request(`/api${dashboardLocation}/notes/not-a-uuid`, {
+        method: "PATCH",
+        json: { name: "x", content: "", type: { kind: "new", name: "x" } },
+      }),
+    { status: 404 },
+  ],
+  [
+    "delete-note API 404s an unknown note",
+    () => request(`/api${dashboardLocation}/notes/00000000-0000-0000-0000-000000000000`, { method: "DELETE" }),
+    { status: 404 },
+  ],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
   [
     "campaigns route redirects anonymous user",
     () => request("/campaigns/00000000-0000-0000-0000-000000000000"),
     { status: 302, location: "/auth/signin" },
+  ],
+  [
+    "delete-note API rejects anonymous user",
+    () => request(`/api${dashboardLocation}/notes/00000000-0000-0000-0000-000000000000`, { method: "DELETE" }),
+    { status: 401 },
   ],
 ];
 

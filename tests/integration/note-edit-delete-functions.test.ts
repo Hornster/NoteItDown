@@ -285,6 +285,23 @@ describe("update_note / delete_note", () => {
     expect(caseOnly.data?.rechecked).toBe(true);
   });
 
+  it("a failed update with p_new_type_name leaves no orphan custom type", async () => {
+    await createNote(tenantA.client, tenantA.campaignId, "Occupied Name", "x");
+    const note = await createNote(tenantA.client, tenantA.campaignId, "Orphan Guard", "x");
+    const typesBefore = await countTypes(tenantA.client, tenantA.campaignId);
+
+    const clash = await callUpdateNote(tenantA.client, {
+      p_campaign_id: tenantA.campaignId,
+      p_note_id: note.id,
+      p_name: "Occupied Name",
+      p_content: "x",
+      p_new_type_name: "Ghosttype",
+    });
+
+    expect(clash.error?.code).toBe("23505");
+    expect(await countTypes(tenantA.client, tenantA.campaignId)).toBe(typesBefore);
+  });
+
   it("returns P0002 for a foreign user's note or a wrong campaign id, changing nothing", async () => {
     const note = await createNote(tenantA.client, tenantA.campaignId, "Protected Note", "original");
 

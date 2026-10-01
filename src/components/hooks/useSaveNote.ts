@@ -65,11 +65,13 @@ export function useSaveNote(mode: "create" | "edit", campaignId: string, noteId?
           // Response body wasn't JSON; fall back to the generic message above.
         }
         setError(body);
+        setPending(false);
       } catch {
         setError(NETWORK_ERROR);
-      } finally {
         setPending(false);
       }
+      // No reset on the success paths: stay pending until the navigation unloads the page,
+      // so a second click can't re-submit (and overwrite the notice).
     },
     [mode, campaignId, noteId],
   );

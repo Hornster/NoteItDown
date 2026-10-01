@@ -43,6 +43,7 @@ export function useDeleteNote(campaignId: string, noteId: string): UseDeleteNote
 
       if (response.status === 404) {
         setError(NOT_FOUND_ERROR);
+        setPending(false);
         return;
       }
 
@@ -53,11 +54,13 @@ export function useDeleteNote(campaignId: string, noteId: string): UseDeleteNote
         // Response body wasn't JSON; fall back to the generic message above.
       }
       setError(body);
+      setPending(false);
     } catch {
       setError(NETWORK_ERROR);
-    } finally {
       setPending(false);
     }
+    // No reset on the success path: stay pending until the navigation unloads the page,
+    // so a second click can't re-send the DELETE (and show a 404 for the note just deleted).
   }, [campaignId, noteId]);
 
   return { remove, pending, error };

@@ -1,4 +1,5 @@
 import type { RelationChange } from "@/types";
+import { isUuid } from "@/lib/utils";
 
 export const RELATION_NOTICE_KEY = "noteitdown:relation-notice";
 
@@ -24,7 +25,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isRelationChangeList(value: unknown): value is RelationChange[] {
   return (
     Array.isArray(value) &&
-    value.every((c) => isRecord(c) && typeof c.note_id === "string" && typeof c.name === "string")
+    value.every((c) => isRecord(c) && typeof c.note_id === "string" && isUuid(c.note_id) && typeof c.name === "string")
   );
 }
 
