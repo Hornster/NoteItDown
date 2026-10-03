@@ -1,7 +1,7 @@
 ---
 change_id: note-image-attachment
 title: Attach an image to a note
-status: planned
+status: plan_reviewed
 created: 2026-10-01
 updated: 2026-10-03
 archived_at: null

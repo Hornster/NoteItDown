@@ -61,7 +61,7 @@ The database enforces the cap with `unique (note_id, position)`, keeps rows in t
 | Phase | What it delivers | Key risk |
 | --- | --- | --- |
 | 1. Storage foundation | Migration, constants, dictionaries, service, CI Storage, isolation tests | Signed-upload behaviour (`apikey`, bucket limits on the signed path) is unverified until tested |
-| 2. Image API + delete cleanup | 4 routes and note-delete folder removal | Astro route collision between `images.ts` and the `images/` directory |
+| 2. Image API + delete cleanup | 4 routes and note-delete folder removal | Telling Storage outages (500) apart from missing images (404) in every route |
 | 3. Pipeline + form attach | Compression port, picker, held saves, failure notice | Browser differences (Safari JPEG, iOS canvas limits, memory) |
 | 4. Note page display | Thumbnails, popup, one-time URL refresh | Expired signed URLs on long-open pages |
 | 5. HEIC + `/licenses` + footer *(cuttable)* | HEIC conversion, notices page, footer, roadmap wrap-up | Decoder size and memory on 48 MP files; LGPL details (libde265 licence) |

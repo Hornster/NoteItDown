@@ -78,7 +78,7 @@ Browser processing happens on pick, so errors show next to the file and Save onl
 - If `apikey` is required, the prepare response also returns the anon key. It is public by design (PostgREST already exposes it to RLS); record that in contract-surfaces.
 - If the bucket doesn't enforce its limits on the signed path, the commit-time `info()` check is the guard. It runs either way.
 
-**iOS blank canvas.** After `drawImage`, sample a few pixels. If all of them are fully transparent and the source wasn't, fail with a typed "browser failure" error instead of uploading a blank image.
+**iOS blank canvas.** On the WebP path, sample a few pixels after `drawImage`. If every sampled pixel has alpha 0, fail with a typed "browser failure" error instead of uploading a blank image. Skip the guard on the JPEG path: the white fill means a blank canvas isn't transparent there, and the area cap already keeps canvases within the iOS limit.
 
 ## Phase 1: Storage foundation
 
@@ -140,6 +140,7 @@ The database and Storage rules, shared constants, types and schemas, the new err
   - `PrepareUploadResponse { image: SignedUpload; thumbnail: SignedUpload | null; apikey?: string }` where `SignedUpload { path; signed_url; token }`
   - `CommitImageCommand { path; thumb_path; width; height; thumb_width; thumb_height; alt_text }`
   - `UpdateImageCommand { alt_text: string | null }`
+  - `CommitImageResponse { id; position }`, `UpdateImageResponse { id; alt_text }` (no signed URLs; nothing on the save path reads them)
   - `ImageUrlsResponse { url; thumb_url }`
 - `ApiError["field"]` gains `"images"`.
 
@@ -178,18 +179,19 @@ The database and Storage rules, shared constants, types and schemas, the new err
 - `isOwnImagePath(path, userId, campaignId, noteId)`: strict regex on the prefix, the uuid and an allowed extension.
 - `listNoteImages(supabase, noteId) → NoteImage[]`, ordered by `position`.
 - `toImageViews(supabase, images) → NoteImageView[]`: one batched `createSignedUrls` call, 6 h expiry. A per-item error gives `thumb_url: null` and never throws.
-- `prepareUpload(supabase, userId, campaignId, noteId, cmd)`: reasons `not_found` and `limit_reached` (count ≥ 2); returns `PrepareUploadResponse`.
+- `prepareUpload(supabase, userId, campaignId, noteId, cmd)`: reasons `not_found`, `limit_reached` (count ≥ 2) and `unexpected` (count query or `createSignedUploadUrl` failed, with `error`); returns `PrepareUploadResponse`.
 - `commitImage(supabase, userId, campaignId, noteId, cmd)`:
   1. checks paths with `isOwnImagePath`;
-  2. calls `info()` on each object and checks size ≤ `MAX_IMAGE_BYTES` and content type in the allow-list;
+  2. calls `info()` on each object and passes the result to the pure, exported `validateUploadedObject(info) → { ok: true; size; contentType } | { ok: false }`, which checks size ≤ `MAX_IMAGE_BYTES` and content type in the allow-list (a missing `size` or `contentType` counts as invalid, since both are optional in storage-js `FileObjectV2`);
   3. picks the lowest free position and inserts;
-  4. maps `23505` on position to `limit_reached`;
+  4. on `23505` for `note_images_note_position_key`, works out the free position again and retries the insert once; maps it to `limit_reached` only if no position is free;
   5. on any failure after upload, removes both objects.
-  Reasons: `not_found`, `invalid_upload`, `limit_reached`, `unexpected`.
-- `updateImageAltText`: reason `not_found` (no row updated).
-- `deleteImage(supabase, noteId, imageId)`: deletes the row (RLS), then removes both objects, logging a removal error and still returning success.
+  Returns `CommitImageResponse`. Reasons: `not_found`, `invalid_upload`, `limit_reached`, `unexpected`.
+- Item services take `campaignId`, `noteId` and `imageId` and filter on all three (`campaign_id`, `note_id`, `id`), so the URL stays authoritative like `deleteNote`. Each returns a typed union that includes `unexpected` (with `error`) for DB or Storage failures, kept apart from `not_found`.
+- `updateImageAltText(supabase, campaignId, noteId, imageId, altText) → UpdateImageResponse`: reason `not_found` (no row updated).
+- `deleteImage(supabase, campaignId, noteId, imageId)`: deletes the row (RLS), then removes both objects, logging a removal error and still returning success. Reason `not_found` when no row was deleted.
 - `removeNoteFolder(supabase, userId, campaignId, noteId)`: list the prefix, then `remove`, ≤ 1000 per call. Errors are logged and swallowed.
-- `getImageUrls(supabase, noteId, imageId) → ImageUrlsResponse | null`: full-size URL expires in 300 s, thumbnail in 6 h.
+- `getImageUrls(supabase, campaignId, noteId, imageId)`: success `ImageUrlsResponse`, reason `not_found` (no row) or `unexpected` (signing failed). Full-size URL expires in 300 s, thumbnail in 6 h.
 
 #### 6. CI and local config
 
@@ -197,7 +199,7 @@ The database and Storage rules, shared constants, types and schemas, the new err
 
 **Intent**: Start the Storage container in CI so the policy tests run on every push.
 
-**Contract**: remove `storage-api` from the `supabase start -x` list. Keep `imgproxy` excluded.
+**Contract**: remove `storage-api` from the `supabase start -x` list. Keep `imgproxy` excluded. Ship this edit in the same commit as the migration. With `storage-api` excluded, the `storage` schema may not exist when `supabase start` applies a migration that writes to `storage.buckets`/`storage.objects`, and the CI job would fail.
 
 #### 7. Integration tests
 
@@ -206,7 +208,7 @@ The database and Storage rules, shared constants, types and schemas, the new err
 **Intent**: Prove the DB and Storage rules with two tenants. Settle the signed-upload unknowns as assertions, not a throwaway spike.
 
 **Contract**:
-- `helpers.ts` gains a tiny valid WebP/JPEG fixture builder (static byte arrays) and a `createTestNote` helper if none exists.
+- `helpers.ts` gains a tiny valid WebP/JPEG fixture builder (static byte arrays) and a new `createTestNote(client, campaignId, name?)` helper (none exists in `helpers.ts` today). The per-file note helpers in the existing test files stay as they are.
 - Table rules:
   - The 2-image cap holds: inserting a third row fails, and so does a duplicate position.
   - A row with a `campaign_id`/`note_id` mismatch fails the composite FK.
@@ -215,13 +217,16 @@ The database and Storage rules, shared constants, types and schemas, the new err
   - Note delete cascades the rows.
 - Storage policies, with tenant B:
   - B can't upload into A's folder, or into its own folder under A's note id;
+  - B's `createSignedUploadUrl` fails for the same two paths (the signed PUT likely runs without re-checking RLS, so signing is the gate the app actually relies on);
   - B can't `list`, `createSignedUrl` or `remove` A's objects;
   - A can remove its own objects after its note row is deleted.
 - Signed upload, with assertions that record the observed behaviour:
   - a bare `fetch` PUT without `apikey`;
   - an oversized body (> 2,621,440 B) on the signed path;
   - a disallowed content type (`image/png`) on the signed path.
-- Service flow: prepare → PUT → commit gives one row and a view with a `thumb_url`. Commit with a foreign path gives `invalid_upload`, and commit with an oversized object gives `invalid_upload` with the object removed. `removeNoteFolder` empties the prefix.
+- Service flow: prepare → PUT → commit gives one row and a view with a `thumb_url`. Commit with a foreign path gives `invalid_upload`. `removeNoteFolder` empties the prefix.
+- Commit with an oversized or disallowed-type object (`invalid_upload`, object removed) runs **only if** the signed-upload assertions show the bucket does not enforce its limits. Otherwise no anon-key client can create such an object, and the check is covered by the `validateUploadedObject` unit tests.
+- `src/lib/services/note-images.test.ts` (new, unit): `validateUploadedObject` accepts size = `MAX_IMAGE_BYTES` and rejects +1, rejects `image/png`, and rejects a missing `size` or `contentType`.
 
 #### 8. Contract surfaces
 
@@ -243,7 +248,7 @@ The database and Storage rules, shared constants, types and schemas, the new err
 - Migration applies on a fresh local database: `npx supabase db reset`
 - Lint passes: `npm run lint`
 - Type check passes: `npx astro sync && npx astro check`
-- Unit tests pass, including the note-images schema tests: `npm run test:unit`
+- Unit tests pass, including the note-images schema and `validateUploadedObject` tests: `npm run test:unit`
 - Integration tests pass, including `note-images.test.ts` cross-tenant and signed-upload assertions: `npm run test:integration`
 - CI workflow starts Supabase with `storage-api` (no `storage-api` in the `-x` list of `.github/workflows/ci.yml`)
 
@@ -270,7 +275,7 @@ The HTTP surface over the Phase 1 service, plus Storage cleanup in the existing 
 
 **Intent**: Hand out signed upload URLs for a note the caller owns, while the note has fewer than 2 images.
 
-**Contract**: `POST`, `prerender = false`. Guard order: 401 → 500 (Supabase not configured) → 404 on a non-uuid → 400 on a bad JSON or zod body → 404 when the service reports `not_found` → 409 `{ field: "images" }` when `limit_reached` → 200 `PrepareUploadResponse`. The user id always comes from `context.locals.user.id`, never from the body.
+**Contract**: `POST`, `prerender = false`. Guard order: 401 → 500 (Supabase not configured) → 404 on a non-uuid → 400 on a bad JSON or zod body → 404 when the service reports `not_found` → 409 `{ field: "images" }` when `limit_reached` → 500 (generic `MESSAGES.GENERIC_IMAGE_ERROR`, logged with `console.error`) when `unexpected` → 200 `PrepareUploadResponse`. The user id always comes from `context.locals.user.id`, never from the body.
 
 #### 2. Images collection and item routes
 
@@ -279,18 +284,18 @@ The HTTP surface over the Phase 1 service, plus Storage cleanup in the existing 
 **Intent**: Commit an upload, read fresh signed URLs, change alt text, and delete one image.
 
 **Contract**:
+- Every route uses the same 401 → 500 → `isUuid` guard order as `[noteId].ts` (`imageId` included). Routes with a body then return 400 (no `field`) on non-JSON or a zod failure. Every route maps the service's `unexpected` reason to a 500 with `MESSAGES.GENERIC_IMAGE_ERROR`, logged with `console.error`.
 - `POST .../images` (commit): body `CommitImageCommand`. Responses:
-  - 201 `NoteImageView`
-  - 400 `{ field: "images" }` for `invalid_upload`
+  - 201 `CommitImageResponse`
+  - 400 on bad JSON or zod; 400 `{ field: "images" }` for `invalid_upload`
   - 404
   - 409 for `limit_reached`
   - 500 (generic, logged)
-- `GET .../images/[imageId]`: 200 `ImageUrlsResponse` with `Cache-Control: no-store`; 404 when the image isn't on this note or isn't the caller's.
-- `PATCH .../images/[imageId]`: body `UpdateImageCommand`; 200 `NoteImageView`; 404.
-- `DELETE .../images/[imageId]`: 200 `{ id }`; 404.
-- Every route uses the same 401 → 500 → `isUuid` guard order as `[noteId].ts`.
+- `GET .../images/[imageId]`: 200 `ImageUrlsResponse` with `Cache-Control: no-store`; 404 when the image isn't on this campaign and note or isn't the caller's; 500 when signing fails.
+- `PATCH .../images/[imageId]`: body `UpdateImageCommand`; 400 on bad JSON or zod; 200 `UpdateImageResponse`; 404; 500.
+- `DELETE .../images/[imageId]`: 200 `{ id }`; 404; 500.
 
-Astro routing note: `images.ts` and the `images/` directory coexist. Confirm that `images.ts` serves `/images` and `images/uploads.ts` serves `/images/uploads`. If they collide, rename `images.ts` to `images/index.ts`.
+Astro routing: `images.ts` next to the `images/` directory follows the existing `[campaignId]/notes.ts` + `notes/[noteId].ts` layout, which already works.
 
 #### 3. Note delete cleanup
 
@@ -338,14 +343,14 @@ The hand-written compression pipeline, the picker in `NoteForm`, and save orches
 
 #### 1. Compression pipeline
 
-**File**: `src/lib/images/compress.ts` (new), `src/lib/images/errors.ts` (new), `src/lib/images/compress.test.ts` (new)
+**File**: `src/lib/images/compress.ts` (new), `src/lib/images/errors.ts` (new), `src/lib/images/compress.test.ts` (new), `src/lib/images/heic.ts` (new), `src/lib/images/heic.test.ts` (new)
 
 **Intent**: Port `references/compress-to-webp.js` to strict TypeScript with the decided changes: start quality 0.8, area and side caps instead of the 4096 px cap, one decode producing both outputs, and a JPEG fallback on a white background. Split it so the maths is unit-testable in Node.
 
 **Contract**:
 - Pure, exported and unit-tested:
-  - `fitDimensions(w, h) → { width, height }`: ≤ `MAX_CANVAS_AREA`, ≤ `MAX_IMAGE_SIDE`, aspect ratio kept; 2000×12000 gives about 1672×10033.
-  - `thumbnailDimensions(w, h) → { width, height } | null`: null when the longest side is ≤ 512.
+  - `fitDimensions(w, h) → { width, height }`: ≤ `MAX_CANVAS_AREA`, ≤ `MAX_IMAGE_SIDE`, aspect ratio kept, each side clamped to ≥ 1 px (`Math.max(1, Math.round(…))`, as in the reference); 2000×12000 gives about 1672×10033.
+  - `thumbnailDimensions(w, h) → { width, height } | null`: null when the longest side is ≤ 512; each side clamped to ≥ 1 px (16383×1 gives 512×1).
   - `bestUnderBudget(encodeAt, opts)`: injected encoder; the first try is at 0.8; never inflates.
 - Browser-only: `processImage(source: Blob) → Promise<ProcessedImage>`, where `ProcessedImage = { image: Encoded; thumbnail: Encoded | null }` and `Encoded = { blob, width, height, type: "image/webp" | "image/jpeg" }`.
   - Decode once with `createImageBitmap(source, { imageOrientation: "from-image" })`.
@@ -353,8 +358,9 @@ The hand-written compression pipeline, the picker in `NoteForm`, and save orches
   - Check every output's `type`.
   - Downscale only while the result is still over `CLIENT_IMAGE_CEILING_BYTES` at `minQuality`.
   - Release memory: `bitmap.close()`, zero the canvas size.
-  - Run the blank-canvas guard.
-- Typed errors: `UnsupportedImageError` (decode failed, not HEIC), `ImageTooLargeError` (can't get under the ceiling at the minimum dimension), `BrowserImageError` (blank canvas, no OffscreenCanvas or `from-image` support, encoder failure), and `HeicNotSupportedYetError` until Phase 5 replaces that path.
+  - Run the blank-canvas guard on the WebP path only (see "iOS blank canvas" above).
+- Typed errors: `UnsupportedImageError` (any decode failure; `compress.ts` itself never checks for HEIC), `ImageTooLargeError` (can't get under the ceiling at the minimum dimension), `BrowserImageError` (blank canvas, no OffscreenCanvas or `from-image` support, encoder failure), and `HeicNotSupportedYetError` until Phase 5 replaces that path.
+- HEIC detection: `src/lib/images/heic.ts` (new) exports the pure `looksLikeHeic(bytes: Uint8Array) → boolean`. It reads the ISO-BMFF `ftyp` box at offset 4 and checks the major brand against `heic`, `heix`, `heim`, `heis`, `hevc`, `hevx` and `mif1`. It is unit-tested on hand-built headers and imports nothing from `heic-to`. The picker reads the file's first 32 bytes only after an `UnsupportedImageError`; if `looksLikeHeic` matches, it shows `HeicNotSupportedYetError` instead.
 
 #### 2. Picker component
 
@@ -365,8 +371,8 @@ The hand-written compression pipeline, the picker in `NoteForm`, and save orches
 **Contract**:
 - Props: `existing: NoteImageView[]` (edit mode), plus a controlled value and `onChange` for the held state `{ kept: NoteImageView[]; removedIds: string[]; altEdits: Record<id, string | null>; added: PendingImage[] }`, where `PendingImage = { key, fileName, status: "processing" | "ready" | "error", processed?, previewUrl?, error?, alt_text }`.
 - Behaviour:
-  - The `<input type="file" accept={PICKER_ACCEPT}>` is disabled when kept + added reaches 2.
-  - `processImage` is loaded with `await import("@/lib/images/compress")` inside the change handler.
+  - The `<input type="file" accept={PICKER_ACCEPT}>` is disabled when kept + added reaches 2. Picks with status `error` don't count toward the cap; picks that are `processing` or `ready` do.
+  - `processImage` is loaded with `await import("@/lib/images/compress")` inside the change handler, behind an `if (import.meta.env.SSR) return;` guard. NoteForm is server-rendered, so without the guard Rollup still emits the compression chunk into the Worker output. Phase 5's `heic-to` import uses the same guard.
   - Each pick shows "Processing…" and becomes a preview from an object URL (revoked on remove or unmount), or an inline error message per typed error.
   - A fixed hint says "Images are compressed before upload."
   - "Animated images become static" appears whenever a picked file's sniffed or declared type is GIF or WebP.
@@ -375,24 +381,25 @@ The hand-written compression pipeline, the picker in `NoteForm`, and save orches
 
 #### 3. Form and save orchestration
 
-**File**: `src/components/notes/NoteForm.tsx`, `src/components/hooks/useSaveNote.ts`, `src/lib/images/upload.ts` (new)
+**File**: `src/components/notes/NoteForm.tsx`, `src/components/hooks/useSaveNote.ts`, `src/lib/images/upload.ts` (new), `src/lib/images/upload.test.ts` (new)
 
 **Intent**: Wire the picker into both modes. After the note write succeeds, apply image operations in the decided order. A failed image step never loses the note, and the user always learns which images failed.
 
 **Contract**:
 - `NoteForm` gets an optional `images: NoteImageView[]` prop in edit mode and renders `NoteImagePicker`. Submit stays disabled while any pick is `processing`. Pending picks with status `error` are ignored at save, and their message stays visible.
 - `upload.ts` exports `uploadPendingImage(campaignId, noteId, pending) → Promise<void>`: prepare, then PUT the image (and thumbnail when present) to the signed URLs with `Content-Type` = the blob type (plus `apikey` if Phase 1 found it required), then commit. Errors are typed.
-- `useSaveNote.submit(command, imageChanges)`:
-  - create mode: POST, then upload each added image in order;
-  - edit mode: PATCH, then DELETE each removed image, then PATCH each changed alt text, then upload each added image;
-  - collect failures as `{ fileName | "image N", reason }`;
-  - all succeeded: same navigation as today, with the relation notice written in edit mode as before;
+- `upload.ts` also exports the pure `applyImageChanges(noteId, changes, api) → Promise<ImageFailure[]>`. `api` (`deleteImage`, `updateAlt`, `uploadPending`) is passed in, so the order and failure collection can be unit-tested in Node. It runs DELETE for each removed image, then PATCH for each changed alt text, then uploads each added image. It never stops at the first failure. Create mode passes only `added`.
+- `useSaveNote.submit(command, imageChanges)` does the note write, calls `applyImageChanges` with the real fetch-based `api`, and handles navigation:
+  - create mode: POST, then `applyImageChanges`;
+  - edit mode: PATCH, then write the relation notice as today (right after the 200, before any image step, so an image failure can't drop it; it shows on the next note-page view, matched by `noteId`), then `applyImageChanges`;
+  - failures are `{ fileName | "image N", reason }`;
+  - all succeeded: same navigation as today;
   - any failure: write `noteitdown:image-failure` and `location.replace` to `/campaigns/[campaignId]/notes/[noteId]/edit`.
 - Pending stays true until navigation, as today.
 
 #### 4. Image-failure notice
 
-**File**: `src/lib/image-failure-notice.ts` (new), `src/lib/image-failure-notice.test.ts` (new), `src/components/notes/ImageFailureNotice.tsx` (new), `src/pages/campaigns/[campaignId]/notes/[noteId]/edit.astro`, `src/pages/campaigns/[campaignId]/notes/new.astro`
+**File**: `src/lib/image-failure-notice.ts` (new), `src/lib/image-failure-notice.test.ts` (new), `src/components/notes/ImageFailureNotice.tsx` (new), `src/pages/campaigns/[campaignId]/notes/[noteId]/edit.astro`
 
 **Intent**: A one-shot notice on the edit page saying the note was saved but listing the images that weren't, following `relation-notice.ts`.
 
@@ -401,14 +408,22 @@ The hand-written compression pipeline, the picker in `NoteForm`, and save orches
 - `takeImageFailureNotice(storage, noteId)` always removes the key and returns the payload only on a matching `noteId`. All storage access is wrapped in try/catch.
 - `edit.astro` loads `listNoteImages` + `toImageViews` and passes `images` to `NoteForm`. It mounts `ImageFailureNotice` (`client:load`) above the form.
 
+#### 5. Contract surfaces
+
+**File**: `docs/reference/contract-surfaces.md`
+
+**Intent**: Register what Phase 3 introduces when it lands, not a phase later.
+
+**Contract**: register `noteitdown:image-failure` (key, payload, `takeImageFailureNotice` semantics) under "Session storage"; update the edit route in "Routes" with the `images` prop and the `ImageFailureNotice` mount.
+
 ### Success Criteria:
 
 #### Automated Verification:
 
-- Unit tests pass, covering `fitDimensions` (2000×12000, 16384×1, 8000×8000), `thumbnailDimensions` (512 boundary), `bestUnderBudget` (fits at 0.8, needs a search, never fits) and `image-failure-notice`: `npm run test:unit`
+- Unit tests pass, covering `fitDimensions` (2000×12000, 16384×1, 8000×8000), `thumbnailDimensions` (512 boundary, 16383×1 → 512×1), `bestUnderBudget` (fits at 0.8, needs a search, never fits), `looksLikeHeic` (heic/mif1 brands, a JPEG header, fewer than 12 bytes), `applyImageChanges` (deletes before uploads, one failure doesn't stop the rest, failure labels) and `image-failure-notice`: `npm run test:unit`
 - Lint passes: `npm run lint`
 - Type check passes: `npx astro check`
-- Build succeeds and the Worker bundle contains no compression code (no `convertToBlob` in the server output): `npm run build && ! grep -rl convertToBlob dist/_worker.js 2>/dev/null` (adjust the path to the actual server output directory)
+- Build succeeds and the Worker bundle contains no compression code (no `convertToBlob` in the server output): `npm run build && test -d dist/server && ! grep -rl convertToBlob dist/server`
 - Integration tests still pass: `npm run test:integration`
 
 #### Manual Verification:
@@ -450,10 +465,15 @@ Thumbnails on the note page with stored dimensions, a full-size popup that fetch
 
 **Contract**:
 - Props: `campaignId`, `noteId`, `noteName`, `images: NoteImageView[]`.
-- Each thumbnail is an `<img loading="lazy">` with `width`/`height` taken from `thumb_*` (or the original's), and `alt` = `alt_text ?? "<noteName> — image N"`.
+- Each thumbnail is an `<img loading="lazy">` with `width`/`height` taken from `thumb_*` (or the original's), and `alt` = `alt_text ?? "<noteName> — image N"`, where N is the 1-based display index (not `position + 1`).
+- Layout: a 2-column grid. The `width`/`height` attributes only reserve the aspect ratio; the rendered size comes from CSS (`h-auto w-full` inside the grid cell), so two 512 px thumbnails fit side by side in the card.
 - A null `thumb_url` renders a fixed placeholder ("Image unavailable") instead of throwing.
-- `onError`: once per image, GET `.../images/[imageId]` and swap in the fresh `thumb_url`; never retry again.
+- Thumbnail refresh, once per image (GET `.../images/[imageId]`, swap in the fresh `thumb_url`, never retry again), triggered by either:
+  - `onError` after hydration, or
+  - a mount effect that finds `img.complete && img.naturalWidth === 0` on the image's ref. React doesn't replay an `error` event that fired before hydration, and the SSR'd `<img>` starts loading before the island hydrates.
 - Clicking a thumbnail opens a `Dialog`, GETs the URL, and shows the full image with `object-contain`, sized to the viewport. It has a loading state and an error message.
+  - The dialog renders a `DialogTitle` (the image's alt text or fallback; `sr-only` is fine). Radix logs a console error without one.
+  - The fetch is tagged with the image id it was made for. A response that doesn't match the currently open image is dropped (or the request is aborted on close), so a late response for image A never shows in B's dialog.
 - The full-size URL never appears in the page HTML.
 
 #### 3. Note page wiring
@@ -462,15 +482,15 @@ Thumbnails on the note page with stored dimensions, a full-size popup that fetch
 
 **Intent**: Load the image views server-side in one batched signing call and mount the island below the content.
 
-**Contract**: after the note is resolved, `images = await toImageViews(supabase, await listNoteImages(supabase, note.id))`. Mount `<NoteImages client:visible …>` only when `images.length > 0`.
+**Contract**: after the note is resolved, `images = await toImageViews(supabase, await listNoteImages(supabase, note.id))`. Mount `<NoteImages client:load …>` only when `images.length > 0`. Use `client:load` like every other island, not `client:visible`: with `client:visible`, lazy images start loading before the island hydrates, so their errors go unhandled.
 
 #### 4. Contract surfaces
 
 **File**: `docs/reference/contract-surfaces.md`
 
-**Intent**: Update the note detail and edit route descriptions (images section, popup behaviour, edit page props) and register `noteitdown:image-failure` under "Session storage".
+**Intent**: Update the note detail route description (images section, popup behaviour). The edit route and `noteitdown:image-failure` are registered in Phase 3.
 
-**Contract**: edits to the existing "Routes" and "Session storage" sections.
+**Contract**: edits to the existing "Routes" section.
 
 ### Success Criteria:
 
@@ -486,7 +506,7 @@ Thumbnails on the note page with stored dimensions, a full-size popup that fetch
 - The note page shows thumbnails at the right size with no layout jump on load; alt text appears in the DOM, with the fallback used when empty
 - The page HTML (view-source) contains only thumbnail URLs, no full-size URL; devtools shows the full image downloads only after clicking
 - The popup shows the full image fitted to the window and closes with Esc and with the close button
-- With a thumbnail URL forced to expire (or edited to an invalid token in devtools), the image recovers once via the refresh; a second failure shows the broken state without looping
+- With a thumbnail URL forced to expire (or edited to an invalid token in devtools), the image recovers once via the refresh; a second failure shows the broken state without looping. Also check the pre-hydration case: a broken thumbnail URL already in the SSR HTML (e.g. temporarily corrupt the token in `toImageViews`, then reload) still recovers once.
 - A note without images shows no images section; notes list and memory map are unchanged
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation from the human that the manual testing was successful before proceeding to the next phase.
@@ -503,17 +523,18 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### 1. HEIC conversion
 
-**File**: `package.json`, `src/lib/images/heic.ts` (new), `src/lib/images/compress.ts`, `src/components/notes/NoteImagePicker.tsx`
+**File**: `package.json`, `src/lib/images/heic.ts`, `src/lib/images/errors.ts`, `src/components/notes/NoteImagePicker.tsx`
 
 **Intent**: When `createImageBitmap` can't decode a file and its bytes say HEIC, convert it to a high-quality JPEG with a lazily loaded, unmodified `heic-to`, then run the normal pipeline.
 
 **Contract**:
 - Dependency `"heic-to": "1.6.5"` (exact pin, no caret).
-- `heic.ts` exports `convertHeicToJpeg(file) → Promise<Blob>`, which uses `await import("heic-to")` (`isHeic` on the bytes, then `heicTo({ type: "image/jpeg", quality: 0.92 })`).
+- `heic.ts` (which already has Phase 3's `looksLikeHeic`) gains `convertHeicToJpeg(file) → Promise<Blob>`. It runs `await import("heic-to")` inside the function, then `heicTo({ blob: file, type: "image/jpeg", quality: 0.92 })`. `heic-to` is imported only there, so a non-HEIC file never downloads the decoder (3.19 MB raw, about 777 KB gzipped). `heic-to`'s own `isHeic` is not used, because calling it would load the whole chunk.
 - The picker's flow:
   1. try `processImage(file)`;
-  2. on `UnsupportedImageError`, run `isHeic`; if it's HEIC, convert and run `processImage(jpeg)`;
+  2. on `UnsupportedImageError`, read the first 32 bytes; if `looksLikeHeic` matches, convert and run `processImage(jpeg)`;
   3. otherwise keep the unsupported error.
+- Errors from `convertHeicToJpeg` (a corrupt HEIC or an HEIF variant libheif can't decode) become `UnsupportedImageError`. A `RangeError` or out-of-memory failure becomes `BrowserImageError`. Errors from the second `processImage` pass through unchanged.
 - Remove `HeicNotSupportedYetError`.
 - The decoder lands in its own chunk. Confirm this in the build output.
 
@@ -526,9 +547,9 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 **Contract**:
 - Not added to `PROTECTED_ROUTES`. Uses `Layout`.
 - Entries:
-  - `heic-to` 1.6.5 (LGPL-3.0, its copyright line, `https://github.com/hoppergee/heic-to`)
+  - `heic-to` 1.6.5 (LGPL-3.0, "© Hopper Gee", taken from the `author` field in its package.json because its LICENSE has no project copyright line, `https://github.com/hoppergee/heic-to`)
   - libheif 1.23.5 (LGPL-3.0, copyright Dirk Farin / struktur AG, `https://github.com/strukturag/libheif`)
-  - libde265: version and licence read from the `heic-to` package or upstream during implementation; record the source
+  - libde265 1.0.16 (LGPL-3.0, copyright struktur AG, `https://github.com/strukturag/libde265`). The version comes from the `LIBDE265_VERSION` in heic-to's README build notes. Confirm the licence and copyright line against upstream `COPYING` during implementation.
 - The full LGPL-3.0 and GPL-3.0 texts, imported with `?raw` and rendered in `<pre>`.
 - The bundled versions must match `package-lock.json`.
 
@@ -538,7 +559,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 **Intent**: A minimal footer on every page with a "Third-party licences" link to `/licenses`.
 
-**Contract**: a `<footer>` after `<slot />`, styled to work on the dark cosmic pages and the auth pages without changing their layout.
+**Contract**: a `<footer>` after `<slot />`. Every page wraps its content in its own `bg-cosmic min-h-screen` div, and `body` is white (`bg-background`, no `.dark`). So the footer gets its own background matching the end of the cosmic gradient (`bg-[#0a0e1a]`), muted small text (e.g. `text-xs text-blue-100/60`) and light padding. It sits below the fold, and no page's `min-h-screen` changes.
 
 #### 4. Roadmap and contract wrap-up
 
@@ -553,7 +574,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 #### Automated Verification:
 
 - `heic-to` is pinned exactly: `grep '"heic-to": "1.6.5"' package.json`
-- Build succeeds and `heic-to` is emitted as a separate client chunk, not in the Worker or the main island chunk: `npm run build`
+- Build succeeds and `heic-to` is emitted as a separate client chunk, not in the Worker or the main island chunk (the decoder is the only code with `de265_` symbols): `npm run build && test $(grep -rl de265_ dist/client | wc -l) -eq 1 && ! grep -rlq de265_ dist/server`
 - Lint passes: `npm run lint`
 - Type check passes: `npx astro check`
 - All tests pass: `npm test`
@@ -561,7 +582,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Manual Verification:
 
-- Chrome or Firefox on Linux: an iPhone HEIC uploads as WebP; the network panel shows the `heic-to` chunk loading only on that pick
+- Chrome or Firefox on Linux: an iPhone HEIC uploads as WebP; the network panel shows the `heic-to` chunk loading only on that pick (not on a corrupt non-HEIC file); a portrait iPhone HEIC displays upright
 - A 48 MP HEIC processes without the tab crashing; "Processing…" is visible while it runs
 - A non-HEIC undecodable file still shows the "unsupported or corrupt" error
 - `/licenses` loads while signed out and lists name, version, licence, copyright and source for each library, plus the full LGPL-3.0 and GPL-3.0 texts
@@ -629,7 +650,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 - [ ] 1.1 Migration applies on a fresh local database: `npx supabase db reset`
 - [ ] 1.2 Lint passes: `npm run lint`
 - [ ] 1.3 Type check passes: `npx astro sync && npx astro check`
-- [ ] 1.4 Unit tests pass, including the note-images schema tests: `npm run test:unit`
+- [ ] 1.4 Unit tests pass, including the note-images schema and `validateUploadedObject` tests: `npm run test:unit`
 - [ ] 1.5 Integration tests pass, including `note-images.test.ts` cross-tenant and signed-upload assertions: `npm run test:integration`
 - [ ] 1.6 CI workflow starts Supabase with `storage-api`
 
@@ -658,7 +679,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass for pipeline maths and image-failure-notice: `npm run test:unit`
+- [ ] 3.1 Unit tests pass for pipeline maths, applyImageChanges and image-failure-notice: `npm run test:unit`
 - [ ] 3.2 Lint passes: `npm run lint`
 - [ ] 3.3 Type check passes: `npx astro check`
 - [ ] 3.4 Build succeeds and the Worker bundle contains no compression code
@@ -689,7 +710,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 - [ ] 4.5 Thumbnails render at stored size without layout jump; alt text and fallback present
 - [ ] 4.6 Page HTML contains no full-size URL; full image downloads only on click
 - [ ] 4.7 Popup fits the window and closes with Esc and the close button
-- [ ] 4.8 Expired thumbnail URL recovers once; a second failure does not loop
+- [ ] 4.8 Expired thumbnail URL recovers once (also when broken before hydration); a second failure does not loop
 - [ ] 4.9 Notes without images show no images section; list and map unchanged
 
 ### Phase 5: HEIC fallback, `/licenses` and footer
@@ -705,7 +726,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Manual
 
-- [ ] 5.7 Linux Chrome/Firefox: iPhone HEIC uploads as WebP; decoder chunk loads only on that pick
+- [ ] 5.7 Linux Chrome/Firefox: iPhone HEIC uploads as WebP; decoder chunk loads only on that pick; portrait HEIC upright
 - [ ] 5.8 A 48 MP HEIC processes without crashing, with a visible processing state
 - [ ] 5.9 A non-HEIC undecodable file still shows the unsupported error
 - [ ] 5.10 `/licenses` loads signed out with all required fields and full licence texts
