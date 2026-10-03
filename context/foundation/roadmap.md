@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-10-01
+updated: 2026-10-03
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -46,7 +46,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done     |
 | S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done     |
 | S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | done     |
-| S-05 | note-image-attachment             | attach an image to a note                                                        | S-01          | FR-004                                | proposed |
+| S-05 | note-image-attachment             | attach an image to a note                                                        | S-01          | FR-004                                | planning |
 
 ## Streams
 
@@ -146,7 +146,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Supabase Storage bucket policy (size limits, per-user access rules) for note images — Owner: team. Block: no.
 - **Risk:** Nice-to-have and independent of the matching hypothesis — the PRD's own resolution on FR-004 notes images "don't feed the core domain rule" since exact-name matching only reads text, so this is sequenced last without blocking anything.
-- **Status:** proposed
+- **Status:** planning
 
 ## Backlog Handoff
 
