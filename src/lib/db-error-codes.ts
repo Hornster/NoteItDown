@@ -1,0 +1,9 @@
+/** Postgres SQLSTATE codes the services map to typed results. */
+export const PG_ERROR = {
+  UNIQUE_VIOLATION: "23505",
+  FOREIGN_KEY_VIOLATION: "23503",
+  CHECK_VIOLATION: "23514",
+  INSUFFICIENT_PRIVILEGE: "42501",
+  NO_DATA_FOUND: "P0002",
+  INVALID_PARAMETER_VALUE: "22023",
+} as const;

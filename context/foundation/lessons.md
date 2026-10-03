@@ -15,3 +15,10 @@
 - **Problem**: The implementation commit parked mobile support in the roadmap ("phone-width checks are not MVP acceptance criteria"), yet manual criterion 3.13 (phone width) was ticked `[x]` with no note. A later reader can't tell whether the criterion was verified or waived.
 - **Rule**: When a scope decision waives a plan success criterion, mark it with a note like `(waived: <reason>, <where decided>)` instead of a bare `[x]`.
 - **Applies to**: implement, impl-review, plan
+
+## Use the central error/status/message dictionaries in new code
+
+- **Context**: context/foundation/roadmap.md Observations (scattered numeric status codes, SQLSTATE strings and message literals)
+- **Problem**: HTTP statuses, Postgres error codes and user-facing strings are repeated as literals across routes and services, so renames and wording changes drift.
+- **Rule**: In new code use `HTTP_STATUS` (`src/lib/http-status.ts`), `PG_ERROR` (`src/lib/db-error-codes.ts`) and `MESSAGES` (`src/lib/messages.ts`) instead of literals. Add missing entries to the dictionaries; do not introduce new inline literals.
+- **Applies to**: plan, implement, impl-review

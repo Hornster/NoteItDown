@@ -647,17 +647,17 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [ ] 1.1 Migration applies on a fresh local database: `npx supabase db reset`
-- [ ] 1.2 Lint passes: `npm run lint`
-- [ ] 1.3 Type check passes: `npx astro sync && npx astro check`
-- [ ] 1.4 Unit tests pass, including the note-images schema and `validateUploadedObject` tests: `npm run test:unit`
-- [ ] 1.5 Integration tests pass, including `note-images.test.ts` cross-tenant and signed-upload assertions: `npm run test:integration`
-- [ ] 1.6 CI workflow starts Supabase with `storage-api`
+- [x] 1.1 Migration applies on a fresh local database: `npx supabase db reset`
+- [x] 1.2 Lint passes: `npm run lint`
+- [x] 1.3 Type check passes: `npx astro sync && npx astro check`
+- [x] 1.4 Unit tests pass, including the note-images schema and `validateUploadedObject` tests: `npm run test:unit`
+- [x] 1.5 Integration tests pass, including `note-images.test.ts` cross-tenant and signed-upload assertions: `npm run test:integration`
+- [x] 1.6 CI workflow starts Supabase with `storage-api`
 
 #### Manual
 
-- [ ] 1.7 Bucket `note-images` is private with a 2,621,440 B limit and only webp/jpeg allowed
-- [ ] 1.8 Signed-upload findings are written into contract-surfaces and match the test assertions
+- [x] 1.7 Bucket `note-images` is private with a 2,621,440 B limit and only webp/jpeg allowed
+- [x] 1.8 Signed-upload findings are written into contract-surfaces and match the test assertions
 
 ### Phase 2: Image API and note-delete cleanup
 

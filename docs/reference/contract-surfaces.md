@@ -47,6 +47,35 @@ Load-bearing names that downstream changes must not silently rename without upda
 - RLS policies: `relations_select_own_campaign`, `relations_insert_own_campaign`, `relations_delete_own_campaign`. **No `UPDATE` policy** — rows are only ever created by detection or removed by re-detection (FR-011).
 - **Rows are written only by `public.detect_note_relations()` and `public.recompute_campaign_relations()`** (`supabase/migrations/20260926120000_relation_detection.sql`) — see "Relation detection" below. No app code inserts into or deletes from `relations`. **Not enforced at the DB level:** `relations_insert_own_campaign` / `relations_delete_own_campaign` still let an authenticated user write their own campaign's rows directly via PostgREST (the `security invoker` detection functions depend on those policies). Such hand-written rows self-heal: the next write of either endpoint note, or `recompute_campaign_relations`, restores the matched set. FR-011 is therefore a UI/app-code guarantee, not a DB invariant.
 
+## note_images
+
+- Table: `public.note_images` (`supabase/migrations/20261003120000_note_images.sql`, change `note-image-attachment`).
+- Columns: `id`, `campaign_id`, `note_id`, `position` (smallint, 0 or 1), `path` (unique), `thumb_path` (unique, null when the original fits within 512 px), `mime` (`image/webp` | `image/jpeg`), `width`, `height`, `thumb_width`, `thumb_height` (null together with `thumb_path`), `byte_size` (1..2621440), `alt_text`, `created_at`.
+- The 2-images-per-note cap is a table invariant: `position in (0,1)` plus `note_images_note_position_key unique (note_id, position)`.
+- Composite FK: `note_images_note_same_campaign_fkey (campaign_id, note_id)` → `notes (campaign_id, id)`, `on delete cascade`. The cascade removes rows only, **never Storage objects** (see cleanup obligations below).
+- Checks: `note_images_thumb_consistency_check` (thumb path/width/height all null or all set), `note_images_path_shape_check` (`split_part(path,'/',2) = campaign_id::text` and `split_part(path,'/',3) = note_id::text`, same for `thumb_path`), `alt_text` trimmed, non-empty and at most 200 chars (`ALT_TEXT_MAX_LENGTH`).
+- RLS policies: `note_images_select_own_campaign`, `note_images_insert_own_campaign` (also requires `split_part(path,'/',1) = auth.uid()::text`), `note_images_update_own_campaign` (exists for the alt-text grant only), `note_images_delete_own_campaign`. Ownership joins `campaigns.owner_id = auth.uid()` like `notes`.
+- Column UPDATE grant: `authenticated` may update only `alt_text`; changing `path` etc. is denied with `42501`.
+
+## Storage: note-images bucket
+
+- Bucket id `note-images` (`NOTE_IMAGES_BUCKET`), **private**, `file_size_limit` 2621440 B (`MAX_IMAGE_BYTES`, 2.5 MiB, per object), `allowed_mime_types` `image/webp`, `image/jpeg`. Created by the migration (not `config.toml`) so local and hosted match.
+- Limits live in `src/lib/images/limits.ts` (`MAX_IMAGES_PER_NOTE`, `MAX_IMAGE_BYTES`, `CLIENT_IMAGE_CEILING_BYTES` = 2516582, `THUMBNAIL_MAX_SIDE`, `MAX_CANVAS_AREA`, `MAX_IMAGE_SIDE`, `STORED_IMAGE_MIMES`, `PICKER_ACCEPT`, `ALT_TEXT_MAX_LENGTH`). The migration values must match.
+- Path format (built server-side only, `buildImagePaths`): `{user_id}/{campaign_id}/{note_id}/{uuid}.{webp|jpg}` and `{uuid}-thumb.{webp|jpg}`. `isOwnImagePath` validates commit input with a strict regex.
+- `storage.objects` policies (all `to authenticated`, `bucket_id = 'note-images'`): `note_images_objects_insert_own_note`, `note_images_objects_select_own_folder`, `note_images_objects_delete_own_folder`. **No UPDATE policy; never pass `upsert`.**
+- **Asymmetry rule**: INSERT requires folder 1 = `auth.uid()` **and** folders 2/3 naming a campaign and note the caller owns (segments compared as text, never cast to uuid). SELECT and DELETE check only folder 1 = `auth.uid()`, so objects can still be removed after the note row is gone.
+- **Signed upload findings** (observed against local Supabase, asserted in `tests/integration/note-images.test.ts`):
+  - A bare `fetch` PUT to the signed upload URL works **without** an `apikey` header (token in the URL is enough), so `PrepareUploadResponse.apikey` is not needed and stays unset.
+  - The bucket limits **are enforced** on the signed path: a body over 2,621,440 B is rejected with HTTP 400 (body `statusCode: "413"`), and `Content-Type: image/png` (or `application/octet-stream`) with HTTP 400 (body `statusCode: "415"`). The stored content type is the request header; bytes are not sniffed.
+  - The signed PUT does not re-check `storage.objects` RLS, so `createSignedUploadUrl` (which does: INSERT policy) is the real gate. Tenant B cannot sign for A's folder or for A's note id.
+  - Commit still verifies each object with `info()` through `validateUploadedObject` (size and content type, missing values count as invalid).
+- **Cleanup obligations** (cascades never touch Storage): note delete must call `removeNoteFolder` after the row is gone; **campaign delete must remove every note folder under `{user_id}/{campaign_id}/`** (not implemented in Phase 1); a failed commit removes both objects; image delete removes the row first, then the objects (a removal failure is logged and the orphan accepted).
+- Service: `src/lib/services/note-images.ts` (`buildImagePaths`, `isOwnImagePath`, `validateUploadedObject`, `listNoteImages`, `toImageViews`, `prepareUpload`, `commitImage`, `updateImageAltText`, `deleteImage`, `removeNoteFolder`, `getImageUrls`). Zod schemas: `src/lib/schemas/note-images.ts` (`prepareUploadSchema`, `commitImageSchema`, `updateImageSchema`, all `.strict()`).
+
+## Shared constants (error dictionaries)
+
+- `HTTP_STATUS` (`src/lib/http-status.ts`), `PG_ERROR` (`src/lib/db-error-codes.ts`: `UNIQUE_VIOLATION` 23505, `FOREIGN_KEY_VIOLATION` 23503, `CHECK_VIOLATION` 23514, `INSUFFICIENT_PRIVILEGE` 42501, `NO_DATA_FOUND` P0002, `INVALID_PARAMETER_VALUE` 22023) and `MESSAGES` (`src/lib/messages.ts`) are the central dictionaries. New code uses them; existing routes still use literals.
+
 ## Trigger functions
 
 - `public.set_updated_at()` — generic `before update` trigger, sets `updated_at = now()`. Fired by `campaigns_set_updated_at`, `notes_set_updated_at`.
@@ -144,6 +173,8 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - `supabase/migrations/20260928120000_campaign_name_rules.sql` — adds `campaigns_name_check` and the `campaigns_owner_name_key` unique index (see above). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 - `supabase/migrations/20260930120000_note_edit_delete_functions.sql` — adds `resolve_note_type`, `update_note`, `delete_note` and redefines `create_note` to use `resolve_note_type` (see above). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 
+- `supabase/migrations/20261003120000_note_images.sql` — adds the private `note-images` bucket, `public.note_images` with RLS and the alt-text-only update grant, and the three `storage.objects` policies (see "note_images" and "Storage: note-images bucket" above). Applied to production manually (`npx supabase db push`) — CI does not run migrations on hosted, but the CI `smoke` job now starts the Storage container (`storage-api` removed from the `supabase start -x` list) because this migration writes to `storage.buckets`.
+
 ## Shared TypeScript types
 
 - `src/types.ts` — `Campaign`, `NoteType`, `Note`, `Relation` interfaces mirror the tables above field-for-field (snake_case, no camelCase mapping layer).
@@ -151,3 +182,4 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - `CampaignSummary` (`Pick<Campaign, "id" | "name">`) is the subset of a campaign shown in the `CampaignSwitcher` island (`src/components/campaigns/CampaignSwitcher.tsx`), loaded via `listCampaigns` (`src/lib/services/campaigns.ts`) inside `Topbar.astro`.
 - `CampaignView` (`src/lib/campaign-paths.ts`) and `campaignSwitchPath(view, targetCampaignId)` are the pure mapping from a page's current view to the equivalent URL in another campaign, used by both `CampaignSwitcher` and every campaign page's `Topbar` call (`view` prop: `notes`, `map`, `new-note`, `note`, `edit`, or `none` on `/campaigns/new`).
 - `MemoryMapRelation` (`Pick<Relation, "id" | "note_a_id" | "note_b_id">`) and `MemoryMapData` (`{ notes: NoteListItem[]; relations: MemoryMapRelation[] }`) are the `/map` page's domain DTOs, free of any `@xyflow/react` types — the mapping to React Flow `Node`/`Edge` happens inside `MemoryMap.tsx`.
+- Note images (`src/types.ts`): `NoteImage` (mirrors `note_images`), `NoteImageView`, `PrepareUploadCommand`, `PrepareUploadResponse`, `SignedUpload`, `CommitImageCommand`, `CommitImageResponse`, `UpdateImageCommand`, `UpdateImageResponse`, `ImageUrlsResponse`. `ApiError["field"]` also allows `"images"`.

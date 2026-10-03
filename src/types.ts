@@ -101,7 +101,7 @@ export interface NoteDetail extends Note {
 
 export interface ApiError {
   error: string;
-  field?: "name" | "content" | "type";
+  field?: "name" | "content" | "type" | "images";
 }
 
 /** A relation as needed by the memory map: no `campaign_id`, since the caller already scoped the query to one. */
@@ -111,4 +111,87 @@ export type MemoryMapRelation = Pick<Relation, "id" | "note_a_id" | "note_b_id">
 export interface MemoryMapData {
   notes: NoteListItem[];
   relations: MemoryMapRelation[];
+}
+
+/** A stored image attached to a note; mirrors `public.note_images` (20261003120000_note_images.sql). */
+export interface NoteImage {
+  id: string;
+  campaign_id: string;
+  note_id: string;
+  position: number;
+  path: string;
+  thumb_path: string | null;
+  mime: "image/webp" | "image/jpeg";
+  width: number;
+  height: number;
+  thumb_width: number | null;
+  thumb_height: number | null;
+  byte_size: number;
+  alt_text: string | null;
+  created_at: string;
+}
+
+/**
+ * What the note page renders per image. `thumb_url` is the signed thumbnail URL (the
+ * original's when there is no separate thumbnail); null when signing failed.
+ */
+export interface NoteImageView {
+  id: string;
+  position: number;
+  alt_text: string | null;
+  width: number;
+  height: number;
+  thumb_width: number | null;
+  thumb_height: number | null;
+  thumb_url: string | null;
+}
+
+/** Command to get signed upload URLs for one image. */
+export interface PrepareUploadCommand {
+  mime: "image/webp" | "image/jpeg";
+  with_thumbnail: boolean;
+}
+
+export interface SignedUpload {
+  path: string;
+  signed_url: string;
+  token: string;
+}
+
+export interface PrepareUploadResponse {
+  image: SignedUpload;
+  thumbnail: SignedUpload | null;
+  /** Anon key, only present when the signed PUT requires an `apikey` header. */
+  apikey?: string;
+}
+
+/** Command to register uploaded objects as a `note_images` row. */
+export interface CommitImageCommand {
+  path: string;
+  thumb_path: string | null;
+  width: number;
+  height: number;
+  thumb_width: number | null;
+  thumb_height: number | null;
+  alt_text: string | null;
+}
+
+export interface UpdateImageCommand {
+  alt_text: string | null;
+}
+
+export interface CommitImageResponse {
+  id: string;
+  position: number;
+}
+
+export interface UpdateImageResponse {
+  id: string;
+  alt_text: string | null;
+}
+
+/** Fresh signed URLs for one image: full-size (short-lived) and thumbnail. */
+export interface ImageUrlsResponse {
+  url: string;
+  thumb_url: string;
 }
