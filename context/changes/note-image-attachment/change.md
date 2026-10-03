@@ -1,9 +1,9 @@
 ---
 change_id: note-image-attachment
 title: Attach an image to a note
-status: new
+status: preparing
 created: 2026-10-01
-updated: 2026-10-01
+updated: 2026-10-03
 archived_at: null
 ---
 
@@ -24,11 +24,11 @@ archived_at: null
 ### Limits
 
 - **Scope change from FR-004:** FR-004 says "an image". This change allows **up to 2 images per note**. Enforce the cap on the server and in the database, not only in the UI.
-- Bucket `file_size_limit` is **2.5 MB per file**.
-- Browser compression ceiling is **2.4 MB** (`maxSizeMB: 2.4`). The margin covers MB/MiB rounding so the bucket never rejects a compressed file.
+- Bucket `file_size_limit` is **2.5 MiB per file** (2,621,440 B, set in bytes in the migration; unit decided 2026-10-03).
+- Browser compression ceiling is **2.4 MiB** (2,516,582 B). Both limits use binary units, so the bucket never rejects a compressed file.
   - The limit applies to each file separately. A thumbnail is its own object with its own 2.5 MB allowance, so it doesn't share the original's budget.
-- There is **no pixel-dimension limit**. Tall and wide images (maps, handouts) are allowed. Only the data size is capped.
-- Allowed types: jpeg, png and webp, maybe gif. **No SVG** (XSS risk). The file picker also accepts HEIC/HEIF; the browser converts them (see "HEIC conversion" below), so the bucket only ever receives WebP.
+- ~~There is **no pixel-dimension limit**.~~ **Superseded 2026-10-03:** area cap, see "Decisions (2026-10-03)".
+- Allowed types: jpeg, png, webp and gif (gif decided 2026-10-03, see below). **No SVG** (XSS risk). The file picker also accepts HEIC/HEIF; the browser converts them (see "HEIC conversion" below), so the bucket receives only WebP, or JPEG from Safari (changed 2026-10-03).
 
 ### Processing in the browser
 
@@ -37,7 +37,7 @@ archived_at: null
   - Encode as WebP at a fixed starting quality of about 0.8 (`initialQuality`).
   - Lower the quality or the resolution further only if the result is still over 2.4 MB.
   - Never inflate images toward the limit. The free tier's 1 GB is shared across all users.
-- Proposed library: `browser-image-compression`. Self-host its web-worker script (`libURL`) or set `useWebWorker: false`; by default it loads from cdn.jsdelivr.net.
+- ~~Proposed library: `browser-image-compression`.~~ **Superseded 2026-10-03:** hand-written pipeline, see "Decisions (2026-10-03)".
 
 ### HEIC conversion
 
@@ -66,7 +66,7 @@ archived_at: null
 
 - **Why:** the browser receives the bundled code, so the license obligations apply:
   - LGPL-3.0: `heic-to`, and the libheif and libde265 libraries it bundles.
-  - MIT: `browser-image-compression`.
+  - ~~MIT: `browser-image-compression`.~~ Dropped 2026-10-03.
 - **New page** `/licenses` (Astro, static):
   - It is **public**, so don't add it to `PROTECTED_ROUTES`. Legal notices must be readable without signing in.
   - It is fully static, so it can be prerendered.
@@ -98,3 +98,45 @@ archived_at: null
 - Clean up Storage files in the note delete flow (S-04), in campaign deletion, and when an upload succeeds but the row insert fails. Delete both the original and the thumbnail. SQL cascades remove rows but leave the files in the bucket.
 - Build file paths on the server: `{user_id}/{campaign_id}/{note_id}/{uuid}.webp`. RLS on `storage.objects` uses a per-operation policy based on the user's folder, plus a check that the note belongs to the user.
 - Image changes don't go through the relation re-detection RPC, and don't change `updated_at` in a way that misleads the S-04 relation-change notice.
+
+## Decisions (2026-10-03)
+
+Answers to the open questions in research.md "Verification (2026-10-03)".
+
+### Where images are added
+
+- On **both the create and the edit form**.
+- Create flow: the note is created first (the storage path needs `note_id`). Images upload **after the 201 and before navigating away**.
+- If the note saved but an image failed, don't lose the note and don't hide the failure. Show which image failed and let the user retry from the edit form.
+
+### PRD guardrail ("never lost or corrupted", "no silent degradation")
+
+- **Accepted risks:**
+  - every image is lossily re-encoded to WebP;
+  - Free-plan projects pause after a week of inactivity;
+  - Supabase database backups do not cover Storage objects.
+- **Not silent:** show a short hint next to the file picker saying images are compressed.
+
+### Processing pipeline
+
+- **Hand-written**, no `browser-image-compression`: `createImageBitmap` → canvas / `OffscreenCanvas` → WebP blob.
+- This gives exact control over the earlier decisions: EXIF is always stripped, no resolution is lost unless the file is over the 2.4 MB ceiling, and the output is never the original file.
+- Check the output `type`. Where the browser can't encode WebP, the canvas falls back to PNG silently. Confirmed: Safari can't encode WebP. The fallback is canvas JPEG, see below.
+- `/licenses` no longer lists `browser-image-compression`.
+
+### Animated images
+
+- **Accept GIF.** Animated GIF/WebP keep only their **first frame** after re-encoding.
+- No animation detection. Show a **fixed line** ("Animated images become static") whenever a GIF or WebP file is picked.
+
+### Compression pipeline details (from research "Follow-up: compression reference validation")
+
+- **Base:** `references/compress-to-webp.js`, ported to TypeScript in `src/lib/`, with these changes:
+  - starting quality (`maxQuality`) **0.8**;
+  - a single decode produces both the image and the 512 px thumbnail, and returns `{ blob, width, height, type }` for each.
+- **Dimensions:** an **area cap of ≤ 16,777,216 px** (the iOS canvas limit) plus **≤ 16,383 px per side** (the WebP maximum), replacing the 4096 px side cap. Tall maps keep most of their resolution, e.g. 2000×12000 → about 1672×10033.
+- **Safari fallback: canvas JPEG.**
+  - When the WebP output check fails, encode as JPEG. Fill the canvas with white before `drawImage` so transparency doesn't turn black.
+  - The bucket allow-list is `image/webp` and `image/jpeg`. The file extension and content type follow the output type, so the path becomes `{uuid}.webp` or `{uuid}.jpg`.
+  - This replaces "the bucket only ever receives WebP".
+- **Minimum browsers:** Chrome 112+, Firefox 111+, Safari 16.4+. Keep `imageOrientation: 'from-image'` and OffscreenCanvas. Older browsers get a clear "browser not supported" error.
