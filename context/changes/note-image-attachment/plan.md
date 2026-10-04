@@ -647,33 +647,33 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [x] 1.1 Migration applies on a fresh local database: `npx supabase db reset`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Type check passes: `npx astro sync && npx astro check`
-- [x] 1.4 Unit tests pass, including the note-images schema and `validateUploadedObject` tests: `npm run test:unit`
-- [x] 1.5 Integration tests pass, including `note-images.test.ts` cross-tenant and signed-upload assertions: `npm run test:integration`
-- [x] 1.6 CI workflow starts Supabase with `storage-api`
+- [x] 1.1 Migration applies on a fresh local database: `npx supabase db reset` — 839ae50
+- [x] 1.2 Lint passes: `npm run lint` — 839ae50
+- [x] 1.3 Type check passes: `npx astro sync && npx astro check` — 839ae50
+- [x] 1.4 Unit tests pass, including the note-images schema and `validateUploadedObject` tests: `npm run test:unit` — 839ae50
+- [x] 1.5 Integration tests pass, including `note-images.test.ts` cross-tenant and signed-upload assertions: `npm run test:integration` — 839ae50
+- [x] 1.6 CI workflow starts Supabase with `storage-api` — 839ae50
 
 #### Manual
 
-- [x] 1.7 Bucket `note-images` is private with a 2,621,440 B limit and only webp/jpeg allowed
-- [x] 1.8 Signed-upload findings are written into contract-surfaces and match the test assertions
+- [x] 1.7 Bucket `note-images` is private with a 2,621,440 B limit and only webp/jpeg allowed — 839ae50
+- [x] 1.8 Signed-upload findings are written into contract-surfaces and match the test assertions — 839ae50
 
 ### Phase 2: Image API and note-delete cleanup
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Type check passes: `npx astro check`
-- [ ] 2.3 Unit and integration tests pass: `npm test`
-- [ ] 2.4 Integration test: note delete then `removeNoteFolder` leaves no objects under the note prefix
-- [ ] 2.5 Production build succeeds: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Type check passes: `npx astro check`
+- [x] 2.3 Unit and integration tests pass: `npm test`
+- [x] 2.4 Integration test: note delete then `removeNoteFolder` leaves no objects under the note prefix
+- [x] 2.5 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.6 Full prepare → PUT → commit → GET → PATCH → DELETE sequence works from the browser console
-- [ ] 2.7 The same calls against another account's note return 404
-- [ ] 2.8 Deleting a note with images leaves its folder empty in Studio
+- [x] 2.6 Full prepare → PUT → commit → GET → PATCH → DELETE sequence works from the browser console
+- [x] 2.7 The same calls against another account's note return 404
+- [x] 2.8 Deleting a note with images leaves its folder empty in Studio
 
 ### Phase 3: Browser pipeline and form attach
 

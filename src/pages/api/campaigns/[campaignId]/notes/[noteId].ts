@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 
 import { jsonError, fieldFromPath } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
+import { removeNoteFolder } from "@/lib/services/note-images";
 import { deleteNote, updateNote } from "@/lib/services/notes";
 import { updateNoteSchema } from "@/lib/schemas/notes";
 import { isUuid } from "@/lib/utils";
@@ -98,6 +99,9 @@ export const DELETE: APIRoute = async (context) => {
     console.error("DELETE /api/campaigns/[campaignId]/notes/[noteId]: unexpected deleteNote failure", result.error);
     return jsonError({ error: "Something went wrong while deleting the note. Please try again." }, 500);
   }
+
+  // Cascade removes image rows, not Storage objects. Failures are logged inside and never change the response.
+  await removeNoteFolder(supabase, context.locals.user.id, campaignId, noteId);
 
   return jsonOk(result.changes);
 };

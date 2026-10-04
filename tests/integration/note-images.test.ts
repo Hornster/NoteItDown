@@ -4,6 +4,7 @@ import type { PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase
 import { createTestNote, createTestUser, jpegFixture, webpFixture } from "./helpers";
 
 import { MAX_IMAGE_BYTES, NOTE_IMAGES_BUCKET } from "@/lib/images/limits";
+import { deleteNote } from "@/lib/services/notes";
 import {
   commitImage,
   getImageUrls,
@@ -417,6 +418,19 @@ describe("note-images service flow", () => {
     const bucket = a.client.storage.from(NOTE_IMAGES_BUCKET);
     expect((await bucket.list(folder)).data?.length).toBe(2);
 
+    await removeNoteFolder(a.client, a.userId, a.campaignId, note.id);
+    expect((await bucket.list(folder)).data).toEqual([]);
+  });
+
+  it("deleteNote then removeNoteFolder leaves no objects under the note prefix", async () => {
+    const note = await createTestNote(a.client, a.campaignId);
+    await prepareAndPut(note, true);
+    const folder = `${a.userId}/${a.campaignId}/${note.id}`;
+    const bucket = a.client.storage.from(NOTE_IMAGES_BUCKET);
+    expect((await bucket.list(folder)).data?.length).toBe(2);
+
+    const deleted = await deleteNote(a.client, a.campaignId, note.id);
+    expect(deleted.success).toBe(true);
     await removeNoteFolder(a.client, a.userId, a.campaignId, note.id);
     expect((await bucket.list(folder)).data).toEqual([]);
   });

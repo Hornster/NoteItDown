@@ -131,9 +131,19 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - File: `src/pages/api/campaigns/[campaignId]/notes/[noteId].ts`. `export const prerender = false`. Services: `updateNote` / `deleteNote` (`src/lib/services/notes.ts`), thin wrappers over the `update_note` / `delete_note` RPCs.
 - Guard order (both verbs): 401 `ApiError` if unauthenticated → 500 if Supabase isn't configured → 404 if `campaignId` or `noteId` fails `isUuid`. There is **no `getCampaign` pre-check**: the 404 for a missing, foreign-campaign or other-tenant note comes from the RPC's SQLSTATE `P0002` (`not_found`), which is RLS-indistinguishable from "doesn't exist".
 - `PATCH`: body is `UpdateNoteCommand` (same shape as `CreateNoteCommand`), validated by `updateNoteSchema` (`= createNoteSchema`, `.strict()`). Then 400 `ApiError` with `field` on a non-JSON body or zod failure → `updateNote` mapping: `duplicate_name` (`23505`) → 409 `field: "name"`; `invalid_type` (`23503`/`42501`/`22023`) → 400 `field: "type"`; `not_found` (`P0002`) → 404; `unexpected` → 500 generic (logged via `console.error`) → 200 `UpdateNoteResponse`.
-- `DELETE`: no body. `deleteNote` mapping: `not_found` (`P0002`) → 404; `unexpected` → 500 generic (logged) → 200 `DeleteNoteResponse`.
+- `DELETE`: no body. `deleteNote` mapping: `not_found` (`P0002`) → 404; `unexpected` → 500 generic (logged) → on success, `removeNoteFolder(supabase, user.id, campaignId, noteId)` (`src/lib/services/note-images.ts`) removes the note's Storage folder (the `note_images` rows are removed by the FK cascade, the objects are not); cleanup failures are logged and never change the response → 200 `DeleteNoteResponse`.
 - Responses: `UpdateNoteResponse { id, name, rechecked, added: RelationChange[], removed: RelationChange[] }`; `DeleteNoteResponse { name, removed: RelationChange[] }`; `RelationChange { note_id, name }`.
 - `countNoteRelations(supabase, noteId)` (`src/lib/services/relations.ts`) is a head-only exact count of relations where the note is `note_a_id` or `note_b_id` (for the delete dialog); throws on error.
+
+## Image API (`/api/campaigns/[campaignId]/notes/[noteId]/images...`)
+
+- Files: `images/uploads.ts`, `images.ts`, `images/[imageId].ts` under `src/pages/api/campaigns/[campaignId]/notes/[noteId]/`. All `export const prerender = false`. Service: `src/lib/services/note-images.ts`; status/message literals come from `HTTP_STATUS` / `MESSAGES`.
+- Guard order (all routes): 401 `ApiError` -> 500 if Supabase isn't configured -> 404 if `campaignId`, `noteId` (and `imageId` where present) fails `isUuid`. Routes with a body then return 400 `ApiError` (no `field`) on non-JSON or a zod failure. The user id always comes from `context.locals.user.id`, never from the body. Service `unexpected` -> 500 `MESSAGES.GENERIC_IMAGE_ERROR`, logged via `console.error`.
+- `POST .../images/uploads`: body `PrepareUploadCommand` (`prepareUploadSchema`, `.strict()`). `not_found` -> 404; `limit_reached` -> 409 `field: "images"`; success -> 200 `PrepareUploadResponse`.
+- `POST .../images` (commit): body `CommitImageCommand` (`commitImageSchema`, `.strict()`). `invalid_upload` -> 400 `field: "images"`; `not_found` -> 404; `limit_reached` -> 409 `field: "images"`; success -> 201 `CommitImageResponse`.
+- `GET .../images/[imageId]`: 200 `ImageUrlsResponse` with `Cache-Control: no-store`; 404 when the image isn't on this campaign and note or isn't the caller's; 500 when signing fails.
+- `PATCH .../images/[imageId]`: body `UpdateImageCommand` (`updateImageSchema`); 200 `UpdateImageResponse`; 404; 500.
+- `DELETE .../images/[imageId]`: 200 `{ id }`; 404; 500. Row is deleted first, objects after (failures logged).
 
 ## `POST /api/campaigns` and `PATCH /api/campaigns/[campaignId]`
 
