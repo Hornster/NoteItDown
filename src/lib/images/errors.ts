@@ -24,11 +24,11 @@ export class BrowserImageError extends Error {
   }
 }
 
-/** The file looks like HEIC and conversion is not available yet. Removed when Phase 5 lands. */
-export class HeicNotSupportedYetError extends Error {
-  constructor(message = "HEIC images are not supported yet.") {
+/** The lazily loaded HEIC decoder chunk could not be downloaded (e.g. offline). */
+export class HeicDecoderLoadError extends Error {
+  constructor(message = "The HEIC conversion library could not be loaded.") {
     super(message);
-    this.name = "HeicNotSupportedYetError";
+    this.name = "HeicDecoderLoadError";
   }
 }
 

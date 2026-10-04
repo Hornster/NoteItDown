@@ -700,34 +700,34 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [x] 4.1 Lint passes: `npm run lint`
-- [x] 4.2 Type check passes: `npx astro check`
-- [x] 4.3 All tests pass: `npm test`
-- [x] 4.4 Build succeeds: `npm run build`
+- [x] 4.1 Lint passes: `npm run lint` — 99a563c
+- [x] 4.2 Type check passes: `npx astro check` — 99a563c
+- [x] 4.3 All tests pass: `npm test` — 99a563c
+- [x] 4.4 Build succeeds: `npm run build` — 99a563c
 
 #### Manual
 
-- [x] 4.5 Thumbnails render at stored size without layout jump; alt text and fallback present
-- [x] 4.6 Page HTML contains no full-size URL; full image downloads only on click
-- [x] 4.7 Popup fits the window and closes with Esc and the close button
-- [x] 4.8 Expired thumbnail URL recovers once (also when broken before hydration); a second failure does not loop
-- [x] 4.9 Notes without images show no images section; list and map unchanged
+- [x] 4.5 Thumbnails render at stored size without layout jump; alt text and fallback present — 99a563c
+- [x] 4.6 Page HTML contains no full-size URL; full image downloads only on click — 99a563c
+- [x] 4.7 Popup fits the window and closes with Esc and the close button — 99a563c
+- [x] 4.8 Expired thumbnail URL recovers once (also when broken before hydration); a second failure does not loop — 99a563c
+- [x] 4.9 Notes without images show no images section; list and map unchanged — 99a563c
 
 ### Phase 5: HEIC fallback, `/licenses` and footer
 
 #### Automated
 
-- [ ] 5.1 `heic-to` is pinned exactly at 1.6.5
-- [ ] 5.2 Build succeeds and `heic-to` is a separate client chunk
-- [ ] 5.3 Lint passes: `npm run lint`
-- [ ] 5.4 Type check passes: `npx astro check`
-- [ ] 5.5 All tests pass: `npm test`
-- [ ] 5.6 Smoke test passes against the preview
+- [x] 5.1 `heic-to` is pinned exactly at 1.6.5
+- [x] 5.2 Build succeeds and `heic-to` is a separate client chunk
+- [x] 5.3 Lint passes: `npm run lint`
+- [x] 5.4 Type check passes: `npx astro check`
+- [x] 5.5 All tests pass: `npm test`
+- [x] 5.6 Smoke test passes against the preview
 
 #### Manual
 
 - [ ] 5.7 Linux Chrome/Firefox: iPhone HEIC uploads as WebP; decoder chunk loads only on that pick; portrait HEIC upright
 - [ ] 5.8 A 48 MP HEIC processes without crashing, with a visible processing state
-- [ ] 5.9 A non-HEIC undecodable file still shows the unsupported error
-- [ ] 5.10 `/licenses` loads signed out with all required fields and full licence texts
-- [ ] 5.11 Footer link appears on auth, campaign and note pages
+- [x] 5.9 A non-HEIC undecodable file still shows the unsupported error
+- [x] 5.10 `/licenses` loads signed out with all required fields and full licence texts
+- [x] 5.11 Footer link appears on auth, campaign and note pages

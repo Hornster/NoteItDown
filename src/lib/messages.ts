@@ -9,9 +9,10 @@ export const MESSAGES = {
   GENERIC_IMAGE_ERROR: "Something went wrong while handling the image. Please try again.",
   NETWORK_ERROR: "Network error. Please check your connection and try again.",
   IMAGE_UNSUPPORTED: "This file is unsupported or corrupt. Try a JPEG, PNG, WebP or GIF.",
+  IMAGE_HEIC_DECODER_UNAVAILABLE:
+    "Cannot retrieve HEIC conversion library. Make sure you are connected to the Internet.",
   IMAGE_TOO_LARGE: "This image can't be compressed small enough. Try a smaller image.",
   IMAGE_BROWSER_FAILURE: "Your browser couldn't process this image. Try another browser or a different file.",
-  IMAGE_HEIC_NOT_SUPPORTED_YET: "HEIC images are not supported yet. Convert the file to JPEG and try again.",
   IMAGE_UPLOAD_FAILED: "The image upload failed.",
   IMAGE_PROCESSING: "Processing…",
   IMAGE_COMPRESSED_HINT: "Images are compressed before upload.",

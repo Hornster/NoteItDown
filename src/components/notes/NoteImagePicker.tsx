@@ -3,11 +3,11 @@ import { ImagePlus, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   BrowserImageError,
-  HeicNotSupportedYetError,
+  HeicDecoderLoadError,
   ImageTooLargeError,
   UnsupportedImageError,
 } from "@/lib/images/errors";
-import { looksLikeHeic } from "@/lib/images/heic";
+import { convertHeicToJpeg, looksLikeHeic } from "@/lib/images/heic";
 import { ALT_TEXT_MAX_LENGTH, MAX_IMAGES_PER_NOTE, PICKER_ACCEPT } from "@/lib/images/limits";
 import { MESSAGES } from "@/lib/messages";
 import type { HeldImageState, NoteImageView, PendingImage } from "@/types";
@@ -22,11 +22,9 @@ interface Props {
 const altInputClass =
   "mt-2 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-purple-400 focus:outline-none";
 
-function errorMessage(error: unknown, headIsHeic: boolean): string {
-  if (error instanceof UnsupportedImageError) {
-    return headIsHeic ? MESSAGES.IMAGE_HEIC_NOT_SUPPORTED_YET : MESSAGES.IMAGE_UNSUPPORTED;
-  }
-  if (error instanceof HeicNotSupportedYetError) return MESSAGES.IMAGE_HEIC_NOT_SUPPORTED_YET;
+function errorMessage(error: unknown): string {
+  if (error instanceof UnsupportedImageError) return MESSAGES.IMAGE_UNSUPPORTED;
+  if (error instanceof HeicDecoderLoadError) return MESSAGES.IMAGE_HEIC_DECODER_UNAVAILABLE;
   if (error instanceof ImageTooLargeError) return MESSAGES.IMAGE_TOO_LARGE;
   if (error instanceof BrowserImageError) return MESSAGES.IMAGE_BROWSER_FAILURE;
   return MESSAGES.GENERIC_IMAGE_ERROR;
@@ -78,7 +76,10 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
     const maybeAnimated = isAnimatedCapable(file, head);
     try {
       const { processImage } = await import("@/lib/images/compress");
-      const processed = await processImage(file);
+      const processed = await processImage(file).catch(async (error: unknown) => {
+        if (!(error instanceof UnsupportedImageError) || !looksLikeHeic(head)) throw error;
+        return processImage(await convertHeicToJpeg(file));
+      });
       patchPending(key, {
         status: "ready",
         processed,
@@ -86,7 +87,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
         maybeAnimated,
       });
     } catch (error) {
-      patchPending(key, { status: "error", error: errorMessage(error, looksLikeHeic(head)), maybeAnimated });
+      patchPending(key, { status: "error", error: errorMessage(error), maybeAnimated });
     }
   }
 

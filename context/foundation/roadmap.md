@@ -46,7 +46,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done     |
 | S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done     |
 | S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | done     |
-| S-05 | note-image-attachment             | attach an image to a note                                                        | S-01          | FR-004                                | in-progress |
+| S-05 | note-image-attachment             | attach up to 2 images to a note                                                  | S-01          | FR-004                                | in-progress |
 
 ## Streams
 
@@ -137,14 +137,14 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ### S-05: User can attach an image to a note
 
-- **Outcome:** User can attach an image to a note alongside its text content.
+- **Outcome:** User can attach up to 2 images to a note alongside its text content.
 - **Change ID:** note-image-attachment
 - **PRD refs:** FR-004
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-03, S-04
 - **Blockers:** —
 - **Unknowns:**
-  - Supabase Storage bucket policy (size limits, per-user access rules) for note images — Owner: team. Block: no.
+  - ~~Supabase Storage bucket policy (size limits, per-user access rules) for note images~~ — Settled: private `note-images` bucket, 2.5 MiB per object, WebP/JPEG only, per-user folder RLS (see `docs/reference/contract-surfaces.md`, "Storage: note-images bucket").
 - **Risk:** Nice-to-have and independent of the matching hypothesis — the PRD's own resolution on FR-004 notes images "don't feed the core domain rule" since exact-name matching only reads text, so this is sequenced last without blocking anything.
 - **Status:** in-progress
 
@@ -183,7 +183,7 @@ them may as well be in various places at once, and bare numbers say NOTHING. A s
 - **Full mobile (phone-width) support for the web UI** — Why parked: user decision 2026-09-28 (during S-03) — the MVP targets desktop browsers and does not aim to fully support mobile layouts. The UI is expected to change in the next version, so responsive and mobile polish is deferred until then, and phone-width checks are not MVP acceptance criteria.
 - **Restyle the shadcn alert-dialog to the app's dark theme** — Why parked: user decision 2026-10-01 (during S-04 Phase 4 manual check 4.6) — the note-delete confirmation dialog (`src/components/ui/alert-dialog.tsx`, used by `src/components/notes/DeleteNoteButton.tsx`) keeps shadcn's default light-theme tokens (`bg-background` etc.) and visibly clashes with the dark glass-panel pages. It works correctly, and the UI look is planned to change in the next version, so the restyle is deferred until then.
 - **MIT notices for remaining bundled dependencies on the `/licenses` page** — Why parked: user decision 2026-10-01 (during S-05 scoping).
-  - S-05 adds the public `/licenses` page, linked from a new footer in `src/layouts/Layout.astro`. It lists only the libraries S-05 adds: `heic-to`, libheif and libde265 under LGPL-3.0, and `browser-image-compression` under MIT.
+  - S-05 adds the public `/licenses` page, linked from a new footer in `src/layouts/Layout.astro`. It lists only the libraries S-05 adds: `heic-to`, libheif and libde265 under LGPL-3.0. The dropped `browser-image-compression` is no longer part of this slice (compression is a native canvas pipeline).
   - The other dependencies that ship to the browser are MIT-licensed too, and their notices also belong on that page. Examples: React, Radix UI / shadcn, Tailwind, clsx, tailwind-merge.
   - This is deferred to keep S-05 focused. The likely approach is a list generated at build time (e.g. a Vite/Rollup license plugin) rather than one maintained by hand.
 - **Safari verification of note-image upload, plus an "experimental" notice for Safari users** — Why parked: user decision 2026-10-04 (during S-05 Phase 3 manual check 3.8). No Safari test environment is available: Safari isn't distributed for Linux, Windows support was dropped, and there is no iPhone, iPad or Mac to hand.

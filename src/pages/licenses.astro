@@ -1,0 +1,73 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import lgplText from "@/assets/licenses/lgpl-3.0.txt?raw";
+import gplText from "@/assets/licenses/gpl-3.0.txt?raw";
+
+export const prerender = false;
+
+const notices = [
+  {
+    name: "heic-to",
+    version: "1.6.5",
+    license: "LGPL-3.0",
+    copyright: "© Hopper Gee",
+    source: "https://github.com/hoppergee/heic-to",
+  },
+  {
+    name: "libheif",
+    version: "1.23.5",
+    license: "LGPL-3.0",
+    copyright: "© Dirk Farin / struktur AG",
+    source: "https://github.com/strukturag/libheif",
+  },
+  {
+    name: "libde265",
+    version: "1.0.16",
+    license: "LGPL-3.0",
+    copyright: "© struktur AG, Dirk Farin",
+    source: "https://github.com/strukturag/libde265",
+  },
+];
+---
+
+<Layout title="Third-party licences">
+  <div class="bg-cosmic min-h-screen p-4 text-white">
+    <div class="mx-auto max-w-3xl py-8">
+      <h1 class="mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
+        Third-party licences
+      </h1>
+      <p class="mb-6 text-sm text-blue-100/70">
+        HEIC photos are converted in your browser with the libraries below, loaded only when you pick a HEIC file. They
+        are used unmodified and are distributed under the GNU Lesser General Public License v3.0, which incorporates the
+        GNU General Public License v3.0.
+      </p>
+
+      <ul class="mb-8 space-y-3">
+        {notices.map((n) => (
+          <li class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
+            <p class="font-semibold">
+              {n.name} <span class="text-blue-100/70">{n.version}</span>
+            </p>
+            <p class="text-sm text-blue-100/80">
+              {n.license} &middot; {n.copyright}
+            </p>
+            <a
+              href={n.source}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-purple-300 hover:underline"
+            >
+              {n.source}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <h2 class="mb-2 text-lg font-semibold">GNU Lesser General Public License v3.0</h2>
+      <pre class="mb-8 overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-4 text-xs whitespace-pre-wrap text-blue-100/80">{lgplText}</pre>
+
+      <h2 class="mb-2 text-lg font-semibold">GNU General Public License v3.0</h2>
+      <pre class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-4 text-xs whitespace-pre-wrap text-blue-100/80">{gplText}</pre>
+    </div>
+  </div>
+</Layout>
