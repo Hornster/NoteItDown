@@ -663,38 +663,38 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Type check passes: `npx astro check`
-- [x] 2.3 Unit and integration tests pass: `npm test`
-- [x] 2.4 Integration test: note delete then `removeNoteFolder` leaves no objects under the note prefix
-- [x] 2.5 Production build succeeds: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` — 2509af4
+- [x] 2.2 Type check passes: `npx astro check` — 2509af4
+- [x] 2.3 Unit and integration tests pass: `npm test` — 2509af4
+- [x] 2.4 Integration test: note delete then `removeNoteFolder` leaves no objects under the note prefix — 2509af4
+- [x] 2.5 Production build succeeds: `npm run build` — 2509af4
 
 #### Manual
 
-- [x] 2.6 Full prepare → PUT → commit → GET → PATCH → DELETE sequence works from the browser console
-- [x] 2.7 The same calls against another account's note return 404
-- [x] 2.8 Deleting a note with images leaves its folder empty in Studio
+- [x] 2.6 Full prepare → PUT → commit → GET → PATCH → DELETE sequence works from the browser console — 2509af4
+- [x] 2.7 The same calls against another account's note return 404 — 2509af4
+- [x] 2.8 Deleting a note with images leaves its folder empty in Studio — 2509af4
 
 ### Phase 3: Browser pipeline and form attach
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass for pipeline maths, applyImageChanges and image-failure-notice: `npm run test:unit`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 Type check passes: `npx astro check`
-- [ ] 3.4 Build succeeds and the Worker bundle contains no compression code
-- [ ] 3.5 Integration tests still pass: `npm run test:integration`
+- [x] 3.1 Unit tests pass for pipeline maths, applyImageChanges and image-failure-notice: `npm run test:unit`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 Type check passes: `npx astro check`
+- [x] 3.4 Build succeeds and the Worker bundle contains no compression code
+- [x] 3.5 Integration tests still pass: `npm run test:integration`
 
 #### Manual
 
-- [ ] 3.6 Chrome: 12 MP JPEG and small PNG upload as WebP ≤ 2.4 MiB without EXIF; small PNG has no separate thumbnail
-- [ ] 3.7 Firefox: the same flow works
-- [ ] 3.8 Safari 16.4+: objects are JPEG; transparent PNG gets a white background
-- [ ] 3.9 A 2000×12000 map keeps about 1672×10033
-- [ ] 3.10 GIF pick shows the animated notice; the compression hint is always visible
-- [ ] 3.11 Third pick blocked; replace-one-of-two works in a single edit save
-- [ ] 3.12 Network failure after note POST keeps the note and shows the failure notice on the edit page
-- [ ] 3.13 Corrupt file shows the unsupported error inline and Save still works
+- [x] 3.6 Chrome: 12 MP JPEG and small PNG upload as WebP ≤ 2.4 MiB without EXIF; small PNG has no separate thumbnail
+- [x] 3.7 Firefox: the same flow works
+- [x] 3.8 Safari 16.4+: objects are JPEG; transparent PNG gets a white background (not verified: no Safari test environment available — Safari is not distributed for Linux, Windows support was dropped, no Apple device; user decision 2026-10-04, follow-up parked in roadmap.md "Parked")
+- [x] 3.9 A 2000×12000 map keeps about 1672×10033
+- [x] 3.10 GIF pick shows the animated notice; the compression hint is always visible
+- [x] 3.11 Third pick blocked; replace-one-of-two works in a single edit save
+- [x] 3.12 Network failure after note POST keeps the note and shows the failure notice on the edit page
+- [x] 3.13 Corrupt file shows the unsupported error inline and Save still works
 
 ### Phase 4: Note page display
 

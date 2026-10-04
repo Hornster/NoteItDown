@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-10-03
+updated: 2026-10-04
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -185,6 +185,9 @@ them may as well be in various places at once, and bare numbers say NOTHING. A s
   - S-05 adds the public `/licenses` page, linked from a new footer in `src/layouts/Layout.astro`. It lists only the libraries S-05 adds: `heic-to`, libheif and libde265 under LGPL-3.0, and `browser-image-compression` under MIT.
   - The other dependencies that ship to the browser are MIT-licensed too, and their notices also belong on that page. Examples: React, Radix UI / shadcn, Tailwind, clsx, tailwind-merge.
   - This is deferred to keep S-05 focused. The likely approach is a list generated at build time (e.g. a Vite/Rollup license plugin) rather than one maintained by hand.
+- **Safari verification of note-image upload, plus an "experimental" notice for Safari users** — Why parked: user decision 2026-10-04 (during S-05 Phase 3 manual check 3.8). No Safari test environment is available: Safari isn't distributed for Linux, Windows support was dropped, and there is no iPhone, iPad or Mac to hand.
+  - Still to test on Safari 16.4+: the stored objects are `.jpg` with `image/jpeg` (the canvas JPEG fallback, since Safari can't encode WebP), and a transparent PNG gets a white background, not black (`context/changes/note-image-attachment/plan.md` Progress 3.8).
+  - Until that's done, the image picker should show Safari users a short note that image attachment is experimental in their browser.
 
 ## Milestone History
 

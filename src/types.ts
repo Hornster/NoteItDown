@@ -195,3 +195,52 @@ export interface ImageUrlsResponse {
   url: string;
   thumb_url: string;
 }
+
+/** One browser-encoded output (original or thumbnail). */
+export interface EncodedImage {
+  blob: Blob;
+  width: number;
+  height: number;
+  type: "image/webp" | "image/jpeg";
+}
+
+/** Result of the browser compression pipeline. `thumbnail` is null when the original fits within 512 px. */
+export interface ProcessedImage {
+  image: EncodedImage;
+  thumbnail: EncodedImage | null;
+}
+
+/** An image picked on the note form, held in the browser until Save. */
+export interface PendingImage {
+  key: string;
+  fileName: string;
+  status: "processing" | "ready" | "error";
+  processed?: ProcessedImage;
+  previewUrl?: string;
+  error?: string;
+  /** True when the picked file's sniffed or declared type is GIF or WebP. */
+  maybeAnimated?: boolean;
+  alt_text: string;
+}
+
+/** Image edits held by the note form until Save. */
+export interface HeldImageState {
+  kept: NoteImageView[];
+  removedIds: string[];
+  altEdits: Record<string, string | null>;
+  added: PendingImage[];
+}
+
+/** What `applyImageChanges` needs from the held state; `labels` maps existing image ids to "image N". */
+export interface ImageChanges {
+  removedIds: string[];
+  altEdits: Record<string, string | null>;
+  added: PendingImage[];
+  labels?: Record<string, string>;
+}
+
+/** An image step that failed after the note was saved. */
+export interface ImageFailure {
+  label: string;
+  reason: string;
+}

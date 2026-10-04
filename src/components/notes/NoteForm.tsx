@@ -5,20 +5,22 @@ import { ServerError } from "@/components/auth/ServerError";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import NoteImagePicker from "@/components/notes/NoteImagePicker";
 import { useSaveNote } from "@/components/hooks/useSaveNote";
 import { NOTE_CONTENT_MAX_LENGTH, NOTE_NAME_MAX_LENGTH, NOTE_TYPE_NAME_MAX_LENGTH } from "@/lib/schemas/notes";
-import type { NoteType } from "@/types";
+import type { HeldImageState, NoteImageView, NoteType } from "@/types";
 
 /** Sentinel select value that reveals the custom-type text input. */
 const NEW_TYPE_VALUE = "__new__";
 
 type Props =
-  | { mode: "create"; campaignId: string; noteTypes: NoteType[] }
+  | { mode: "create"; campaignId: string; noteTypes: NoteType[]; images?: undefined }
   | {
       mode: "edit";
       campaignId: string;
       noteTypes: NoteType[];
       note: { id: string; name: string; content: string; type_id: string };
+      images?: NoteImageView[];
     };
 
 interface FieldErrors {
@@ -36,6 +38,14 @@ export default function NoteForm(props: Props) {
   const [typeChoice, setTypeChoice] = useState<string>(note ? note.type_id : (noteTypes[0]?.id ?? NEW_TYPE_VALUE));
   const [newTypeName, setNewTypeName] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
+  const existingImages = props.images ?? [];
+  const [held, setHeld] = useState<HeldImageState>({
+    kept: existingImages,
+    removedIds: [],
+    altEdits: {},
+    added: [],
+  });
+  const processing = held.added.some((p) => p.status === "processing");
 
   const { submit, pending, error: serverError } = useSaveNote(mode, campaignId, note?.id);
 
@@ -83,11 +93,20 @@ export default function NoteForm(props: Props) {
       return;
     }
 
-    void submit({
-      name,
-      content,
-      type: isNewType ? { kind: "new", name: newTypeName.trim() } : { kind: "existing", id: typeChoice },
-    });
+    const labels = Object.fromEntries(existingImages.map((img, i) => [img.id, `image ${String(i + 1)}`]));
+    void submit(
+      {
+        name,
+        content,
+        type: isNewType ? { kind: "new", name: newTypeName.trim() } : { kind: "existing", id: typeChoice },
+      },
+      {
+        removedIds: held.removedIds,
+        altEdits: held.altEdits,
+        added: held.added.filter((p) => p.status === "ready"),
+        labels,
+      },
+    );
   }
 
   const nameError = errors.name ?? (serverError?.field === "name" ? serverError.error : undefined);
@@ -187,11 +206,13 @@ export default function NoteForm(props: Props) {
         {contentError && <p className="mt-1 text-xs text-red-300">{contentError}</p>}
       </div>
 
+      <NoteImagePicker existing={existingImages} held={held} onChange={setHeld} />
+
       <ServerError message={generalError} />
 
       <Button
         type="submit"
-        disabled={pending}
+        disabled={pending || processing}
         className="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500"
       >
         {pending ? (

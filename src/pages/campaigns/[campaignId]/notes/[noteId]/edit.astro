@@ -2,12 +2,14 @@
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import NoteForm from "@/components/notes/NoteForm";
+import ImageFailureNotice from "@/components/notes/ImageFailureNotice";
 import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { getNote, listNoteTypes } from "@/lib/services/notes";
+import { listNoteImages, toImageViews } from "@/lib/services/note-images";
 import { isUuid } from "@/lib/utils";
 import { rememberCampaign } from "@/lib/campaign-cookie";
-import type { NoteDetail, NoteType } from "@/types";
+import type { NoteDetail, NoteImageView, NoteType } from "@/types";
 
 // A top-level `return` in Astro frontmatter crashes this project's ESLint
 // (@typescript-eslint/no-misused-promises); use Astro.response.status + conditional
@@ -19,6 +21,7 @@ const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId
 
 let note: NoteDetail | null = null;
 let noteTypes: NoteType[] = [];
+let images: NoteImageView[] = [];
 if (!campaign) {
   Astro.response.status = 404;
 } else {
@@ -33,6 +36,7 @@ if (!campaign) {
     Astro.response.status = 404;
   } else if (supabase) {
     noteTypes = await listNoteTypes(supabase, campaign.id);
+    images = await toImageViews(supabase, await listNoteImages(supabase, note.id));
   }
 }
 ---
@@ -47,11 +51,13 @@ if (!campaign) {
             <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
               Edit note
             </h1>
+            <ImageFailureNotice noteId={note.id} client:load />
             <NoteForm
               mode="edit"
               campaignId={campaign.id}
               noteTypes={noteTypes}
               note={{ id: note.id, name: note.name, content: note.content, type_id: note.type_id }}
+              images={images}
               client:load
             />
             <a

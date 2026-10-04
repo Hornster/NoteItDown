@@ -1,12 +1,18 @@
 import { useCallback, useState } from "react";
+import { writeImageFailureNotice } from "@/lib/image-failure-notice";
+import { applyImageChanges, createImageApi } from "@/lib/images/upload";
+import { HTTP_STATUS } from "@/lib/http-status";
+import { MESSAGES } from "@/lib/messages";
 import { writeRelationNotice } from "@/lib/relation-notice";
-import type { ApiError, CreateNoteCommand, UpdateNoteResponse } from "@/types";
+import type { ApiError, CreateNoteCommand, ImageChanges, UpdateNoteResponse } from "@/types";
 
 const GENERIC_ERROR: ApiError = { error: "Something went wrong while saving the note. Please try again." };
-const NETWORK_ERROR: ApiError = { error: "Network error. Please check your connection and try again." };
+const NETWORK_ERROR: ApiError = { error: MESSAGES.NETWORK_ERROR };
+
+const NO_IMAGE_CHANGES: ImageChanges = { removedIds: [], altEdits: {}, added: [] };
 
 interface UseSaveNoteResult {
-  submit: (command: CreateNoteCommand) => Promise<void>;
+  submit: (command: CreateNoteCommand, imageChanges?: ImageChanges) => Promise<void>;
   pending: boolean;
   error: ApiError | null;
 }
@@ -24,12 +30,21 @@ export function useSaveNote(mode: "create" | "edit", campaignId: string, noteId?
   const [error, setError] = useState<ApiError | null>(null);
 
   const submit = useCallback(
-    async (command: CreateNoteCommand) => {
+    async (command: CreateNoteCommand, imageChanges: ImageChanges = NO_IMAGE_CHANGES) => {
       setPending(true);
       setError(null);
 
       const url =
         mode === "create" ? `/api/campaigns/${campaignId}/notes` : `/api/campaigns/${campaignId}/notes/${noteId ?? ""}`;
+
+      /** Applies the held image changes; on any failure stores the notice and goes to the edit form. */
+      async function finishImages(savedNoteId: string): Promise<boolean> {
+        const failures = await applyImageChanges(savedNoteId, imageChanges, createImageApi(campaignId));
+        if (failures.length === 0) return true;
+        writeImageFailureNotice(window.sessionStorage, { noteId: savedNoteId, failures });
+        window.location.replace(`/campaigns/${campaignId}/notes/${savedNoteId}/edit`);
+        return false;
+      }
 
       try {
         const response = await fetch(url, {
@@ -38,13 +53,15 @@ export function useSaveNote(mode: "create" | "edit", campaignId: string, noteId?
           body: JSON.stringify(command),
         });
 
-        if (mode === "create" && response.status === 201) {
+        if (mode === "create" && response.status === HTTP_STATUS.CREATED) {
           const body = (await response.json()) as { id: string };
-          window.location.assign(`/campaigns/${campaignId}/notes/${body.id}`);
+          if (await finishImages(body.id)) {
+            window.location.assign(`/campaigns/${campaignId}/notes/${body.id}`);
+          }
           return;
         }
 
-        if (mode === "edit" && response.status === 200) {
+        if (mode === "edit" && response.status === HTTP_STATUS.OK) {
           const body = (await response.json()) as UpdateNoteResponse;
           writeRelationNotice(window.sessionStorage, {
             kind: "edit",
@@ -54,7 +71,10 @@ export function useSaveNote(mode: "create" | "edit", campaignId: string, noteId?
             added: body.added,
             removed: body.removed,
           });
-          window.location.replace(`/campaigns/${campaignId}/notes/${body.id}`);
+          // The relation notice is written before any image step so an image failure can't drop it.
+          if (await finishImages(body.id)) {
+            window.location.replace(`/campaigns/${campaignId}/notes/${body.id}`);
+          }
           return;
         }
 
