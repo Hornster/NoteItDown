@@ -679,22 +679,22 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [x] 3.1 Unit tests pass for pipeline maths, applyImageChanges and image-failure-notice: `npm run test:unit`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 Type check passes: `npx astro check`
-- [x] 3.4 Build succeeds and the Worker bundle contains no compression code
-- [x] 3.5 Integration tests still pass: `npm run test:integration`
+- [x] 3.1 Unit tests pass for pipeline maths, applyImageChanges and image-failure-notice: `npm run test:unit` — e5f6525
+- [x] 3.2 Lint passes: `npm run lint` — e5f6525
+- [x] 3.3 Type check passes: `npx astro check` — e5f6525
+- [x] 3.4 Build succeeds and the Worker bundle contains no compression code — e5f6525
+- [x] 3.5 Integration tests still pass: `npm run test:integration` — e5f6525
 
 #### Manual
 
-- [x] 3.6 Chrome: 12 MP JPEG and small PNG upload as WebP ≤ 2.4 MiB without EXIF; small PNG has no separate thumbnail
-- [x] 3.7 Firefox: the same flow works
-- [x] 3.8 Safari 16.4+: objects are JPEG; transparent PNG gets a white background (not verified: no Safari test environment available — Safari is not distributed for Linux, Windows support was dropped, no Apple device; user decision 2026-10-04, follow-up parked in roadmap.md "Parked")
-- [x] 3.9 A 2000×12000 map keeps about 1672×10033
-- [x] 3.10 GIF pick shows the animated notice; the compression hint is always visible
-- [x] 3.11 Third pick blocked; replace-one-of-two works in a single edit save
-- [x] 3.12 Network failure after note POST keeps the note and shows the failure notice on the edit page
-- [x] 3.13 Corrupt file shows the unsupported error inline and Save still works
+- [x] 3.6 Chrome: 12 MP JPEG and small PNG upload as WebP ≤ 2.4 MiB without EXIF; small PNG has no separate thumbnail — e5f6525
+- [x] 3.7 Firefox: the same flow works — e5f6525
+- [x] 3.8 Safari 16.4+: objects are JPEG; transparent PNG gets a white background (not verified: no Safari test environment available — Safari is not distributed for Linux, Windows support was dropped, no Apple device; user decision 2026-10-04, follow-up parked in roadmap.md "Parked") — e5f6525
+- [x] 3.9 A 2000×12000 map keeps about 1672×10033 — e5f6525
+- [x] 3.10 GIF pick shows the animated notice; the compression hint is always visible — e5f6525
+- [x] 3.11 Third pick blocked; replace-one-of-two works in a single edit save — e5f6525
+- [x] 3.12 Network failure after note POST keeps the note and shows the failure notice on the edit page — e5f6525
+- [x] 3.13 Corrupt file shows the unsupported error inline and Save still works — e5f6525
 
 ### Phase 4: Note page display
 
