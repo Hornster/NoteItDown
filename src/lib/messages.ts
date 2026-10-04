@@ -16,5 +16,8 @@ export const MESSAGES = {
   IMAGE_PROCESSING: "Processing…",
   IMAGE_COMPRESSED_HINT: "Images are compressed before upload.",
   IMAGE_ANIMATED_NOTICE: "Animated images become static.",
+  IMAGE_UNAVAILABLE: "Image unavailable",
+  IMAGE_FULL_LOADING: "Loading image…",
+  IMAGE_FULL_LOAD_FAILED: "The full-size image couldn't be loaded. Please try again.",
   IMAGE_FAILURE_NOTICE_HEADING: "The note was saved, but some images were not.",
 } as const;

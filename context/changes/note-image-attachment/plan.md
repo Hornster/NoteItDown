@@ -700,18 +700,18 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [ ] 4.1 Lint passes: `npm run lint`
-- [ ] 4.2 Type check passes: `npx astro check`
-- [ ] 4.3 All tests pass: `npm test`
-- [ ] 4.4 Build succeeds: `npm run build`
+- [x] 4.1 Lint passes: `npm run lint`
+- [x] 4.2 Type check passes: `npx astro check`
+- [x] 4.3 All tests pass: `npm test`
+- [x] 4.4 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 4.5 Thumbnails render at stored size without layout jump; alt text and fallback present
-- [ ] 4.6 Page HTML contains no full-size URL; full image downloads only on click
-- [ ] 4.7 Popup fits the window and closes with Esc and the close button
-- [ ] 4.8 Expired thumbnail URL recovers once (also when broken before hydration); a second failure does not loop
-- [ ] 4.9 Notes without images show no images section; list and map unchanged
+- [x] 4.5 Thumbnails render at stored size without layout jump; alt text and fallback present
+- [x] 4.6 Page HTML contains no full-size URL; full image downloads only on click
+- [x] 4.7 Popup fits the window and closes with Esc and the close button
+- [x] 4.8 Expired thumbnail URL recovers once (also when broken before hydration); a second failure does not loop
+- [x] 4.9 Notes without images show no images section; list and map unchanged
 
 ### Phase 5: HEIC fallback, `/licenses` and footer
 
