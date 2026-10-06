@@ -11,6 +11,7 @@ import RelationChangeNotice from "@/components/notes/RelationChangeNotice";
 import DeleteNoteButton from "@/components/notes/DeleteNoteButton";
 import NoteImages from "@/components/notes/NoteImages";
 import { rememberCampaign } from "@/lib/campaign-cookie";
+import { MESSAGES } from "@/lib/messages";
 import type { NoteDetail, NoteImageView } from "@/types";
 
 // A top-level `return` in Astro frontmatter crashes this project's ESLint
@@ -24,6 +25,7 @@ const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId
 let note: NoteDetail | null = null;
 let relationCount = 0;
 let images: NoteImageView[] = [];
+let imagesUnavailable = false;
 if (!campaign) {
   Astro.response.status = 404;
 } else {
@@ -38,7 +40,14 @@ if (!campaign) {
     Astro.response.status = 404;
   } else if (supabase) {
     relationCount = await countNoteRelations(supabase, note.id);
-    images = await toImageViews(supabase, await listNoteImages(supabase, note.id));
+    try {
+      images = await toImageViews(supabase, await listNoteImages(supabase, note.id));
+    } catch (error) {
+      // An image-table failure must not block reading the note's text.
+      // eslint-disable-next-line no-console -- surface unexpected failures for operators; the user sees a notice.
+      console.error("note page: loading note images failed", error);
+      imagesUnavailable = true;
+    }
   }
 }
 ---
@@ -100,6 +109,7 @@ if (!campaign) {
                 images={images}
               />
             )}
+            {imagesUnavailable && <p class="mt-6 text-sm text-amber-200">{MESSAGES.NOTE_IMAGES_LOAD_FAILED}</p>}
           </>
         ) : (
           <p class="mt-4 text-blue-100/70">This note doesn't exist or isn't yours.</p>

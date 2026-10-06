@@ -3,7 +3,7 @@ change_id: note-image-attachment
 title: Attach an image to a note
 status: impl_reviewed
 created: 2026-10-01
-updated: 2026-10-06
+updated: 2026-10-07
 archived_at: null
 ---
 

@@ -22,3 +22,10 @@
 - **Problem**: HTTP statuses, Postgres error codes and user-facing strings are repeated as literals across routes and services, so renames and wording changes drift.
 - **Rule**: In new code use `HTTP_STATUS` (`src/lib/http-status.ts`), `PG_ERROR` (`src/lib/db-error-codes.ts`) and `MESSAGES` (`src/lib/messages.ts`) instead of literals. Add missing entries to the dictionaries; do not introduce new inline literals.
 - **Applies to**: plan, implement, impl-review
+
+## Extract island fetch/state logic into hooks
+
+- **Context**: Any React island in src/components/ that fetches or holds async state
+- **Problem**: Components possess inline logic instead of dealing with render
+- **Rule**: Extract fetch/state logic of React islands into hooks in src/components/hooks/
+- **Applies to**: implement
