@@ -189,7 +189,7 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 - `supabase/migrations/20260930120000_note_edit_delete_functions.sql` — adds `resolve_note_type`, `update_note`, `delete_note` and redefines `create_note` to use `resolve_note_type` (see above). Applied to production manually (`npx supabase db push`) — CI does not run migrations.
 
 - `supabase/migrations/20261003120000_note_images.sql` — adds the private `note-images` bucket, `public.note_images` with RLS and the alt-text-only update grant, and the three `storage.objects` policies (see "note_images" and "Storage: note-images bucket" above). Applied to production manually (`npx supabase db push`) — CI does not run migrations on hosted, but the CI `smoke` job now starts the Storage container (`storage-api` removed from the `supabase start -x` list) because this migration writes to `storage.buckets`.
-- `supabase/migrations/20261006120000_note_images_thumb_path_owner.sql` — recreates `note_images_insert_own_campaign` so `thumb_path`'s user folder is pinned to `auth.uid()` like `path`'s (impl-review phase 1, F2). **Not yet pushed to production** — run `npx supabase db push`.
+- `supabase/migrations/20261006120000_note_images_thumb_path_owner.sql` — recreates `note_images_insert_own_campaign` so `thumb_path`'s user folder is pinned to `auth.uid()` like `path`'s (impl-review phase 1, F2). **Pushed to production** — run `npx supabase db push`.
 
 ## Shared TypeScript types
 
