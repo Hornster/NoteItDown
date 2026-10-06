@@ -1,9 +1,9 @@
 ---
 change_id: note-image-attachment
 title: Attach an image to a note
-status: implementing
+status: implemented
 created: 2026-10-01
-updated: 2026-10-04
+updated: 2026-10-06
 archived_at: null
 ---
 
