@@ -9,6 +9,11 @@
 
 - Run implement on phase 5 so the two last HEIC test can be checked off when you perform it.
 
-- impl phase 1 findings:
-  - tests do not utilize created constants (src/lib/schemas)
-- 
+- impl phase 1, 2 findings:
+  - hardcoded literals:
+    - src/lib/schemas/note-images.test.ts
+    - src/lib/services/note-images has the same issue - hardocded, same literals.
+    - tests/integration/note-images.test.ts
+    - src/pages/api/campaigns/[campaignId]/notes/[noteId]/images/[imagesId].ts
+    - src/pages/api/campaigns/[campaignId]/notes/[noteId]/images/uploads.ts
+    - tests/integration/note-images.test.ts

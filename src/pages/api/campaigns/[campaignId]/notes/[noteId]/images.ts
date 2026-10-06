@@ -29,7 +29,7 @@ export const POST: APIRoute = async (context) => {
   try {
     body = await context.request.json();
   } catch {
-    return jsonError({ error: "Request body must be valid JSON." }, HTTP_STATUS.BAD_REQUEST);
+    return jsonError({ error: MESSAGES.INVALID_JSON_BODY }, HTTP_STATUS.BAD_REQUEST);
   }
 
   const parsed = commitImageSchema.safeParse(body);

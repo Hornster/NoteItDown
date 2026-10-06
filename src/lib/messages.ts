@@ -2,6 +2,7 @@
 export const MESSAGES = {
   SIGNED_IN_REQUIRED: "You must be signed in.",
   SUPABASE_NOT_CONFIGURED: "Supabase is not configured.",
+  INVALID_JSON_BODY: "Request body must be valid JSON.",
   NOTE_NOT_FOUND: "This note doesn't exist or isn't yours.",
   IMAGE_LIMIT_REACHED: "A note can have at most 2 images.",
   IMAGE_NOT_FOUND: "Image not found.",

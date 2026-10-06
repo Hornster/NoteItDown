@@ -29,6 +29,7 @@ function guard(context: Parameters<APIRoute>[0]) {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
     return {
+      ok: false as const,
       response: jsonError({ error: MESSAGES.SUPABASE_NOT_CONFIGURED }, HTTP_STATUS.INTERNAL_SERVER_ERROR),
     };
   }
@@ -74,7 +75,7 @@ export const PATCH: APIRoute = async (context) => {
   try {
     body = await context.request.json();
   } catch {
-    return jsonError({ error: "Request body must be valid JSON." }, HTTP_STATUS.BAD_REQUEST);
+    return jsonError({ error: MESSAGES.INVALID_JSON_BODY }, HTTP_STATUS.BAD_REQUEST);
   }
 
   const parsed = updateImageSchema.safeParse(body);
