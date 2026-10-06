@@ -717,17 +717,17 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
 
 #### Automated
 
-- [x] 5.1 `heic-to` is pinned exactly at 1.6.5
-- [x] 5.2 Build succeeds and `heic-to` is a separate client chunk
-- [x] 5.3 Lint passes: `npm run lint`
-- [x] 5.4 Type check passes: `npx astro check`
-- [x] 5.5 All tests pass: `npm test`
-- [x] 5.6 Smoke test passes against the preview
+- [x] 5.1 `heic-to` is pinned exactly at 1.6.5 — 1ea5b04
+- [x] 5.2 Build succeeds and `heic-to` is a separate client chunk — 1ea5b04
+- [x] 5.3 Lint passes: `npm run lint` — 1ea5b04
+- [x] 5.4 Type check passes: `npx astro check` — 1ea5b04
+- [x] 5.5 All tests pass: `npm test` — 1ea5b04
+- [x] 5.6 Smoke test passes against the preview — 1ea5b04
 
 #### Manual
 
-- [ ] 5.7 Linux Chrome/Firefox: iPhone HEIC uploads as WebP; decoder chunk loads only on that pick; portrait HEIC upright
-- [ ] 5.8 A 48 MP HEIC processes without crashing, with a visible processing state
-- [x] 5.9 A non-HEIC undecodable file still shows the unsupported error
-- [x] 5.10 `/licenses` loads signed out with all required fields and full licence texts
-- [x] 5.11 Footer link appears on auth, campaign and note pages
+- [x] 5.7 Linux Chrome/Firefox: iPhone HEIC uploads as WebP; decoder chunk loads only on that pick; portrait HEIC upright — 1ea5b04
+- [x] 5.8 A 48 MP HEIC processes without crashing, with a visible processing state
+- [x] 5.9 A non-HEIC undecodable file still shows the unsupported error — 1ea5b04
+- [x] 5.10 `/licenses` loads signed out with all required fields and full licence texts — 1ea5b04
+- [x] 5.11 Footer link appears on auth, campaign and note pages — 1ea5b04
