@@ -51,6 +51,13 @@ function rowFor(tenant: Tenant, note: Note, position: number, overrides: Record<
   };
 }
 
+// Storage reports a policy denial as HTTP 400 with body statusCode "403"; asserting the message
+// proves the policy fired rather than some unrelated (network, MIME) failure.
+function expectRlsDenied(error: unknown) {
+  expect(error).toMatchObject({ statusCode: "403" });
+  expect((error as Error).message).toMatch(/row-level security/);
+}
+
 async function upload(client: SupabaseClient, path: string, body: Uint8Array = webpFixture()) {
   return client.storage.from(NOTE_IMAGES_BUCKET).upload(path, body, { contentType: "image/webp" });
 }
@@ -121,6 +128,18 @@ describe("note_images table", () => {
     expect(result.error?.code).toBe("42501");
   });
 
+  it("rejects an insert whose thumb_path belongs to another user's folder", async () => {
+    const note = await createTestNote(a.client, a.campaignId);
+    const result = await a.client.from("note_images").insert(
+      rowFor(a, note, 0, {
+        thumb_path: objectPath(b, a.campaignId, note.id, "-thumb.webp"),
+        thumb_width: 50,
+        thumb_height: 50,
+      }),
+    );
+    expect(result.error?.code).toBe("42501");
+  });
+
   it("allows updating only alt_text", async () => {
     const note = await createTestNote(a.client, a.campaignId);
     const row = rowFor(a, note, 0);
@@ -169,17 +188,29 @@ describe("storage.objects policies", () => {
   it("blocks tenant B from uploading into A's folder or under A's note id", async () => {
     const note = await createTestNote(a.client, a.campaignId);
     const intoAFolder = await upload(b.client, objectPath(a, a.campaignId, note.id));
-    expect(intoAFolder.error).not.toBeNull();
+    expectRlsDenied(intoAFolder.error);
 
     const underANote = await upload(b.client, objectPath(b, b.campaignId, note.id));
-    expect(underANote.error).not.toBeNull();
+    expectRlsDenied(underANote.error);
+  });
+
+  it("blocks uploading under the owner's own note paired with another of their campaigns", async () => {
+    const note = await createTestNote(a.client, a.campaignId);
+    const other = await a.client
+      .from("campaigns")
+      .insert({ owner_id: a.userId, name: `Other ${crypto.randomUUID()}` })
+      .select("id")
+      .single<{ id: string }>();
+    expect(other.error).toBeNull();
+    const result = await upload(a.client, objectPath(a, other.data?.id ?? "", note.id));
+    expectRlsDenied(result.error);
   });
 
   it("blocks tenant B from signing upload URLs for the same two paths", async () => {
     const note = await createTestNote(a.client, a.campaignId);
     const bucket = b.client.storage.from(NOTE_IMAGES_BUCKET);
-    expect((await bucket.createSignedUploadUrl(objectPath(a, a.campaignId, note.id))).error).not.toBeNull();
-    expect((await bucket.createSignedUploadUrl(objectPath(b, b.campaignId, note.id))).error).not.toBeNull();
+    expectRlsDenied((await bucket.createSignedUploadUrl(objectPath(a, a.campaignId, note.id))).error);
+    expectRlsDenied((await bucket.createSignedUploadUrl(objectPath(b, b.campaignId, note.id))).error);
   });
 
   it("blocks tenant B from listing, signing or removing A's objects", async () => {
@@ -365,6 +396,40 @@ describe("note-images service flow", () => {
       with_thumbnail: false,
     });
     expect(third).toMatchObject({ success: false, reason: "limit_reached" });
+  });
+
+  it("a replayed commit fails without removing the committed image's objects", async () => {
+    const note = await createTestNote(a.client, a.campaignId);
+    const bucket = a.client.storage.from(NOTE_IMAGES_BUCKET);
+    const commitOf = (upload: Awaited<ReturnType<typeof prepareAndPut>>) =>
+      commitImage(a.client, a.userId, a.campaignId, note.id, {
+        path: upload.image.path,
+        thumb_path: upload.thumbnail?.path ?? null,
+        width: 1000,
+        height: 800,
+        thumb_width: upload.thumbnail ? 512 : null,
+        thumb_height: upload.thumbnail ? 410 : null,
+        alt_text: null,
+      });
+    const expectStored = async (upload: Awaited<ReturnType<typeof prepareAndPut>>) => {
+      expect((await bucket.info(upload.image.path)).error).toBeNull();
+      expect((await bucket.info(upload.thumbnail?.path ?? "")).error).toBeNull();
+    };
+
+    const first = await prepareAndPut(note, true);
+    expect((await commitOf(first)).success).toBe(true);
+
+    // One image on the note: the replay hits the unique path constraint.
+    expect((await commitOf(first)).success).toBe(false);
+    await expectStored(first);
+
+    // Two images on the note: the replay finds no free position.
+    const second = await prepareAndPut(note, true);
+    expect((await commitOf(second)).success).toBe(true);
+    expect(await commitOf(first)).toMatchObject({ success: false, reason: "limit_reached" });
+    await expectStored(first);
+    await expectStored(second);
+    expect(await listNoteImages(a.client, note.id)).toHaveLength(2);
   });
 
   it("rejects prepare for another tenant's note", async () => {

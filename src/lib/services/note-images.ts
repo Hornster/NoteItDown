@@ -212,6 +212,31 @@ async function removeObjects(supabase: SupabaseClient, paths: (string | null)[])
 }
 
 /**
+ * Drops paths a note_images row still references, so a failed (e.g. replayed) commit never
+ * removes a live row's objects. On a lookup error nothing is removed: an orphan is accepted,
+ * a row pointing at a missing file is not.
+ */
+async function unreferencedPaths(supabase: SupabaseClient, paths: (string | null)[]): Promise<string[]> {
+  const candidates = paths.filter((path): path is string => path !== null);
+  if (candidates.length === 0) {
+    return [];
+  }
+  const [byPath, byThumb] = await Promise.all([
+    supabase.from("note_images").select("path").in("path", candidates),
+    supabase.from("note_images").select("thumb_path").in("thumb_path", candidates),
+  ]);
+  if (byPath.error || byThumb.error) {
+    console.error("note-images: failed to check referenced paths", candidates, byPath.error ?? byThumb.error);
+    return [];
+  }
+  const referenced = new Set<string | null>([
+    ...byPath.data.map((row: { path: string }) => row.path),
+    ...byThumb.data.map((row: { thumb_path: string | null }) => row.thumb_path),
+  ]);
+  return candidates.filter((path) => !referenced.has(path));
+}
+
+/**
  * Checks the caller owns the note and it has a free slot, then signs upload URLs for
  * server-built paths. Signing is the gate: the signed PUT does not re-check RLS.
  */
@@ -286,7 +311,7 @@ export async function commitImage(
   }
 
   const fail = async <T extends { success: false }>(result: T): Promise<T> => {
-    await removeObjects(supabase, [path, thumbPath]);
+    await removeObjects(supabase, await unreferencedPaths(supabase, [path, thumbPath]));
     return result;
   };
 
