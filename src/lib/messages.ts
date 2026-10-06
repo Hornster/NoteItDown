@@ -16,10 +16,24 @@ export const MESSAGES = {
   IMAGE_BROWSER_FAILURE: "Your browser couldn't process this image. Try another browser or a different file.",
   IMAGE_UPLOAD_FAILED: "The image upload failed.",
   IMAGE_PROCESSING: "Processing…",
+  IMAGE_PROCESSING_TIMEOUT: "Processing this image took too long. Try a smaller image or another browser.",
   IMAGE_COMPRESSED_HINT: "Images are compressed before upload.",
   IMAGE_ANIMATED_NOTICE: "Animated images become static.",
   IMAGE_UNAVAILABLE: "Image unavailable",
+  IMAGE_LABEL_FALLBACK: "image",
+  IMAGES_LOAD_FAILED:
+    "Images couldn't be loaded right now. You can still edit the text; try again later to change images.",
   IMAGE_FULL_LOADING: "Loading image…",
   IMAGE_FULL_LOAD_FAILED: "The full-size image couldn't be loaded. Please try again.",
   IMAGE_FAILURE_NOTICE_HEADING: "The note was saved, but some images were not.",
 } as const;
+
+/** 1-based label for an image without a file name, e.g. in the image-failure notice. */
+export function imageLabel(n: number): string {
+  return `image ${String(n)}`;
+}
+
+/** Shown when a multi-file pick has more files than free image slots. */
+export function imagesIgnoredNotice(ignored: number): string {
+  return `${MESSAGES.IMAGE_LIMIT_REACHED} ${String(ignored)} ${ignored === 1 ? "file was" : "files were"} not added.`;
+}

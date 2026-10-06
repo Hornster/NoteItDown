@@ -26,3 +26,6 @@ export const STORED_IMAGE_MIMES = ["image/webp", "image/jpeg"] as const;
 export const PICKER_ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif";
 
 export const ALT_TEXT_MAX_LENGTH = 200;
+
+/** A pick still processing after this long is marked as failed so the queue and Save are not stuck. */
+export const IMAGE_PROCESSING_TIMEOUT_MS = 30_000;

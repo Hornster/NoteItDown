@@ -32,6 +32,14 @@ export class HeicDecoderLoadError extends Error {
   }
 }
 
+/** Processing did not finish within `IMAGE_PROCESSING_TIMEOUT_MS` (the work itself can't be cancelled). */
+export class ImageProcessingTimeoutError extends Error {
+  constructor(message = "Image processing took too long.") {
+    super(message);
+    this.name = "ImageProcessingTimeoutError";
+  }
+}
+
 /** A prepare, PUT or commit step failed. `message` is safe to show to the user. */
 export class ImageUploadError extends Error {
   constructor(message: string) {

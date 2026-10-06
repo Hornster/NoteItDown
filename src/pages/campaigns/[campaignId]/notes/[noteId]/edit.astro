@@ -22,6 +22,7 @@ const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId
 let note: NoteDetail | null = null;
 let noteTypes: NoteType[] = [];
 let images: NoteImageView[] = [];
+let imagesUnavailable = false;
 if (!campaign) {
   Astro.response.status = 404;
 } else {
@@ -36,7 +37,14 @@ if (!campaign) {
     Astro.response.status = 404;
   } else if (supabase) {
     noteTypes = await listNoteTypes(supabase, campaign.id);
-    images = await toImageViews(supabase, await listNoteImages(supabase, note.id));
+    try {
+      images = await toImageViews(supabase, await listNoteImages(supabase, note.id));
+    } catch (error) {
+      // An image-table failure must not block editing the note's text.
+      // eslint-disable-next-line no-console -- surface unexpected failures for operators; the user sees a banner.
+      console.error("edit page: loading note images failed", error);
+      imagesUnavailable = true;
+    }
   }
 }
 ---
@@ -57,7 +65,7 @@ if (!campaign) {
               campaignId={campaign.id}
               noteTypes={noteTypes}
               note={{ id: note.id, name: note.name, content: note.content, type_id: note.type_id }}
-              images={images}
+              images={imagesUnavailable ? null : images}
               client:load
             />
             <a

@@ -11,6 +11,15 @@ const NETWORK_ERROR: ApiError = { error: MESSAGES.NETWORK_ERROR };
 
 const NO_IMAGE_CHANGES: ImageChanges = { removedIds: [], altEdits: {}, added: [] };
 
+/** `window.sessionStorage` itself throws when site data is blocked; the notice writers only guard setItem. */
+function sessionStorageOrNull(): Storage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
 interface UseSaveNoteResult {
   submit: (command: CreateNoteCommand, imageChanges?: ImageChanges) => Promise<void>;
   pending: boolean;
@@ -41,7 +50,8 @@ export function useSaveNote(mode: "create" | "edit", campaignId: string, noteId?
       async function finishImages(savedNoteId: string): Promise<boolean> {
         const failures = await applyImageChanges(savedNoteId, imageChanges, createImageApi(campaignId));
         if (failures.length === 0) return true;
-        writeImageFailureNotice(window.sessionStorage, { noteId: savedNoteId, failures });
+        const storage = sessionStorageOrNull();
+        if (storage) writeImageFailureNotice(storage, { noteId: savedNoteId, failures });
         window.location.replace(`/campaigns/${campaignId}/notes/${savedNoteId}/edit`);
         return false;
       }
@@ -54,23 +64,34 @@ export function useSaveNote(mode: "create" | "edit", campaignId: string, noteId?
         });
 
         if (mode === "create" && response.status === HTTP_STATUS.CREATED) {
-          const body = (await response.json()) as { id: string };
-          if (await finishImages(body.id)) {
-            window.location.assign(`/campaigns/${campaignId}/notes/${body.id}`);
+          // The note exists from here on: falling through to the error branch would let a retry duplicate it.
+          let createdId: string | undefined;
+          try {
+            createdId = ((await response.json()) as { id: string }).id;
+            if (await finishImages(createdId)) {
+              window.location.assign(`/campaigns/${campaignId}/notes/${createdId}`);
+            }
+          } catch {
+            window.location.replace(
+              createdId ? `/campaigns/${campaignId}/notes/${createdId}/edit` : `/campaigns/${campaignId}`,
+            );
           }
           return;
         }
 
         if (mode === "edit" && response.status === HTTP_STATUS.OK) {
           const body = (await response.json()) as UpdateNoteResponse;
-          writeRelationNotice(window.sessionStorage, {
-            kind: "edit",
-            noteId: body.id,
-            noteName: body.name,
-            rechecked: body.rechecked,
-            added: body.added,
-            removed: body.removed,
-          });
+          const storage = sessionStorageOrNull();
+          if (storage) {
+            writeRelationNotice(storage, {
+              kind: "edit",
+              noteId: body.id,
+              noteName: body.name,
+              rechecked: body.rechecked,
+              added: body.added,
+              removed: body.removed,
+            });
+          }
           // The relation notice is written before any image step so an image failure can't drop it.
           if (await finishImages(body.id)) {
             window.location.replace(`/campaigns/${campaignId}/notes/${body.id}`);

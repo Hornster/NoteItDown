@@ -1,5 +1,6 @@
 import { ImageUploadError } from "@/lib/images/errors";
-import { MESSAGES } from "@/lib/messages";
+import { HTTP_STATUS } from "@/lib/http-status";
+import { imageLabel, MESSAGES } from "@/lib/messages";
 import type {
   ApiError,
   CommitImageCommand,
@@ -29,7 +30,7 @@ function reasonOf(error: unknown): string {
  */
 export async function applyImageChanges(noteId: string, changes: ImageChanges, api: ImageApi): Promise<ImageFailure[]> {
   const failures: ImageFailure[] = [];
-  const labelOf = (id: string) => changes.labels?.[id] ?? "image";
+  const labelOf = (id: string) => changes.labels?.[id] ?? MESSAGES.IMAGE_LABEL_FALLBACK;
 
   for (const id of changes.removedIds) {
     try {
@@ -53,7 +54,7 @@ export async function applyImageChanges(noteId: string, changes: ImageChanges, a
     try {
       await api.uploadPending(noteId, pending);
     } catch (error) {
-      failures.push({ label: pending.fileName || `image ${String(index)}`, reason: reasonOf(error) });
+      failures.push({ label: pending.fileName || imageLabel(index), reason: reasonOf(error) });
     }
   }
 
@@ -133,7 +134,11 @@ export function createImageApi(campaignId: string): ImageApi {
   const item = (noteId: string, imageId: string) => `/api/campaigns/${campaignId}/notes/${noteId}/images/${imageId}`;
   return {
     deleteImage: async (noteId, imageId) => {
-      await sendJson(item(noteId, imageId), "DELETE");
+      const response = await send(item(noteId, imageId), { method: "DELETE" });
+      // Already gone (e.g. deleted in another tab): the save's goal is reached. The note PATCH just
+      // succeeded, so a 404 here can only mean the image, not the note.
+      if (response.ok || response.status === HTTP_STATUS.NOT_FOUND) return;
+      throw new ImageUploadError(await errorMessageOf(response));
     },
     updateAlt: async (noteId, imageId, altText) => {
       const body: UpdateImageCommand = { alt_text: altText };

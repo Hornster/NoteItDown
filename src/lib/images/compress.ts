@@ -104,16 +104,24 @@ function supportsWebpEncoding(): Promise<boolean> {
   return webpSupport;
 }
 
-/** Samples a few pixels; true when every sampled pixel is fully transparent (iOS blank canvas). */
-function looksBlank(ctx: OffscreenCanvasRenderingContext2D, width: number, height: number): boolean {
-  const xs = [0, Math.floor(width / 2), width - 1];
-  const ys = [0, Math.floor(height / 2), height - 1];
-  for (const x of xs) {
-    for (const y of ys) {
-      if (ctx.getImageData(x, y, 1, 1).data[3] !== 0) return false;
+const BLANK_PROBE_SIDE = 32;
+
+/** True when a 32×32 downscale of the canvas is fully transparent (iOS blank canvas). */
+function looksBlank(canvas: OffscreenCanvas): boolean {
+  const probe = new OffscreenCanvas(BLANK_PROBE_SIDE, BLANK_PROBE_SIDE);
+  try {
+    const ctx = probe.getContext("2d");
+    if (!ctx) return false;
+    ctx.drawImage(canvas, 0, 0, BLANK_PROBE_SIDE, BLANK_PROBE_SIDE);
+    const { data } = ctx.getImageData(0, 0, BLANK_PROBE_SIDE, BLANK_PROBE_SIDE);
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] !== 0) return false;
     }
+    return true;
+  } finally {
+    probe.width = 0;
+    probe.height = 0;
   }
-  return true;
 }
 
 async function renderAndEncode(
@@ -132,7 +140,7 @@ async function renderAndEncode(
     }
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, width, height);
-    if (type === "image/webp" && looksBlank(ctx, width, height)) throw new BrowserImageError();
+    if (type === "image/webp" && looksBlank(canvas)) throw new BrowserImageError();
 
     const encoded = await bestUnderBudget(async (quality) => {
       let blob: Blob;

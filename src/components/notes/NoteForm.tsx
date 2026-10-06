@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NoteImagePicker from "@/components/notes/NoteImagePicker";
 import { useSaveNote } from "@/components/hooks/useSaveNote";
+import { imageLabel, MESSAGES } from "@/lib/messages";
 import { NOTE_CONTENT_MAX_LENGTH, NOTE_NAME_MAX_LENGTH, NOTE_TYPE_NAME_MAX_LENGTH } from "@/lib/schemas/notes";
 import type { HeldImageState, NoteImageView, NoteType } from "@/types";
 
@@ -20,7 +21,8 @@ type Props =
       campaignId: string;
       noteTypes: NoteType[];
       note: { id: string; name: string; content: string; type_id: string };
-      images?: NoteImageView[];
+      /** `null` when the images couldn't be loaded: the picker is hidden so no image change is held. */
+      images?: NoteImageView[] | null;
     };
 
 interface FieldErrors {
@@ -93,7 +95,7 @@ export default function NoteForm(props: Props) {
       return;
     }
 
-    const labels = Object.fromEntries(existingImages.map((img, i) => [img.id, `image ${String(i + 1)}`]));
+    const labels = Object.fromEntries(existingImages.map((img, i) => [img.id, imageLabel(i + 1)]));
     void submit(
       {
         name,
@@ -206,7 +208,11 @@ export default function NoteForm(props: Props) {
         {contentError && <p className="mt-1 text-xs text-red-300">{contentError}</p>}
       </div>
 
-      <NoteImagePicker existing={existingImages} held={held} onChange={setHeld} />
+      {props.images === null ? (
+        <p className="text-sm text-amber-200">{MESSAGES.IMAGES_LOAD_FAILED}</p>
+      ) : (
+        <NoteImagePicker existing={existingImages} held={held} onChange={setHeld} />
+      )}
 
       <ServerError message={generalError} />
 
