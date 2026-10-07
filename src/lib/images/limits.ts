@@ -28,4 +28,4 @@ export const PICKER_ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/he
 export const ALT_TEXT_MAX_LENGTH = 200;
 
 /** A pick still processing after this long is marked as failed so the queue and Save are not stuck. */
-export const IMAGE_PROCESSING_TIMEOUT_MS = 30_000;
+export const IMAGE_PROCESSING_TIMEOUT_MS = 40_000;

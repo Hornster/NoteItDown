@@ -44,7 +44,7 @@ archived_at: null
 - **Why:** `browser-image-compression` decodes through the browser.
   - HEIC decodes natively only in Safari and in Chrome/Edge on macOS.
   - It does not decode in Chrome on Linux, in Chrome/Edge on Windows without the paid HEVC extension, or in Firefox anywhere.
-- **Library:** `heic-to` (https://github.com/hoppergee/heic-to, LGPL-3.0, libheif 1.22.x).
+- **Library:** `heic-to` (https://github.com/hoppergee/heic-to, LGPL-3.0, libheif 1.23.5).
   - Chosen over `heic2any`, which ships an outdated libheif and is barely maintained.
   - Install it from npm and bundle it. Don't use the jsDelivr IIFE script.
 - **Flow:**

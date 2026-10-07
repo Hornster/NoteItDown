@@ -536,6 +536,7 @@ The cuttable phase: in-browser HEIC conversion, the third-party notices page, a 
   3. otherwise keep the unsupported error.
 - Errors from `convertHeicToJpeg` (a corrupt HEIC or an HEIF variant libheif can't decode) become `UnsupportedImageError`. A `RangeError` or out-of-memory failure becomes `BrowserImageError`. Errors from the second `processImage` pass through unchanged.
 - Remove `HeicNotSupportedYetError`.
+- *Addendum (impl-review phase 5, F4):* a failed `import("heic-to")` (offline, chunk 404) becomes `HeicDecoderLoadError`, shown as `MESSAGES.IMAGE_HEIC_DECODER_UNAVAILABLE`, instead of the "unsupported or corrupt" error.
 - The decoder lands in its own chunk. Confirm this in the build output.
 
 #### 2. Licences page

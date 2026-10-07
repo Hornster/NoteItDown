@@ -6,7 +6,7 @@
 - **Reviewed phases**: 4
 - **Date**: 2026-10-06
 - **Verdict**: APPROVED
-- **Findings**: 0 critical, 2 warnings, 5 observations
+- **Findings**: 0 critical, 4 warnings, 5 observations (F8 and F9 added after the manual re-checks)
 
 ## Verdicts
 
@@ -93,9 +93,29 @@ Automated checks re-run on 2026-10-06 at HEAD: `npm run lint` passed, `npx astro
 - **Fix**: Add `imageAltFallback(noteName, n)` (or a template constant) to `src/lib/messages.ts` and use it.
 - **Decision**: FIXED (`imageAltFallback(noteName, n)` in `src/lib/messages.ts`, built on `imageLabel`)
 
+### F8 — Refreshed thumbnail URL can equal the failed one, leaving a broken image
+
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: src/components/hooks/useNoteImages.ts:55
+- **Detail**: Found during the F6 manual re-check, not by the review. Supabase signed URLs are deterministic within one second: the token is a JWT `{ url, scope, iat, exp }` and `iat` is in whole seconds. This was confirmed against local Supabase: two signings in the same second gave identical URLs, and signings a second apart did not. SSR (`toImageViews`) and the refresh endpoint (`getImageUrls`) both sign thumbnails with `THUMB_URL_EXPIRY_SECONDS`. When the render, the first `onError` and the refresh all fall within one second, the refresh returns the URL that already failed. React then leaves `src` alone, the browser makes no second request, no second `error` fires, and the F6 placeholder never shows. A manual "Reload image" fired the error and showed it, which is why the placeholder only appeared after a manual reload, or on its own in the rare case where the refresh landed in the next second.
+- **Fix**: If the refreshed URL equals the current one, treat the refresh as failed and set the URL to `null` (the placeholder).
+- **Decision**: FIXED (`fresh === prev[imageId] ? null : fresh` in `refreshThumb`; manual re-check passed: a blocked thumbnail now shows "Image unavailable" after the one automatic refresh). No hook test: the project has no React hook test setup yet (no `@testing-library/react`, Vitest `environment: "node"`).
+
+### F9 — Edit-page thumbnails show a broken image instead of the placeholder when their bytes fail
+
+- **Severity**: ⚠️ WARNING
+- **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped
+- **Dimension**: Safety & Quality
+- **Location**: src/components/notes/NoteImagePicker.tsx:41-48 (before the fix)
+- **Detail**: Found during the manual re-checks, not by the review. On the edit page, existing images are rendered by `NoteImagePicker` (Phase 3), not `NoteImages`. Its `<img>` had no `onError`, so the "Image unavailable" placeholder only showed for a null `thumb_url` (server-side signing failure). When the bytes failed in the browser (blocked, expired or invalid URL), the user saw the browser's broken-image icon, and a manual "Reload image" didn't help. The plan only asked for thumbnail failure handling on the note page (plan lines 470–472, 509), so this is a scope gap rather than a regression. It is not the F1 case: F1 is the `note_images` query failing server-side, which shows the "Images couldn't be loaded" notice and renders no thumbnails.
+- **Fix**: On `onError`, mark the image as failed and render the existing placeholder, plus the same pre-hydration check as `useNoteImages` (`complete && naturalWidth === 0`). No refresh: the edit page is short-lived, so a 6 h URL expiring mid-edit is unlikely. Per the lessons.md rule "Extract island fetch/state logic into hooks", the state goes in a hook, not in the picker.
+- **Decision**: FIXED (new `src/components/hooks/useThumbFallback.ts`, which returns `isFailed`, `onThumbError` and `registerThumb`; the picker wires `ref`/`onError` and renders the placeholder for failed ids). If the picker later needs refresh-once, it goes into this hook or gets merged with the refresh logic in `useNoteImages`. Manual re-check passed: a blocked thumbnail on the edit page shows "Image unavailable".
+
 ## Triage summary (2026-10-07)
 
-- **Fixed**: F1, F2, F3, F5, F6, F7 (6)
+- **Fixed**: F1, F2, F3, F5, F6, F7, F8, F9 (8)
 - **Skipped**: F4 (1) — recorded as a roadmap observation for the UI visuals revamp
 
 After the fixes, lint, `astro check`, `npm test` (17 files, 173 tests) and `npm run build` all pass.
@@ -104,3 +124,6 @@ Manual re-checks to run on the note page (`npm run dev`):
 - The full-size popup shows "Loading image…" until the bytes arrive. A broken full-size URL shows the error message (F3).
 - A thumbnail that is still broken after its one refresh shows "Image unavailable" (F6).
 - With the `note_images` query failing, the note text still renders with the "Images couldn't be loaded" line (F1).
+
+Manual re-check on the edit page (F9):
+- With an existing image's thumbnail URL blocked in DevTools, reloading the edit page shows "Image unavailable" in place of that thumbnail, both after hydration and when the error fires before it.

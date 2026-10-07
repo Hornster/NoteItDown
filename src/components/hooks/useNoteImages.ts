@@ -52,7 +52,9 @@ export function useNoteImages(campaignId: string, noteId: string, images: NoteIm
       // Fall through to the placeholder; never retry.
     }
     refreshed.current.set(imageId, "done");
-    setThumbUrls((prev) => ({ ...prev, [imageId]: fresh }));
+    // Signing is deterministic within a second, so the "fresh" URL can equal the one that just failed.
+    // React wouldn't touch `src` then, no second `error` would fire, and the broken image would stay.
+    setThumbUrls((prev) => ({ ...prev, [imageId]: fresh === prev[imageId] ? null : fresh }));
   }
 
   // React doesn't replay an `error` event that fired before hydration.

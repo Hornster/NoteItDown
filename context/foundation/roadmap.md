@@ -39,13 +39,13 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 
 ## At a glance
 
-| ID   | Change ID                         | Outcome (user can …)                                                             | Prerequisites | PRD refs                              | Status   |
-| ---- | --------------------------------- | -------------------------------------------------------------------------------- | ------------- | ------------------------------------- | -------- |
-| F-01 | campaign-notes-schema             | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —             | FR-002, Access Control                | done     |
-| S-01 | create-notes                      | add notes (predefined or custom type) to a campaign                              | F-01          | FR-001, FR-003                        | done     |
-| S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done     |
-| S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done     |
-| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | done     |
+| ID   | Change ID                         | Outcome (user can …)                                                             | Prerequisites | PRD refs                              | Status      |
+| ---- | --------------------------------- | -------------------------------------------------------------------------------- | ------------- | ------------------------------------- | ----------- |
+| F-01 | campaign-notes-schema             | (foundation) campaigns/notes/relations schema + RLS + default-campaign-on-signup | —             | FR-002, Access Control                | done        |
+| S-01 | create-notes                      | add notes (predefined or custom type) to a campaign                              | F-01          | FR-001, FR-003                        | done        |
+| S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done        |
+| S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done        |
+| S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | done        |
 | S-05 | note-image-attachment             | attach up to 2 images to a note                                                  | S-01          | FR-004                                | in-progress |
 
 ## Streams
@@ -135,7 +135,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** Depends on S-02's relation-detection engine already existing — re-detection reuses that same engine, so building this after S-02 avoids duplicating the matching logic. This is also the PRD's secondary success criterion, so it's the first thing sequenced after the north star resolves.
 - **Status:** done
 
-### S-05: User can attach an image to a note
+### S-05: User can attach up to 2 images to a note
 
 - **Outcome:** User can attach up to 2 images to a note alongside its text content.
 - **Change ID:** note-image-attachment
@@ -157,7 +157,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-02       | auto-relations-memory-map         | Auto-detected relations on a memory map, with navigation                   | done                  | Archived → `context/archive/2026-09-26-auto-relations-memory-map/` |
 | S-03       | multi-campaign-support            | Create and switch between multiple campaigns                               | done                  | Archived → `context/archive/2026-09-28-multi-campaign-support/`    |
 | S-04       | note-edit-delete-relation-refresh | Edit/delete a note with visible relation-change notice                     | yes                   | Unblocked — S-02 done                                              |
-| S-05       | note-image-attachment             | Attach an image to a note                                                  | yes                   | Unblocked — S-01 done; nice-to-have                                |
+| S-05       | note-image-attachment             | Attach up to 2 images to a note                                            | yes                   | Unblocked — S-01 done; nice-to-have                                |
 
 ## Open Roadmap Questions
 
@@ -169,8 +169,8 @@ Cross-cutting concerns surfaced during implementation reviews. Not blockers for 
 
 - **No DB-error handling strategy (server errors surface as the framework 500 page)** — Surfaced 2026-09-29 in S-03 Phase 2 review (`context/archive/2026-09-28-multi-campaign-support/reviews/impl-review-phase-2.md`, F1). Services in `src/lib/services/` throw on any PostgREST error, and neither pages nor redirect endpoints (`src/pages/dashboard.ts`, `map.ts`, `notes/new.ts`, `notes/[id].ts`, `campaigns/index.ts`) catch it, so a transient Supabase failure — including on `/dashboard`, the post-sign-in target — shows a raw 500. Accepted as risk for the MVP because it is the consistent project-wide convention. Open question for next version: adopt a shared error boundary / error page (and a 503 response helper for endpoints) applied uniformly, rather than patching individual routes.
 - **Error codes are hard-coded in checks.** - If any of them is changed it will require a
-swiping check across entire frontend. Not to mention it is hard to read as comments about
-them may as well be in various places at once, and bare numbers say NOTHING. A separate class that serves as a dictionary of the error codes with **meaningful aliases as names** has to be created. It will screw us over in the future otherwise, that is granted. Same goes for **HTTP error codes** and **error messages shown to the user** (i. e. the message "You must be signed in." can be found hard-coded in 4 different files at the moment of writing this memo, while the error code P0002 is hardcoded 8 times between 2 files and HTTP code 200 is hardcoded in 8 separate files). All of these should be located in **one spot** per type and reused where needed from that spot. Add a lesson about this as well to avoid future mishaps like that. This, of course, does not concern comments, .md files etc.
+  swiping check across entire frontend. Not to mention it is hard to read as comments about
+  them may as well be in various places at once, and bare numbers say NOTHING. A separate class that serves as a dictionary of the error codes with **meaningful aliases as names** has to be created. It will screw us over in the future otherwise, that is granted. Same goes for **HTTP error codes** and **error messages shown to the user** (i. e. the message "You must be signed in." can be found hard-coded in 4 different files at the moment of writing this memo, while the error code P0002 is hardcoded 8 times between 2 files and HTTP code 200 is hardcoded in 8 separate files). All of these should be located in **one spot** per type and reused where needed from that spot. Add a lesson about this as well to avoid future mishaps like that. This, of course, does not concern comments, .md files etc.
 - **No per-user Storage quota for note images** — Surfaced 2026-10-03 in the S-05 plan review (`context/changes/note-image-attachment/reviews/plan-review.md`, F3). `prepareUpload` counts only committed `note_images` rows, and the `storage.objects` INSERT policy allows any number of uploads into the user's own note folders, either by repeating prepare+PUT without a commit or by uploading directly with the user's JWT. The only cleanup is note delete. A signed-in user (and signup is open) could fill the 1 GB free-tier Storage that all users share. Accepted as a risk for the MVP. Open question for the next version: a per-user or per-note object/byte quota enforced on the server (for example a DB-tracked pending-upload count checked in prepare, or a scheduled orphan sweep), since a policy-level count is checked only when a signed URL is created.
 - **Full-size image popup has no path to native resolution** — Surfaced 2026-10-04 in S-05 Phase 4 manual check 4.7 (`context/changes/note-image-attachment/plan.md` Progress 4.7). The popup (`src/components/notes/NoteImages.tsx`) fits the full-size image to the window with `object-contain`, so a large image (for example a tall map) can't be inspected at full scale in place. To ponder and decide later: either add a hint on the shown image that the user can right-click it to open it at full scale, or provide a zoom option in the popup.
 - **Image popup close button is low-contrast** — Surfaced 2026-10-07 in the S-05 Phase 4 implementation review (`context/changes/note-image-attachment/reviews/impl-review-phase-4.md`, F4). The stock shadcn `Dialog` close button (`src/components/ui/dialog.tsx`, `text-muted-foreground` at `opacity-70`) is a dim grey on the popup's `bg-black/80` (`src/components/notes/NoteImages.tsx`) and sits over the image's top-right corner. Esc and clicking the overlay still close it. To deal with during the UI visuals revamp, together with the parked alert-dialog restyle.

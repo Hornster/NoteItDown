@@ -16,6 +16,9 @@ export function looksLikeHeic(bytes: Uint8Array): boolean {
 /** Quality of the intermediate JPEG; the normal pipeline recompresses it afterwards. */
 const HEIC_JPEG_QUALITY = 0.92;
 
+/** heic-to rejects with strings (its worker posts `e.toString()`), so failures are classified by text, not `instanceof`. */
+const BROWSER_FAILURE_PATTERN = /RangeError|memory|canvas to blob/i;
+
 /**
  * Convert a HEIC/HEIF file to a high-quality JPEG. `heic-to` (about 777 KB gzipped) is imported only here, so it
  * is downloaded only when a HEIC file is actually picked. A failed chunk download becomes `HeicDecoderLoadError`;
@@ -31,7 +34,7 @@ export async function convertHeicToJpeg(file: File): Promise<Blob> {
   try {
     return await heicTo({ blob: file, type: "image/jpeg", quality: HEIC_JPEG_QUALITY });
   } catch (error) {
-    if (error instanceof RangeError) throw new BrowserImageError();
+    if (BROWSER_FAILURE_PATTERN.test(String(error))) throw new BrowserImageError();
     throw new UnsupportedImageError();
   }
 }

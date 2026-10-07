@@ -1,6 +1,7 @@
 import { ImagePlus, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useImagePicks } from "@/components/hooks/useImagePicks";
+import { useThumbFallback } from "@/components/hooks/useThumbFallback";
 import { ALT_TEXT_MAX_LENGTH, PICKER_ACCEPT } from "@/lib/images/limits";
 import { imagesIgnoredNotice, MESSAGES } from "@/lib/messages";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ const altInputClass =
 export default function NoteImagePicker({ existing, held, onChange }: Props) {
   const { full, hasAnimated, ignoredCount, addFiles, removePending, setPendingAlt, removeKept, editKeptAlt } =
     useImagePicks(held, onChange);
+  const { isFailed, onThumbError, registerThumb } = useThumbFallback();
 
   function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -38,12 +40,18 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
         return (
           <div key={image.id} className="mt-2 rounded-lg border border-white/10 bg-white/5 p-3">
             <div className="flex items-start gap-3">
-              {image.thumb_url ? (
+              {image.thumb_url && !isFailed(image.id) ? (
                 <img
+                  ref={(element) => {
+                    registerThumb(image.id, element);
+                  }}
                   src={image.thumb_url}
                   alt=""
                   width={image.thumb_width ?? image.width}
                   height={image.thumb_height ?? image.height}
+                  onError={() => {
+                    onThumbError(image.id);
+                  }}
                   className="h-20 w-auto rounded"
                 />
               ) : (
