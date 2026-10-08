@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
-    "@astrojs/cloudflare": "^14.3.1",
+    "@astrojs/cloudflare": "^14.3.4",
     "@astrojs/react": "^6.0.5",
     "@astrojs/sitemap": "^3.7.4",
     "@eslint/config-helpers": "^0.7.0",
@@ -63,7 +63,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
     "vitest": "^5.0.1",
-    "wrangler": "^4.135.0"
+    "wrangler": "^4.15.2"
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [
@@ -82,8 +82,11 @@
     }
   },
   "allowScripts": {
-    "esbuild@0.28.1": true,
     "esbuild@0.28.2": true,
-    "workerd@1.20261001.1": true
+    "sharp@0.34.5": true,
+    "sharp@0.35.4": true,
+    "sharp@0.33.5": true,
+    "esbuild@0.28.1": true,
+    "workerd@1.20261006.1": true
   }
 }
