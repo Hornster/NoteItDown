@@ -3,7 +3,7 @@ project: NoteItDown
 version: 1
 status: draft
 created: 2026-09-21
-updated: 2026-10-04
+updated: 2026-10-08
 prd_version: 1
 main_goal: market-feedback
 top_blocker: capacity
@@ -46,7 +46,7 @@ A TTRPG participant's campaign notes accumulate faster than they can hand-mainta
 | S-02 | auto-relations-memory-map         | see notes auto-connected on the memory map and navigate between them             | S-01          | FR-007, FR-009, FR-010, FR-011, US-01 | done        |
 | S-03 | multi-campaign-support            | create and switch between multiple campaigns                                     | F-01          | FR-002                                | done        |
 | S-04 | note-edit-delete-relation-refresh | edit or delete a note and see a notice of relations changed                      | S-02          | FR-005, FR-006, FR-008                | done        |
-| S-05 | note-image-attachment             | attach up to 2 images to a note                                                  | S-01          | FR-004                                | in-progress |
+| S-05 | note-image-attachment             | attach up to 2 images to a note                                                  | S-01          | FR-004                                | done        |
 
 ## Streams
 
@@ -146,7 +146,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - ~~Supabase Storage bucket policy (size limits, per-user access rules) for note images~~ — Settled: private `note-images` bucket, 2.5 MiB per object, WebP/JPEG only, per-user folder RLS (see `docs/reference/contract-surfaces.md`, "Storage: note-images bucket").
 - **Risk:** Nice-to-have and independent of the matching hypothesis — the PRD's own resolution on FR-004 notes images "don't feed the core domain rule" since exact-name matching only reads text, so this is sequenced last without blocking anything.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -204,3 +204,4 @@ Cross-cutting concerns surfaced during implementation reviews. Not blockers for 
 - **S-02: The app automatically detects relations between notes in the same campaign via exact-name matching and renders them as connections on a memory map; the user can click a connection to navigate directly to the connected note.** — Archived 2026-09-26 → `context/archive/2026-09-26-auto-relations-memory-map/`. Lesson: —.
 - **S-03: User can explicitly create additional campaigns beyond the auto-created default, and switch between them; each campaign's notes and relations stay scoped to that campaign only.** — Archived 2026-09-29 → `context/archive/2026-09-28-multi-campaign-support/`. Lesson: —.
 - **S-04: User can edit a note's content (including its name) or delete it (behind an explicit confirmation step), and the app re-runs relation detection automatically, showing a visible notice of which relations were added or removed as a result — never a silent change.** — Archived 2026-10-01 → `context/archive/2026-09-29-note-edit-delete-relation-refresh/`. Lesson: —.
+- **S-05: User can attach up to 2 images to a note alongside its text content.** — Archived 2026-10-08 → `context/archive/2026-10-01-note-image-attachment/`. Lesson: —.
