@@ -1,12 +1,11 @@
 ---
 project: "NoteItDown"
-context_type: greenfield
-created: 2026-09-16
-updated: 2026-09-16
-
+context_type: brownfield
+created: 2026-10-08
+updated: 2026-10-08
 timeline_budget:
-  mvp_weeks: 3
-  hard_deadline: null
+  delivery_weeks: 3
+  hard_deadline: 2026-10-29
   after_hours_only: true
 product_type: web-app
 target_scale:
@@ -17,136 +16,263 @@ checkpoint:
   current_phase: 8
   phases_completed: [1, 2, 3, 4, 5, 6, 7]
   gray_areas_resolved:
-    - topic: "persona & sharing scope"
-      decision: "individual TTRPG participant (GM or player), one account per person, no cross-account sharing of campaign data"
+    - topic: "change category"
+      decision: "hardening/tech-debt + visual UI revamp (+ dashboard/map search); image follow-ups later moved out in Phase 3; mobile support not included"
+    - topic: "scope give-way order"
+      decision: "mobile (Android phone-width) support is deferred first if scope is too large"
+    - topic: "persona"
+      decision: "same solo TTRPG participant; developer (author) as secondary persona for tests/hooks/constants"
+    - topic: "must preserve"
+      decision: "auth session behavior, notes & campaigns CRUD, relation forming, memory-map navigation, CI/deploy; image handling secondary"
     - topic: "access control"
-      decision: "login required, flat role model, no roles"
-    - topic: "note typing"
-      decision: "predefined types (NPC, Place, Quest, Observation) plus user-defined custom types, unique per campaign"
-    - topic: "image attachment priority"
-      decision: "nice-to-have, demoted from must-have — doesn't feed the core matching rule"
-    - topic: "campaign creation"
-      decision: "a default campaign is auto-created at signup; explicit creation available for additional campaigns"
-    - topic: "note edit/delete relation propagation"
-      decision: "must-have; re-detection runs on edit/delete and surfaces added/removed relations visibly, never silently"
-    - topic: "note deletion safety"
-      decision: "requires an explicit confirmation step before removal"
-    - topic: "manual relation-setting"
-      decision: "excluded entirely from MVP — relations are exclusively auto-detected; manual links + aliases deferred to v2"
-    - topic: "relation matching algorithm"
-      decision: "exact-name string matching only, no fuzzy/NLP matching"
+      decision: "no change; current login + flat model + per-user RLS preserved; storage quota is a usage limit, not an access change"
+    - topic: "button colors"
+      decision: "follow palette file: red only for destructive; Cancel = neutral outlined parchment + default focus; gold = primary/positive; green #5E8C5A only for success messages"
+    - topic: "milestone scope cut"
+      decision: "storage quota and full-res image popup moved out to a later milestone; remaining 8 threads incl. e2e stay; ~3 weeks"
+    - topic: "dashboard grouping & search"
+      decision: "categories = note types (A-Z, collapsible); notes A-Z within group; search by note name"
+    - topic: "success criteria"
+      decision: "primary = themed app + working dashboard/map searches guarded by risk tests on push; secondary = repo-wide constants + lesson"
+    - topic: "search behavior"
+      decision: "case-insensitive substring on note name; blur re-runs only if text changed; dashboard filters groups in place + auto-expands; map: center on 1, mark many (gold), neutral 'no notes found' on 0"
+    - topic: "test strategy bounds"
+      decision: "hook = lint + unit only; CI on push = integration + e2e limited to risky flows (auth, notes CRUD, relations, per-user/campaign isolation); e2e spike early; explicit risk-scenario list; extend existing tests"
+    - topic: "sequencing constraints"
+      decision: "constants refactor is its own change before UI revamp; auth tests before auth edits; relation-notice wording pinned by tests before constants move"
+    - topic: "business logic"
+      decision: "no domain logic change; search is a separate lookup aid, not relation matching"
+    - topic: "constraints"
+      decision: "no schema/data migration; URLs, API routes and response shapes unchanged"
     - topic: "product framing"
-      decision: "web app, small scale (handful of users), after-hours only, no hard deadline, 3-week MVP"
-  frs_drafted: 11
+      decision: "no change: web app, small scale; after-hours; hard deadline 2026-10-29 (~3 weeks)"
+    - topic: "non-goals"
+      decision: "no mobile layouts; no image quota/full-res popup; no relation-rule change or content search; no coverage-% targets, no full e2e suite, no shared error boundary"
+  frs_drafted: 15
   quality_check_status: accepted
 ---
 
-# Shape Notes: NoteItDown
+# Shape Notes: NoteItDown — next milestone (post-MVP)
+
+> Prior MVP shape session archived → `context/foundation/archive/shape-notes-2026-10-08-1856.md`.
 
 ## Seed idea (verbatim)
 
-> NoteItDown: a noting app directed at DnD (Dungeons and Dragons) table top role-playing game. It's purpose is to allow for easier noting of quests, observations, NPC (non-playable character) data, places and, most importantly, connections and relations between them (what, by my experience, is the hardest thing to keep in order especially for longer and more elaborate campaigns). The relations should be capable of being generated automatically whenever possible (heuristically only and just with exact-name matching, no complicated algorithms needed for now) to make it easier for the players and presented in simpe and readable way (i.e. partial memory map) for ease of travel around accumulated over time data. Among data types that can be noted should be images and plain text.
+> In this milestone we will be aiming for making the UI look better and work with mobile devices (only Android OS for now. Reference file for color usage is prepared and will be provided when needed), making sure the tests cover the most risky areas of the application flow. We will see if we can add some hooks and/or triggers for the tests, too, to make development faster. Another thing to do will be to refactor the code to utilize constants instead of hardcoded values (i.e. HTTP or POSTGRES codes, string literals, etc.). Secondary things to work with are: user storage quota for note images, full-size image popup path to full resolution. These are parts of Observations and Parked segments of the @context/foundation/roadmap.md .
+
+## Current System
+
+- **Purpose:** NoteItDown helps a solo TTRPG participant keep campaign notes (NPCs, places, quests, observations, custom types) connected automatically through exact-name matching, shown on a navigable memory map.
+- **Architecture:** SSR web app (monolith) on Cloudflare Workers, with Supabase as the backing service.
+- **Tech stack:** Astro 7 SSR + React 19 islands, Tailwind 4, shadcn/ui, Supabase (Postgres + Auth + Storage), Cloudflare Workers, Vitest unit + integration suites, GitHub Actions CI (lint/check/build + smoke), husky + lint-staged pre-commit.
+- **User base:** solo users, small scale. So far only the author has used the deployed app. Mobile users are expected in the future.
+- **Core functionality (M-1 MVP, shipped and working):** auth (signup/signin/signout), multi-campaign with a default campaign at signup, notes CRUD with predefined/custom types, automatic exact-name relation detection, memory map with navigation, a relation-change notice on edit/delete, up to 2 images per note.
+- **Partial prior work:** `src/lib/constants/` (`http-status.ts`, `db-error-codes.ts`, `messages.ts`, `db-constraints.ts`) already exists. The constants rule was applied to the newest code (commit `5bf36f1`) but not across older code.
 
 ## Vision & Problem Statement
 
-A TTRPG participant — GM or player — running or playing in a Dungeons & Dragons campaign accumulates quests, NPCs, places, and observations session after session. As a campaign grows longer and more elaborate, the connections *between* those things become impossible to hold in memory or in flat notes: the knowledge is there, but it's trapped, unstructured, and un-navigable. Today this person keeps loose text notes (a doc, a notebook, a notes app); the relations between entries exist only in their own memory, so returning to old material to answer "who is connected to whom, and how" is slow and error-prone.
+The MVP is done and working. This milestone is about polishing it and building a firmer base: rules that came up during MVP development become applied project conventions, and the observations the MVP left behind get resolved.
 
-General-purpose note and wiki tools (Notion, Obsidian, World Anvil, and similar) require every link between entries to be created manually. Over a long campaign nobody sustains that discipline consistently, so the web of connections decays even when the raw notes are still there. NoteItDown's insight is that campaign entities are named consistently enough (NPC names, place names, quest names) that a simple, heuristic, exact-name-match pass can surface likely relations automatically — without requiring the user to hand-build a link graph, and without needing complex NLP or inference.
+- **UI polish:** the app should look better, following a prepared color reference (to be provided). Known leftovers include the light-themed alert-dialog that clashes with the dark pages and the low-contrast close button on the image popup.
+- **Risk-oriented test coverage:** tests should cover the riskiest areas of the application flow. The goal is coverage of risk, not a coverage percentage.
+- **Faster development feedback:** explore hooks and/or triggers that run tests, to speed up development.
+- **Constants over hardcoded values:** refactor the remaining code to use constants (HTTP codes, Postgres error codes, user-facing string literals, etc.) instead of hardcoded values wherever possible.
+- **New dashboard & map usability:** notes on the dashboard grouped by type, with a name search; a search on the memory map that finds and highlights or centers on nodes. These were added during shaping to improve readability.
+- ~~Secondary — image follow-ups~~ — **moved out to a later milestone** during Phase 3 scoping: the per-user storage quota for note images and the full-resolution path for the image popup.
+
+**Why now:** this is the natural next step after the MVP. It is not driven by an incident or by user feedback.
+
+**Deferred:** full mobile (Android phone-width) support. The user expects mobile users in the future, but has no mobile users today and has explicitly allowed postponing it if scope is too large. It is the first thing to give way.
 
 ## User & Persona
 
-**Primary persona**: An individual TTRPG participant (GM or player) managing their own campaign notes solo. They may run or play in one or more campaigns, but each campaign's notes belong to and are visible only to them — this is not a shared/collaborative tool between a GM and their players, at least for v1. The moment they reach for this product is mid-campaign, after enough sessions have passed that quests, NPCs, and places have piled up and they can no longer recall or manually trace how everything connects.
+**Primary persona (unchanged):** the solo TTRPG participant (GM or player) from the MVP. Their experience changes mostly through the visual revamp and the image follow-ups.
+
+**Secondary persona:** the developer (the author) maintaining the codebase. The constants refactor, risk-oriented tests and test hooks/triggers serve this persona.
 
 ## Access Control
 
-Login required (email+password / OAuth / passwordless — exact mechanism is a downstream stack decision). Flat role model: every account is the same kind of user: an owner of their own campaigns. No admin/member distinction, no cross-account sharing or roles within a campaign. A user's campaigns and notes are visible only to that user.
+**Current model:** login is required (Supabase email + password, cookie-based session). The user model is flat, with no roles. Signed-out users are kept out of protected routes, and per-user RLS isolates campaigns, notes, relations and note-image storage.
+
+No changes planned — current model preserved. (The per-user note-image storage quota, moved out to a later milestone, would be a usage limit within this model, not an access change.)
 
 ## Success Criteria
 
 ### Primary
-- A user can sign up/log in, create a campaign, add multiple notes (NPCs/places/quests/observations, text + optional image), and see the app automatically detect relations between notes via exact-name matching.
-- A user can view a simple memory map showing their notes and the detected connections between them, and navigate from the map back to individual notes.
+
+Every page of the app uses the D&D palette (`context/foundation/materials/dnd-color-palette.md`) instead of the generic default theme. The dashboard shows notes grouped by type with a working search, and the memory map has a working search. Authentication, notes CRUD and automatic relation management are covered by automated tests that run on push in CI.
+
+Change flow (end user):
+1. From the first page, the app shows the dark D&D theme.
+2. On the dashboard, notes are grouped by note type. Groups are sorted A–Z and collapsed; clicking a group expands it (dropdown style) to show its notes, sorted A–Z.
+3. A search bar on the dashboard finds notes by name. Search starts after a short pause in typing, on Enter, or when the field loses focus.
+4. On the memory map, a search bar with the same trigger behavior centers the viewport on the found node when there is one match. With several matches, every matching node is visibly marked as found (e.g. colored edge or title color, in gold).
+5. Header/footer link placement and the edit/new note layouts are unchanged. Buttons are colored by meaning: gold for primary/positive actions, red only for destructive actions (delete and its confirmation). Cancel is a neutral outlined parchment button and gets the default focus in confirmation dialogs. Green `#5E8C5A` is used only for success messages.
+
+Change flow (developer):
+1. Modifying a file runs the related checks through a hook: lint for that file and the related tests.
+2. On push, CI also runs integration/e2e tests on top of the existing jobs.
+3. Risk-first test coverage targets authentication, notes CRUD and automatic relation management.
 
 ### Secondary
-- Editing or deleting a note automatically re-runs the heuristic match, so relations stay accurate without manual upkeep.
+
+The constants rule is applied across the whole repo: no hardcoded HTTP status codes, Postgres error codes or duplicated user-facing messages remain in `src/` (comments and `.md` files excluded). A lesson recorded in `context/foundation/lessons.md` prevents regressions.
 
 ### Guardrails
-- A user never sees another user's campaign data (cross-account data isolation).
-- Uploaded images and notes are never lost or corrupted.
-- The memory map stays readable as notes accumulate — it must not become an unreadable tangle as a campaign grows.
+
+- Preserved flows keep working: auth session behavior, notes & campaigns CRUD, relation forming, memory-map navigation.
+- CI/deploy stays green: the existing lint/check/build/smoke jobs and auto-deploy keep working.
+- Layout stays unchanged where promised: header/footer link placement and the edit/new note layouts.
+- Palette contrast holds: text/button pairs meet the palette's stated contrast (at least WCAG AA for normal text), and red is never used outside destructive actions.
+
+**Blast radius (user's assessment):** layout/UI regressions are the most likely to be noticed first. Problems from the constants refactor are expected to be caught by automated tests.
+
+**Timeline:** about 3 weeks of after-hours work, after scoping down. The per-user note-image storage quota and the full-resolution image popup path were moved out to a later milestone. Mobile support was already deferred.
 
 ## Functional Requirements
 
-### Campaigns & Access
-- FR-001: User can sign up and log in to an account. Priority: must-have
-  > Socrates: Counter-argument considered: "login adds friction for a quick-note hobby tool." Resolution: kept; login is required to keep each user's campaigns private, per Access Control.
-- FR-002: A default campaign is automatically created for the user at signup; the user can also create additional campaigns explicitly. Priority: must-have
-  > Socrates: Counter-argument considered: "forcing an explicit 'create campaign' step before any note-taking is friction with no payoff for single-campaign users." Resolution: revised — auto-create a default campaign at signup, but keep explicit creation available for users who run more than one.
+### UI theme & feedback
 
-### Notes
-- FR-003: User can create a note using one of the predefined types (NPC, Place, Quest, Observation) or a custom, campaign-unique type name, plus plain text content. Priority: must-have
-  > Socrates: Counter-argument considered: "a fixed type list is too rigid — real campaigns have things that don't fit neatly." Resolution: revised — predefined types cover the common cases, but the user can also define their own type name (unique within the campaign) for anything that doesn't fit.
-- FR-004: User can attach an image to a note. Priority: nice-to-have
-  > Socrates: Counter-argument considered: "images don't feed the core domain rule (exact-name matching only reads text) and could be deferred to v2 without weakening the MVP's proof point." Resolution: demoted to nice-to-have — kept in scope since the original idea calls for it, but not required to prove the MVP works.
-- FR-005: User can edit a note's content, including its name. Priority: must-have
-  > Socrates: Counter-argument considered: "DnD names are easy to mistype, and users will edit note names to fix mistakes; since relations are already established, the app should propagate a rename rather than let the relation silently break." Resolution: kept, and merged into FR-008 — editing a note (including renames) must re-run relation detection and surface what changed. See FR-008.
-- FR-006: User can delete a note. Deletion requires an explicit confirmation step before removal. Priority: must-have
-  > Socrates: Counter-argument considered: "deleting a referenced note could leave dangling relations elsewhere, and accidental deletion risks permanent data loss." Resolution: kept, with an added confirmation step before delete completes — addresses accidental loss; dangling relations are handled by FR-008's re-detection on delete.
+- FR-001: User sees the D&D palette theme on every page (dark, nearly black background, parchment text, grey ornaments), per `context/foundation/materials/dnd-color-palette.md`. This covers the MVP leftovers: the light-themed alert-dialog and the low-contrast image-popup close button. Priority: must-have. Change: modified
+  > Socrates: Counter-argument considered: "theming now, then redoing it for mobile later = double
+  > work." Resolution: kept. The theme is applied through shared palette tokens, so a later mobile
+  > milestone changes layout, not colors.
+- FR-002: User sees buttons colored by meaning: gold for primary/positive actions; red only for destructive actions (delete and its confirmation); Cancel as a neutral outlined parchment button with default focus in confirmation dialogs; green `#5E8C5A` only for success messages. Priority: must-have. Change: modified
+  > Socrates: Counter-argument considered: "color alone fails color-blind users / gold and green
+  > overlap." Resolution: kept as written. The user validated the palette against protanopia,
+  > deuteranopia, tritanopia and achromatopsia in a simulator; all colors stay distinguishable. Gold
+  > (primary/positive action) and green (success message) have related but different meanings.
 
-### Relations & Memory Map
-- FR-007: App automatically detects relations between notes via exact-name matching (e.g., one note's text contains another note's exact name). Priority: must-have
-  > Socrates: Counter-argument considered: "exact-name matching produces false negatives (name variants like 'Bob' vs 'Bob the Blacksmith' won't link) and false positives (a note named 'Inn' could match the word 'inn' incidentally)." Resolution: kept as written — heuristic, exact-name-only matching was the deliberate scope choice in the original idea; no fuzzy/NLP matching in the MVP.
-- FR-008: Editing or deleting a note automatically re-runs relation detection, so the map stays accurate without manual upkeep. After re-detection, the user is shown what relations were added or removed as a result of the edit — changes are never silent. Priority: must-have
-  > Socrates: Counter-argument considered: "relations silently appearing or disappearing after an edit could confuse the user, since it isn't obvious the map changed or why." Resolution: revised and promoted to must-have — re-detection must surface a visible notice of what changed, not happen invisibly.
-- FR-009: User can view a memory map showing their notes and the relations automatically detected between them. Priority: must-have
-  > Socrates: Counter-argument considered: "a graph/map visualization is nontrivial UI work — a simple 'related notes' list per note might prove the same value with far less effort." Resolution: kept; the memory map is the product's core payoff per the original idea, not an incidental feature.
-- FR-010: User can navigate from the memory map to an individual note. Priority: must-have
-  > Socrates: Counter-argument considered: "this is standard interaction for any graph UI and might not need to be its own FR separate from FR-009." Resolution: kept as a separate FR — it's the step that makes the map actually useful for "ease of travel around accumulated data," per the original idea, not just a passive visualization.
-- FR-011: User cannot manually create, edit, or override a relation between two notes — relations are exclusively the output of automatic exact-name matching in the MVP. Priority: must-have
-  > Scope note: manual relation-setting is deliberately excluded, not deferred by oversight. Letting a user manually declare "these two names refer to the same thing" without a real alias system would create a false impression that the app remembers and generalizes that equivalence — it wouldn't. Manual relations plus a proper alias system are a natural, connected v2 feature, not a v1 shortcut.
-  > Socrates: Counter-argument considered: "with no way to dismiss a wrong auto-detected relation (per FR-007's known false-positive risk) or capture real domain knowledge the app can't infer, the user is stuck with an incomplete or occasionally wrong map." Resolution: kept as written — this is an accepted MVP limitation, not a gap; addressing it (dismissal, manual links, aliases) is explicitly the connected v2 feature named in the scope note above.
+### Dashboard
+
+- FR-003: User can see notes on the dashboard grouped by note type. Groups are sorted A–Z and collapsed by default; a group expands on click (dropdown style) to show its notes, sorted A–Z. Priority: must-have. Change: modified
+  > Socrates: Counter-argument considered: "how search results display relative to groups is undefined."
+  > Resolution: while searching, groups are filtered in place. Groups without matches are hidden; groups
+  > with matches auto-expand and show only the matching notes. Clearing the search restores the
+  > collapsed view.
+- FR-004: User can search notes by name on the dashboard. The search triggers after a short pause in typing, on Enter, or when the search field loses focus. Priority: must-have. Change: new
+  > Socrates: Counter-arguments considered: "the blur trigger is surprising" and "matching rules are
+  > undefined" (equal weight). Resolution: blur stays, but re-runs the search only if the text changed
+  > since the last search, so clicking a note doesn't reshuffle the list. Matching is a case-insensitive
+  > substring match on the note name.
+
+### Memory map
+
+- FR-005: User can search memory-map nodes by note name, with the same search triggers as FR-004. With a single match the viewport centers on that node; with multiple matches every matching node is visibly marked as found. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "no-match feedback is undefined." Resolution: with no
+  > matches, a visible "no notes found" message in neutral parchment text (not red) appears near the
+  > search bar, and the viewport stays where it is.
+
+### Developer workflow
+
+- FR-006: Developer gets lint and the related tests run automatically for a modified file, through a hook. Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "integration tests in the hook need local Supabase, so it is
+  > slow or fails offline." Resolution: the hook runs lint + unit tests only; integration tests run on
+  > push/CI.
+- FR-007: Developer gets integration/e2e tests run in CI on push, in addition to the existing jobs (this introduces an e2e framework). Priority: must-have. Change: new
+  > Socrates: Counter-argument considered: "a new e2e framework is the biggest unknown in the
+  > milestone." Resolution: kept, but e2e is limited to the risky flows (see FR-008), and the framework
+  > is set up in an early spike so blockers surface early. The existing integration suite remains the
+  > fallback.
+- FR-008: Developer can rely on automated tests that cover the riskiest flows: authentication, notes CRUD and automatic relation management. Coverage is oriented to risk, not to a percentage. Priority: must-have. Change: modified
+  > Socrates: Counter-arguments considered: "relation tests overlap existing unit tests", "multi-
+  > campaign isolation (RLS) is missing from the list", "'risk-oriented' has no done-criterion."
+  > Resolution: per-user/per-campaign data isolation is added to the risky flows. Done means an explicit
+  > list of named risk scenarios per flow, each with at least one test. Existing tests are mapped first
+  > and only the gaps are added (extend, don't duplicate).
+- FR-009: Developer uses shared constants for HTTP status codes, Postgres error codes and user-facing messages across all of `src/` (finishing the partial refactor from the previous milestone; comments and `.md` files excluded). A lesson in `lessons.md` records the rule. Priority: must-have. Change: modified
+  > Socrates: Counter-arguments considered: "it touches many files alongside the UI revamp" and
+  > "'wherever possible' is open-ended." Resolution: the literal kinds are bounded to HTTP status codes,
+  > Postgres error codes, user-facing messages and repeated domain strings. The refactor is its own
+  > change, sequenced before the UI revamp so the diffs don't mix.
+
+### Preserved
+
+- FR-010: User can sign up, sign in and sign out; session behavior is unchanged. Priority: must-have. Change: preserved
+  > Socrates: Counter-argument considered: "retheming the auth pages and the constants work in auth
+  > routes both touch auth." Resolution: auth tests land before any auth page or route is edited.
+- FR-011: User can create, view, edit and delete notes, and create and switch campaigns. Priority: must-have. Change: preserved
+  > Socrates: Counter-argument considered: "dashboard regrouping replaces the current note list."
+  > Resolution: every current entry point stays reachable from the grouped dashboard (open, create, edit
+  > and delete a note; campaign switching).
+- FR-012: App detects relations by exact-name matching and shows the relation-change notice on note edit/delete. Priority: must-have. Change: preserved
+  > Socrates: Counter-arguments considered: "the constants refactor touches the relation-change
+  > messages" and "search's case-insensitive matching may be confused with relation matching."
+  > Resolution: search matching code stays separate from relation detection. The relation-notice wording
+  > and behavior are pinned by tests before the constants refactor moves the text.
+- FR-013: User can navigate between connected notes on the memory map. Priority: must-have. Change: preserved
+  > Socrates: Counter-arguments considered: "map search marking/centering may interfere with click-to-
+  > navigate" and "retheming may make edges/nodes hard to see." Resolution: search marking and centering
+  > must not change click-to-navigate on nodes or connections. Map nodes and edges must meet palette
+  > contrast against the dark background.
+- FR-014: Header/footer link placement and the edit/new note layouts stay unchanged. Priority: must-have. Change: preserved
+  > Socrates: Counter-argument considered: "retheming may shift spacing/sizes unintentionally."
+  > Resolution: "unchanged" means the same structure and placement. Spacing shifts caused by theming are
+  > checked manually against before/after screenshots of those pages.
+- FR-015: User can attach up to 2 images to a note and view them in the popup. Priority: must-have. Change: preserved
+  > Socrates: Counter-argument considered: "the popup restyle (close button) touches the image
+  > component." Resolution: after the restyle, upload and view get a manual check in Chromium and
+  > Firefox; Safari verification stays parked.
 
 ## User Stories
 
-### US-01: User adds notes and sees them automatically connected on the memory map
+### US-01: User finds a note quickly on the themed dashboard and on the map
 
-- **Given** a logged-in user with a campaign containing at least one existing note (e.g. an NPC named "Bob the Blacksmith")
-- **When** they create a new note whose text mentions that exact name (e.g. a Quest note reading "...Bob the Blacksmith asked me to retrieve his hammer...")
-- **Then** the app automatically detects a relation between the two notes and the connection appears on the campaign's memory map, without any manual linking step
+- **Given** a signed-in user with a campaign that has notes of several types
+- **When** they open the dashboard
+- **Then** they see the D&D-themed page with notes grouped by type (groups sorted A–Z, collapsed)
+- **And** expanding a group shows its notes sorted A–Z
+- **When** they type part of a note's name into the dashboard search and pause, press Enter or leave the field
+- **Then** the matching notes are shown (groups filtered in place, matching groups auto-expanded)
+- **When** they search the same name on the memory map
+- **Then** the viewport centers on that node (one match), or all matching nodes are marked as found (several matches), or a "no notes found" message appears (no match)
 
-#### Acceptance Criteria
-- Matching is exact-name only (case- and heuristic-based, no fuzzy/partial/NLP matching) — a partial or variant name does not create a relation.
-- No relation is created if no note names appear verbatim in another note's text.
-- The user can click the relation or the connected node on the map to navigate directly to that note.
-- If the mentioned note is later renamed or deleted, the relation is re-evaluated (per FR-008) and the change is visibly surfaced to the user, not silent.
+*Before:* the dashboard showed a flat list in the default theme, and the map had no search.
 
 ## Business Logic
 
-The app classifies a pair of notes as related whenever one note's text contains another note's exact name.
+No domain logic change. This is a UI, search and engineering-hardening change.
 
-The rule consumes two user-facing inputs, both already produced by ordinary note-taking: the name of each note within a campaign, and the plain-text content of every other note in that same campaign. It requires no extra input step from the user — the user never explicitly links anything, per FR-011.
+The existing domain rule is preserved unchanged: relations between notes in the same campaign are detected automatically by exact-name matching, and are re-detected with a visible notice when a note is edited or deleted (FR-012). The new note search (FR-004, FR-005) is a lookup aid with its own case-insensitive substring matching on note names. It is deliberately kept separate from relation detection and does not create, change or influence relations.
 
-The rule's output is a set of detected relations between notes, scoped to a single campaign (relations never cross campaigns, consistent with the per-user, per-campaign data isolation established in Access Control). Each relation is directional-agnostic for display purposes: it simply marks that note A and note B are connected because A's name appears in B's text (or vice versa).
+## Constraints & Preserved Behavior
 
-The user encounters this rule in two places: on the memory map, where detected relations render as connections between notes; and as a visible add/removed-relations notice whenever they edit or delete a note and the rule re-runs (FR-008), so the effect of the rule is never invisible to them.
+- **No schema or data migration.** Existing campaigns, notes, relations and note images stay as they are.
+- **Backward compatibility:** page URLs and API routes are unchanged, and so are API response shapes. The constants refactor (FR-009) must keep HTTP status codes and user-facing messages identical in behavior; it changes where values are defined, not what they are.
+- **Supabase free-tier limits:** integration and e2e tests (locally and in CI) run only against a local Supabase, never against the hosted project.
+- **Existing integrations that must keep working:** Supabase Auth/Postgres/Storage, Cloudflare Workers deploy, and the GitHub Actions CI jobs (lint, `astro check`, build, smoke) with auto-deploy on merge.
+- **Preserved behavior:** auth session behavior; notes & campaigns CRUD; exact-name relation forming and the relation-change notice; memory-map click-to-navigate; header/footer link placement; edit/new note layouts; image attach + popup view (FR-010 to FR-015).
+- **Sequencing constraints (from the Socrates round):** the constants refactor is its own change, done before the UI revamp. Auth tests land before any auth page or route is edited. The relation-notice wording is pinned by tests before the constants refactor moves it.
 
 ## Non-Functional Requirements
 
-- A user sees their note saved, and the memory map reflecting it, within a short, perceptible delay after creating or editing a note — no long unexplained waits.
-- Notes and their attached images persist reliably for the life of a campaign (which may run months or years) — no expiration, silent degradation, or requirement for the user to manually back up their data.
+- **Contrast:** text and button color pairs meet at least WCAG AA for normal text, including map node labels and edges and the search-match highlight. Background ornaments are exempt; they are intentionally low-contrast (~1.3:1) per the palette.
+- **Search responsiveness:** dashboard and map search results update within ~300 ms after the search triggers, for a typical campaign size.
+- **Developer feedback speed:** the per-file hook (lint + unit tests) finishes within ~10 s.
+- **Destructive actions are not signaled by color alone:** red buttons carry an icon and an explicit label, and Cancel has the default focus in confirmation dialogs.
+
+## Product Framing
+
+- **Product type:** no change — existing web app.
+- **Target scale:** no change — small (only the author so far; mobile users expected in a later milestone).
+- **Timing:** after-hours work; hard deadline 2026-10-29 (~3 weeks, matching `delivery_weeks: 3`).
 
 ## Non-Goals
 
-- **No manual relation-setting or alias system.** Relations are exclusively the output of automatic exact-name matching (FR-011). Letting users manually declare two names equivalent without a real alias system would falsely imply the app generalizes that equivalence. Natural v2 feature, not a v1 shortcut.
-- **No fuzzy/NLP-based relation matching.** Only exact-name string matching is used to detect relations (FR-007) — no similarity scoring, no language-model inference. A deliberate scope choice from the original idea, not a placeholder for a "better" algorithm later.
-- **No shared/collaborative campaigns.** A campaign's notes are private to the account that owns them; there's no sharing between a GM and their players, or between any two accounts, in v1 (Access Control).
-- **No native mobile/desktop app.** V1 ships as a web app only; no dedicated iOS/Android/desktop client.
+- **Mobile / phone-width layouts.** Deferred to a later milestone. The theme goes through palette tokens so that later work changes layout only.
+- **Per-user note-image storage quota and a full-resolution path for the image popup.** Moved to a later milestone during Phase 3 scoping. The quota stays an accepted risk while signups are effectively only the author.
+- **Changing relation detection, or searching inside note content.** The exact-name relation rule is untouched, and search matches note names only.
+- **Coverage-percentage targets and a full e2e suite.** Tests are driven by risk; e2e covers only the risky flows (auth, notes CRUD, relations, per-user/campaign isolation). A shared error boundary / 503 helper is also out of scope; the DB-error-handling Observation stays open.
 
 ## Quality cross-check
 
-All elements checked and present, no gaps:
-- Access Control: present (login, flat roles, per-user isolation).
-- Business Logic: present (one-sentence rule: exact-name-match relation classification).
-- Project artifacts: present (this file, valid checkpoint).
-- Timeline-cost: present (3-week after-hours MVP, within the ≤3-week default, no acknowledgment block needed).
-- Non-Goals: present (4 entries).
+Ran 2026-10-08. All 6 brownfield elements are present (Access Control, Business Logic, project artifacts, timeline-cost acknowledgment, Non-Goals, preserved behavior). No gaps.
+
+Note (not a gap): the 3-week estimate covers 8 threads, including a new e2e framework. The early e2e spike (FR-007) is the checkpoint for validating it.
+
+## Forward: technical-roadmap
+
+Informational only; not a PRD section.
+
+- Change sequencing raised during shaping: constants refactor (FR-009) → risk tests for auth, notes CRUD, relations and isolation (FR-008, with the relation-notice wording pinned) → e2e spike + CI job (FR-007) → per-file hook (FR-006) → UI revamp (FR-001/002) → dashboard grouping + search (FR-003/004) → map search (FR-005). The constants-before-UI and tests-before-auth-edits constraints are binding; the rest is a suggestion.
+- Color reference: `context/foundation/materials/dnd-color-palette.md`.
