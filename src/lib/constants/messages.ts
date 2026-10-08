@@ -1,10 +1,12 @@
+import { ALT_TEXT_MAX_LENGTH, MAX_IMAGES_PER_NOTE } from "@/lib/images/limits";
+
 /** User-facing strings shared by API routes and the UI. New code uses these instead of literals. */
 export const MESSAGES = {
   SIGNED_IN_REQUIRED: "You must be signed in.",
   SUPABASE_NOT_CONFIGURED: "Supabase is not configured.",
   INVALID_JSON_BODY: "Request body must be valid JSON.",
   NOTE_NOT_FOUND: "This note doesn't exist or isn't yours.",
-  IMAGE_LIMIT_REACHED: "A note can have at most 2 images.",
+  IMAGE_LIMIT_REACHED: `A note can have at most ${String(MAX_IMAGES_PER_NOTE)} images.`,
   IMAGE_NOT_FOUND: "Image not found.",
   IMAGE_UPLOAD_INVALID: "The uploaded image is not valid. Please try another file.",
   GENERIC_IMAGE_ERROR: "Something went wrong while handling the image. Please try again.",
@@ -26,6 +28,14 @@ export const MESSAGES = {
   NOTE_IMAGES_LOAD_FAILED: "Images couldn't be loaded right now. Try reloading the page later.",
   IMAGE_FULL_LOADING: "Loading image…",
   IMAGE_FULL_LOAD_FAILED: "The full-size image couldn't be loaded. Please try again.",
+  IMAGE_ALT_TEXT_TOO_LONG: `Alt text must be at most ${String(ALT_TEXT_MAX_LENGTH)} characters.`,
+  IMAGE_THUMBNAIL_FIELDS_MISMATCH: "Thumbnail path and dimensions must be provided together.",
+  IMAGES_LABEL: "Images",
+  IMAGE_REMOVE_LABEL: "Remove image",
+  IMAGE_ALT_TEXT_LABEL: "Alt text",
+  IMAGE_ALT_TEXT_PLACEHOLDER: "Alt text (optional)",
+  NOTICE_DISMISS_LABEL: "Dismiss",
+  FOOTER_LICENSES_LINK: "Third-party licences",
   IMAGE_FAILURE_NOTICE_HEADING: "The note was saved, but some images were not.",
 } as const;
 

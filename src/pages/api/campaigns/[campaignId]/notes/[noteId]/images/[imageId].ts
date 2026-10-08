@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 
 import { jsonError } from "@/lib/api";
-import { HTTP_STATUS } from "@/lib/http-status";
-import { MESSAGES } from "@/lib/messages";
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { MESSAGES } from "@/lib/constants/messages";
 import { deleteImage, getImageUrls, updateImageAltText } from "@/lib/services/note-images";
 import { updateImageSchema } from "@/lib/schemas/note-images";
 import { createClient } from "@/lib/supabase";

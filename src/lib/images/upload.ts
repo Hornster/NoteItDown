@@ -1,6 +1,6 @@
 import { ImageUploadError } from "@/lib/images/errors";
-import { HTTP_STATUS } from "@/lib/http-status";
-import { imageLabel, MESSAGES } from "@/lib/messages";
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { imageLabel, MESSAGES } from "@/lib/constants/messages";
 import type {
   ApiError,
   CommitImageCommand,

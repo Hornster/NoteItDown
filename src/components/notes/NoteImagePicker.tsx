@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { useImagePicks } from "@/components/hooks/useImagePicks";
 import { useThumbFallback } from "@/components/hooks/useThumbFallback";
 import { ALT_TEXT_MAX_LENGTH, PICKER_ACCEPT } from "@/lib/images/limits";
-import { imagesIgnoredNotice, MESSAGES } from "@/lib/messages";
+import { imagesIgnoredNotice, MESSAGES } from "@/lib/constants/messages";
 import { cn } from "@/lib/utils";
 import type { HeldImageState, NoteImageView } from "@/types";
 
@@ -32,7 +32,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
 
   return (
     <div>
-      <Label htmlFor="images">Images</Label>
+      <Label htmlFor="images">{MESSAGES.IMAGES_LABEL}</Label>
 
       {held.kept.map((image) => {
         const original = originals.get(image.id) ?? image;
@@ -61,7 +61,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
               )}
               <button
                 type="button"
-                aria-label="Remove image"
+                aria-label={MESSAGES.IMAGE_REMOVE_LABEL}
                 onClick={() => {
                   removeKept(image);
                 }}
@@ -72,8 +72,8 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
             </div>
             <input
               type="text"
-              aria-label="Alt text"
-              placeholder="Alt text (optional)"
+              aria-label={MESSAGES.IMAGE_ALT_TEXT_LABEL}
+              placeholder={MESSAGES.IMAGE_ALT_TEXT_PLACEHOLDER}
               maxLength={ALT_TEXT_MAX_LENGTH}
               value={altValue}
               onChange={(e) => {
@@ -108,7 +108,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
             </div>
             <button
               type="button"
-              aria-label="Remove image"
+              aria-label={MESSAGES.IMAGE_REMOVE_LABEL}
               onClick={() => {
                 removePending(pending);
               }}
@@ -120,8 +120,8 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
           {pending.status === "ready" && (
             <input
               type="text"
-              aria-label="Alt text"
-              placeholder="Alt text (optional)"
+              aria-label={MESSAGES.IMAGE_ALT_TEXT_LABEL}
+              placeholder={MESSAGES.IMAGE_ALT_TEXT_PLACEHOLDER}
               maxLength={ALT_TEXT_MAX_LENGTH}
               value={pending.alt_text}
               onChange={(e) => {

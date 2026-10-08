@@ -1,7 +1,8 @@
 /* eslint-disable no-console -- server-side service logs removal/signing failures it deliberately swallows */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { PG_ERROR } from "@/lib/db-error-codes";
+import { DB_CONSTRAINT } from "@/lib/constants/db-constraints";
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
 import { MAX_IMAGE_BYTES, MAX_IMAGES_PER_NOTE, NOTE_IMAGES_BUCKET, STORED_IMAGE_MIMES } from "@/lib/images/limits";
 import type {
   CommitImageCommand,
@@ -21,8 +22,6 @@ const THUMB_URL_EXPIRY_SECONDS = 6 * 60 * 60;
 const FULL_URL_EXPIRY_SECONDS = 300;
 /** Storage `list` page size, also the batch size for `remove`. */
 const STORAGE_PAGE_SIZE = 1000;
-
-const POSITION_KEY_CONSTRAINT = "note_images_note_position_key";
 
 export type PrepareUploadResult =
   | { success: true; upload: PrepareUploadResponse }
@@ -285,7 +284,7 @@ export async function prepareUpload(
 function isPositionConflict(error: { code?: string; message?: string; details?: string }): boolean {
   return (
     error.code === PG_ERROR.UNIQUE_VIOLATION &&
-    `${error.message ?? ""} ${error.details ?? ""}`.includes(POSITION_KEY_CONSTRAINT)
+    `${error.message ?? ""} ${error.details ?? ""}`.includes(DB_CONSTRAINT.NOTE_IMAGES_NOTE_POSITION_KEY)
   );
 }
 

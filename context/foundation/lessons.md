@@ -20,7 +20,7 @@
 
 - **Context**: context/foundation/roadmap.md Observations (scattered numeric status codes, SQLSTATE strings and message literals)
 - **Problem**: HTTP statuses, Postgres error codes and user-facing strings are repeated as literals across routes and services, so renames and wording changes drift.
-- **Rule**: In new code use `HTTP_STATUS` (`src/lib/http-status.ts`), `PG_ERROR` (`src/lib/db-error-codes.ts`) and `MESSAGES` (`src/lib/messages.ts`) instead of literals. Add missing entries to the dictionaries; do not introduce new inline literals.
+- **Rule**: In new code use `HTTP_STATUS` (`src/lib/constants/http-status.ts`), `PG_ERROR` (`src/lib/constants/db-error-codes.ts`), `DB_CONSTRAINT` (`src/lib/constants/db-constraints.ts`) and `MESSAGES` (`src/lib/constants/messages.ts`) instead of literals. Add missing entries to the dictionaries; do not introduce new inline literals.
 - **Applies to**: plan, implement, impl-review
 
 ## Extract island fetch/state logic into hooks

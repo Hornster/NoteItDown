@@ -3,6 +3,9 @@ import type { PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase
 
 import { createTestNote, createTestUser, jpegFixture, webpFixture } from "./helpers";
 
+import { DB_CONSTRAINT } from "@/lib/constants/db-constraints";
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
+import { HTTP_STATUS } from "@/lib/constants/http-status";
 import { MAX_IMAGE_BYTES, NOTE_IMAGES_BUCKET } from "@/lib/images/limits";
 import { deleteNote } from "@/lib/services/notes";
 import {
@@ -54,7 +57,7 @@ function rowFor(tenant: Tenant, note: Note, position: number, overrides: Record<
 // Storage reports a policy denial as HTTP 400 with body statusCode "403"; asserting the message
 // proves the policy fired rather than some unrelated (network, MIME) failure.
 function expectRlsDenied(error: unknown) {
-  expect(error).toMatchObject({ statusCode: "403" });
+  expect(error).toMatchObject({ statusCode: String(HTTP_STATUS.FORBIDDEN) });
   expect((error as Error).message).toMatch(/row-level security/);
 }
 
@@ -69,11 +72,11 @@ describe("note_images table", () => {
     expect((await a.client.from("note_images").insert(rowFor(a, note, 1))).error).toBeNull();
 
     const third = await a.client.from("note_images").insert(rowFor(a, note, 2));
-    expect(third.error?.code).toBe("23514");
+    expect(third.error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
 
     const duplicate = await a.client.from("note_images").insert(rowFor(a, note, 0));
-    expect(duplicate.error?.code).toBe("23505");
-    expect(duplicate.error?.message).toContain("note_images_note_position_key");
+    expect(duplicate.error?.code).toBe(PG_ERROR.UNIQUE_VIOLATION);
+    expect(duplicate.error?.message).toContain(DB_CONSTRAINT.NOTE_IMAGES_NOTE_POSITION_KEY);
   });
 
   it("rejects a campaign_id/note_id mismatch (composite FK)", async () => {
@@ -91,8 +94,8 @@ describe("note_images table", () => {
     const result = await a.client
       .from("note_images")
       .insert(rowFor(a, note, 0, { campaign_id: secondCampaignId, path: objectPath(a, secondCampaignId, note.id) }));
-    expect(result.error?.code).toBe("23503");
-    expect(result.error?.message).toContain("note_images_note_same_campaign_fkey");
+    expect(result.error?.code).toBe(PG_ERROR.FOREIGN_KEY_VIOLATION);
+    expect(result.error?.message).toContain(DB_CONSTRAINT.NOTE_IMAGES_NOTE_SAME_CAMPAIGN_FKEY);
   });
 
   it("rejects a path whose segments do not match the row (path-shape check)", async () => {
@@ -100,7 +103,7 @@ describe("note_images table", () => {
     const wrongNote = await a.client
       .from("note_images")
       .insert(rowFor(a, note, 0, { path: objectPath(a, a.campaignId, crypto.randomUUID()) }));
-    expect(wrongNote.error?.code).toBe("23514");
+    expect(wrongNote.error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
 
     const wrongThumb = await a.client.from("note_images").insert(
       rowFor(a, note, 0, {
@@ -109,7 +112,7 @@ describe("note_images table", () => {
         thumb_height: 10,
       }),
     );
-    expect(wrongThumb.error?.code).toBe("23514");
+    expect(wrongThumb.error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
   });
 
   it("rejects inconsistent thumbnail nullability", async () => {
@@ -117,7 +120,7 @@ describe("note_images table", () => {
     const result = await a.client
       .from("note_images")
       .insert(rowFor(a, note, 0, { thumb_path: objectPath(a, a.campaignId, note.id, "-thumb.webp") }));
-    expect(result.error?.code).toBe("23514");
+    expect(result.error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
   });
 
   it("rejects an insert whose path belongs to another user's folder", async () => {
@@ -125,7 +128,7 @@ describe("note_images table", () => {
     const result = await a.client
       .from("note_images")
       .insert(rowFor(a, note, 0, { path: objectPath(b, a.campaignId, note.id) }));
-    expect(result.error?.code).toBe("42501");
+    expect(result.error?.code).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
   });
 
   it("rejects an insert whose thumb_path belongs to another user's folder", async () => {
@@ -137,7 +140,7 @@ describe("note_images table", () => {
         thumb_height: 50,
       }),
     );
-    expect(result.error?.code).toBe("42501");
+    expect(result.error?.code).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
   });
 
   it("allows updating only alt_text", async () => {
@@ -152,13 +155,13 @@ describe("note_images table", () => {
     expect(alt.data).toEqual([{ alt_text: "A map" }]);
 
     const blank = await a.client.from("note_images").update({ alt_text: "   " }).eq("id", id);
-    expect(blank.error?.code).toBe("23514");
+    expect(blank.error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
 
     const path = await a.client
       .from("note_images")
       .update({ path: objectPath(a, a.campaignId, note.id) })
       .eq("id", id);
-    expect(path.error?.code).toBe("42501");
+    expect(path.error?.code).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
   });
 
   it("hides rows from other tenants and cascades when the note is deleted", async () => {
@@ -270,23 +273,23 @@ describe("signed upload behaviour (observed against local Supabase)", () => {
     const note = await createTestNote(a.client, a.campaignId);
     const target = await signed(note);
     const result = await put(target.signedUrl, webpFixture(), "image/webp");
-    expect(result.status).toBe(200);
+    expect(result.status).toBe(HTTP_STATUS.OK);
   });
 
   it("rejects a body over the bucket size limit (HTTP 400, body statusCode 413)", async () => {
     const note = await createTestNote(a.client, a.campaignId);
     const target = await signed(note);
     const result = await put(target.signedUrl, new Uint8Array(MAX_IMAGE_BYTES + 1), "image/webp");
-    expect(result.status).toBe(400);
-    expect(result.body.statusCode).toBe("413");
+    expect(result.status).toBe(HTTP_STATUS.BAD_REQUEST);
+    expect(result.body.statusCode).toBe(String(HTTP_STATUS.PAYLOAD_TOO_LARGE));
   });
 
   it("rejects a disallowed content type (HTTP 400, body statusCode 415)", async () => {
     const note = await createTestNote(a.client, a.campaignId);
     const target = await signed(note);
     const result = await put(target.signedUrl, webpFixture(), "image/png");
-    expect(result.status).toBe(400);
-    expect(result.body.statusCode).toBe("415");
+    expect(result.status).toBe(HTTP_STATUS.BAD_REQUEST);
+    expect(result.body.statusCode).toBe(String(HTTP_STATUS.UNSUPPORTED_MEDIA_TYPE));
   });
 });
 
@@ -309,7 +312,7 @@ describe("note-images service flow", () => {
         body: webpFixture(),
         headers: { "Content-Type": "image/webp" },
       });
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(HTTP_STATUS.OK);
     }
     return prepared.upload;
   }
@@ -342,7 +345,7 @@ describe("note-images service flow", () => {
     const urls = await getImageUrls(a.client, a.campaignId, note.id, images[0]?.id ?? "");
     expect(urls.success).toBe(true);
     if (urls.success) {
-      expect((await fetch(urls.urls.url)).status).toBe(200);
+      expect((await fetch(urls.urls.url)).status).toBe(HTTP_STATUS.OK);
     }
   });
 
@@ -361,7 +364,7 @@ describe("note-images service flow", () => {
       body: jpegFixture(),
       headers: { "Content-Type": "image/jpeg" },
     });
-    expect(put.status).toBe(200);
+    expect(put.status).toBe(HTTP_STATUS.OK);
 
     const committed = await commitImage(a.client, a.userId, a.campaignId, note.id, {
       path: prepared.upload.image.path,

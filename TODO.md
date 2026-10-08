@@ -7,5 +7,4 @@
     - tests/integration/note-images.test.ts
     - src/pages/api/campaigns/[campaignId]/notes/[noteId]/images/[imagesId].ts
     - src/pages/api/campaigns/[campaignId]/notes/[noteId]/images/uploads.ts
-    - tests/integration/note-images.test.ts
 

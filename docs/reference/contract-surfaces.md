@@ -77,7 +77,7 @@ Load-bearing names that downstream changes must not silently rename without upda
 
 ## Shared constants (error dictionaries)
 
-- `HTTP_STATUS` (`src/lib/http-status.ts`), `PG_ERROR` (`src/lib/db-error-codes.ts`: `UNIQUE_VIOLATION` 23505, `FOREIGN_KEY_VIOLATION` 23503, `CHECK_VIOLATION` 23514, `INSUFFICIENT_PRIVILEGE` 42501, `NO_DATA_FOUND` P0002, `INVALID_PARAMETER_VALUE` 22023) and `MESSAGES` (`src/lib/messages.ts`) are the central dictionaries. New code uses them; existing routes still use literals.
+- `HTTP_STATUS` (`src/lib/constants/http-status.ts`), `PG_ERROR` (`src/lib/constants/db-error-codes.ts`: `UNIQUE_VIOLATION` 23505, `FOREIGN_KEY_VIOLATION` 23503, `CHECK_VIOLATION` 23514, `INSUFFICIENT_PRIVILEGE` 42501, `NO_DATA_FOUND` P0002, `INVALID_PARAMETER_VALUE` 22023) `DB_CONSTRAINT` (`src/lib/constants/db-constraints.ts`: Postgres constraint names services and tests match on) and `MESSAGES` (`src/lib/constants/messages.ts`) are the central dictionaries, all under `src/lib/constants/`. New code uses them; existing routes still use literals.
 
 ## Trigger functions
 

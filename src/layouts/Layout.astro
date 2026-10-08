@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
 import { missingConfigs } from "@/lib/config-status";
+import { MESSAGES } from "@/lib/constants/messages";
 
 interface Props {
   title?: string;
@@ -36,7 +37,7 @@ const { title = "10x Astro Starter" } = Astro.props;
     <slot />
     <footer class="bg-[#0a0e1a] px-4 py-6 text-center text-xs text-blue-100/60">
       <a href="/licenses" class="hover:underline">
-        Third-party licences
+        {MESSAGES.FOOTER_LICENSES_LINK}
       </a>
     </footer>
   </body>

@@ -8,7 +8,7 @@ import {
 } from "@/lib/images/errors";
 import { convertHeicToJpeg, looksLikeHeic } from "@/lib/images/heic";
 import { IMAGE_PROCESSING_TIMEOUT_MS, MAX_IMAGES_PER_NOTE } from "@/lib/images/limits";
-import { MESSAGES } from "@/lib/messages";
+import { MESSAGES } from "@/lib/constants/messages";
 import type { HeldImageState, NoteImageView, PendingImage } from "@/types";
 
 type HeldUpdater = (update: (prev: HeldImageState) => HeldImageState) => void;

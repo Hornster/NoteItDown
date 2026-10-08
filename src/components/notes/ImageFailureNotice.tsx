@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { takeImageFailureNotice, type ImageFailureNotice as Notice } from "@/lib/image-failure-notice";
-import { MESSAGES } from "@/lib/messages";
+import { MESSAGES } from "@/lib/constants/messages";
 
 interface Props {
   noteId: string;
@@ -38,7 +38,7 @@ export default function ImageFailureNotice({ noteId }: Props) {
       </div>
       <button
         type="button"
-        aria-label="Dismiss"
+        aria-label={MESSAGES.NOTICE_DISMISS_LABEL}
         onClick={() => {
           setNotice(null);
         }}

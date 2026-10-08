@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MESSAGES } from "@/lib/constants/messages";
 import { ALT_TEXT_MAX_LENGTH, MAX_IMAGE_SIDE, STORED_IMAGE_MIMES } from "@/lib/images/limits";
 import type { CommitImageCommand, PrepareUploadCommand, UpdateImageCommand } from "@/types";
 
@@ -15,7 +16,7 @@ export const prepareUploadSchema = z
 const altTextSchema = z
   .string()
   .trim()
-  .max(ALT_TEXT_MAX_LENGTH, `Alt text must be at most ${ALT_TEXT_MAX_LENGTH} characters.`)
+  .max(ALT_TEXT_MAX_LENGTH, MESSAGES.IMAGE_ALT_TEXT_TOO_LONG)
   .nullable()
   .transform((value) => (value === null || value === "" ? null : value));
 
@@ -38,7 +39,7 @@ export const commitImageSchema = z
       const set = [v.thumb_path, v.thumb_width, v.thumb_height].filter((x) => x !== null).length;
       return set === 0 || set === 3;
     },
-    { message: "Thumbnail path and dimensions must be provided together.", path: ["thumb_path"] },
+    { message: MESSAGES.IMAGE_THUMBNAIL_FIELDS_MISMATCH, path: ["thumb_path"] },
   );
 
 /** PATCH .../images/[imageId] body. */

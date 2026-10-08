@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { ALT_TEXT_MAX_LENGTH, MAX_IMAGE_SIDE } from "@/lib/images/limits";
+
 import { commitImageSchema, prepareUploadSchema, updateImageSchema } from "./note-images";
 
 function validCommit(overrides: Record<string, unknown> = {}): Record<string, unknown> {
@@ -35,9 +37,11 @@ describe("commitImageSchema", () => {
     ).toBe(true);
   });
 
-  it("accepts alt text of 200 chars and rejects 201", () => {
-    expect(commitImageSchema.safeParse(validCommit({ alt_text: "a".repeat(200) })).success).toBe(true);
-    expect(commitImageSchema.safeParse(validCommit({ alt_text: "a".repeat(201) })).success).toBe(false);
+  it("accepts alt text at the length limit and rejects one char more", () => {
+    expect(commitImageSchema.safeParse(validCommit({ alt_text: "a".repeat(ALT_TEXT_MAX_LENGTH) })).success).toBe(true);
+    expect(commitImageSchema.safeParse(validCommit({ alt_text: "a".repeat(ALT_TEXT_MAX_LENGTH + 1) })).success).toBe(
+      false,
+    );
   });
 
   it("turns whitespace-only alt text into null and trims", () => {
@@ -54,8 +58,8 @@ describe("commitImageSchema", () => {
 
   it("rejects non-positive and oversized dimensions", () => {
     expect(commitImageSchema.safeParse(validCommit({ width: 0 })).success).toBe(false);
-    expect(commitImageSchema.safeParse(validCommit({ height: 16_384 })).success).toBe(false);
-    expect(commitImageSchema.safeParse(validCommit({ width: 16_383 })).success).toBe(true);
+    expect(commitImageSchema.safeParse(validCommit({ height: MAX_IMAGE_SIDE + 1 })).success).toBe(false);
+    expect(commitImageSchema.safeParse(validCommit({ width: MAX_IMAGE_SIDE })).success).toBe(true);
   });
 
   it("rejects an unknown key", () => {
@@ -70,9 +74,9 @@ describe("updateImageSchema", () => {
     expect(blank.success && blank.data.alt_text).toBeNull();
   });
 
-  it("enforces the 200 char limit and rejects unknown keys", () => {
-    expect(updateImageSchema.safeParse({ alt_text: "a".repeat(200) }).success).toBe(true);
-    expect(updateImageSchema.safeParse({ alt_text: "a".repeat(201) }).success).toBe(false);
+  it("enforces the alt text length limit and rejects unknown keys", () => {
+    expect(updateImageSchema.safeParse({ alt_text: "a".repeat(ALT_TEXT_MAX_LENGTH) }).success).toBe(true);
+    expect(updateImageSchema.safeParse({ alt_text: "a".repeat(ALT_TEXT_MAX_LENGTH + 1) }).success).toBe(false);
     expect(updateImageSchema.safeParse({ alt_text: null, path: "x" }).success).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { useNoteImages } from "@/components/hooks/useNoteImages";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { MESSAGES, imageAltFallback } from "@/lib/messages";
+import { MESSAGES, imageAltFallback } from "@/lib/constants/messages";
 import { cn } from "@/lib/utils";
 import type { NoteImageView } from "@/types";
 

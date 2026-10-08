@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { writeImageFailureNotice } from "@/lib/image-failure-notice";
 import { applyImageChanges, createImageApi } from "@/lib/images/upload";
-import { HTTP_STATUS } from "@/lib/http-status";
-import { MESSAGES } from "@/lib/messages";
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { MESSAGES } from "@/lib/constants/messages";
 import { writeRelationNotice } from "@/lib/relation-notice";
 import type { ApiError, CreateNoteCommand, ImageChanges, UpdateNoteResponse } from "@/types";
 

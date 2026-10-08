@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NoteImagePicker from "@/components/notes/NoteImagePicker";
 import { useSaveNote } from "@/components/hooks/useSaveNote";
-import { imageLabel, MESSAGES } from "@/lib/messages";
+import { imageLabel, MESSAGES } from "@/lib/constants/messages";
 import { NOTE_CONTENT_MAX_LENGTH, NOTE_NAME_MAX_LENGTH, NOTE_TYPE_NAME_MAX_LENGTH } from "@/lib/schemas/notes";
 import type { HeldImageState, NoteImageView, NoteType } from "@/types";
 
