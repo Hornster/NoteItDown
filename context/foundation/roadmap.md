@@ -9,7 +9,7 @@ main_goal: market-feedback
 top_blocker: capacity
 milestone_id: mvp-memory-map
 milestone_seq: 1
-milestone_status: open
+milestone_status: done
 ---
 
 # Roadmap: NoteItDown
@@ -20,7 +20,7 @@ milestone_status: open
 
 ## Milestone
 
-**M-1: MVP — Notes with Auto-Detected Relations & Memory Map** — Status: open
+**M-1: MVP — Notes with Auto-Detected Relations & Memory Map** — Status: done
 
 - **Intent:** Prove that heuristic, exact-name-match relation detection can keep a TTRPG campaign's web of NPCs, places, quests, and observations navigable — without any manual linking step — by shipping the full note-taking + relation-detection + memory-map loop described in the PRD.
 - **Source materials:** `context/foundation/prd.md` (v1)
@@ -156,8 +156,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-01       | create-notes                      | Add notes to a campaign                                                    | done                  | Archived → `context/archive/2026-09-23-create-notes/`              |
 | S-02       | auto-relations-memory-map         | Auto-detected relations on a memory map, with navigation                   | done                  | Archived → `context/archive/2026-09-26-auto-relations-memory-map/` |
 | S-03       | multi-campaign-support            | Create and switch between multiple campaigns                               | done                  | Archived → `context/archive/2026-09-28-multi-campaign-support/`    |
-| S-04       | note-edit-delete-relation-refresh | Edit/delete a note with visible relation-change notice                     | yes                   | Unblocked — S-02 done                                              |
-| S-05       | note-image-attachment             | Attach up to 2 images to a note                                            | yes                   | Unblocked — S-01 done; nice-to-have                                |
+| S-04       | note-edit-delete-relation-refresh | Edit/delete a note with visible relation-change notice                     | done                   | Unblocked — S-02 done                                              |
+| S-05       | note-image-attachment             | Attach up to 2 images to a note                                            | done                   | Unblocked — S-01 done; nice-to-have                                |
 
 ## Open Roadmap Questions
 
@@ -193,7 +193,7 @@ Cross-cutting concerns surfaced during implementation reviews. Not blockers for 
 
 ## Milestone History
 
-(Empty — this is the first milestone.)
+- **M-1: MVP — Notes with Auto-Detected Relations & Memory Map** (`mvp-memory-map`) — closed 2026-10-08. All six items done (F-01, S-01–S-05): full PRD v1 scope (FR-001–FR-011, US-01) shipped — notes with exact-name auto-relations on a memory map, multi-campaign support, edit/delete with relation-change notice, and up to 2 images per note.
 
 ## Done
 
