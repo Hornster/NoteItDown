@@ -7,6 +7,8 @@ test("a seeded user signs in and lands on their own campaign", async ({ page }) 
   const { email, password, campaignId } = await createTestUser();
 
   await page.goto("/auth/signin");
+  // Wait for the signin island to hydrate; filling the SSR inputs earlier gets wiped by React's controlled state.
+  await page.locator("astro-island:not([ssr])").waitFor();
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
