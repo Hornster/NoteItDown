@@ -1,10 +1,10 @@
 ---
 change_id: e2e-framework-spike
 title: Spike an e2e framework with one sign-in scenario running locally and in CI
-status: impl_reviewed
+status: archived
 created: 2026-10-09
 updated: 2026-10-09
-archived_at: null
+archived_at: 2026-10-09T21:22:00Z
 ---
 
 ## Notes
