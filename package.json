@@ -13,7 +13,8 @@
     "smoke": "node scripts/smoke.mjs",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@eslint/compat": "^2.1.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
     "@types/d3-force": "^3.0.10",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",

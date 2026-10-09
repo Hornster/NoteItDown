@@ -18,7 +18,13 @@ import type { Note } from "@/types";
  * shared with the smoke step that runs right after in CI. Call this once per test file
  * (in beforeAll) per tenant, not once per test.
  */
-export async function createTestUser(): Promise<{ client: SupabaseClient; userId: string; campaignId: string }> {
+export async function createTestUser(): Promise<{
+  client: SupabaseClient;
+  userId: string;
+  campaignId: string;
+  email: string;
+  password: string;
+}> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_KEY;
   if (!supabaseUrl || !supabaseKey) {
@@ -55,7 +61,7 @@ export async function createTestUser(): Promise<{ client: SupabaseClient; userId
     throw new Error("createTestUser: no campaign was auto-created for the new user.");
   }
 
-  return { client, userId, campaignId };
+  return { client, userId, campaignId, email, password };
 }
 
 /** Creates a note through the create_note RPC and returns it. */

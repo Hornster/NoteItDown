@@ -41,7 +41,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 
 | ID   | Change ID                   | Outcome (user can …)                                                                                  | Prerequisites | PRD refs                               | Status   |
 | ---- | --------------------------- | ----------------------------------------------------------------------------------------------------- | ------------- | -------------------------------------- | -------- |
-| F-01 | e2e-framework-spike         | (foundation) an e2e framework runs one sign-in scenario locally and as a CI job on push               | —             | FR-007                                 | planning |
+| F-01 | e2e-framework-spike         | (foundation) an e2e framework runs one sign-in scenario locally and as a CI job on push               | —             | FR-007                                 | in-progress |
 | S-01 | auth-risk-tests             | developer can rely on named auth risk scenarios, each covered by a test that runs in CI               | F-01          | FR-007, FR-008, FR-010                 | proposed |
 | S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | proposed |
 | S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | ready    |
@@ -87,7 +87,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Does the e2e run share the existing smoke job's local-Supabase setup, or need its own CI job? — Owner: `/10x-plan`. Block: no.
 - **Risk:** Biggest unknown in the milestone (PRD FR-007); sequenced first so a misfit surfaces while the integration suite can still serve as the fallback, and kept to one scenario so it doesn't turn into a full e2e suite.
-- **Status:** planning
+- **Status:** in-progress
 
 ## Slices
 

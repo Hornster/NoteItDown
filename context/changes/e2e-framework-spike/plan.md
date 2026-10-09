@@ -301,18 +301,18 @@ Job id rename changes the required-check name (`smoke` → `local-stack`) for an
 
 #### Automated
 
-- [ ] 1.1 Lint passes: `npm run lint`
-- [ ] 1.2 Type check passes: `npx astro check`
-- [ ] 1.3 Unit tests pass: `npm run test:unit`
-- [ ] 1.4 Integration tests still pass with the shared preflight: `npm run test:integration`
-- [ ] 1.5 e2e passes and reports `1 passed`: `npm run build && npm run test:e2e`
-- [ ] 1.6 e2e fails with a Supabase-named preflight error when local Supabase is stopped and when env is missing
+- [x] 1.1 Lint passes: `npm run lint`
+- [x] 1.2 Type check passes: `npx astro check`
+- [x] 1.3 Unit tests pass: `npm run test:unit`
+- [x] 1.4 Integration tests still pass with the shared preflight: `npm run test:integration`
+- [x] 1.5 e2e passes and reports `1 passed`: `npm run build && npm run test:e2e`
+- [x] 1.6 e2e fails with a Supabase-named preflight error when local Supabase is stopped and when env is missing
 
 #### Manual
 
-- [ ] 1.7 Check for an already running dev/preview server on 4321/4322 and ask before stopping it
-- [ ] 1.8 `TESTING.md` reads correctly and every listed command works as described
-- [ ] 1.9 `git status` shows no Playwright output directories as untracked
+- [x] 1.7 Check for an already running dev/preview server on 4321/4322 and ask before stopping it
+- [x] 1.8 `TESTING.md` reads correctly and every listed command works as described
+- [x] 1.9 `git status` shows no Playwright output directories as untracked
 
 ### Phase 2: CI wiring + seam fixes
 
