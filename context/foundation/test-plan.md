@@ -133,7 +133,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 - **Location**: `tests/e2e/**/*.spec.ts`; requires `npx supabase start`, a fresh `npm run build` and `npx playwright install chromium` once.
 - **Run locally**: `npm run test:e2e` — Playwright starts the production preview on port 4322 itself (locally it reuses a server already on 4322, so stop stale servers first). See `TESTING.md`.
-- **Seed** users through the API with `createTestUser` (`tests/integration/helpers.ts`), which returns `email`, `password` and the user's `campaignId`; create the minimum number of users per run — local GoTrue's auth rate limit (30 / 5 min / IP) is shared with integration and smoke in CI.
+- **Seed** users through the API with `createTestUser` (`tests/support/test-user.ts`), which returns `email`, `password` and the user's `campaignId`; create the minimum number of users per run — local GoTrue's auth rate limit (30 / 5 min / IP) is shared with integration and smoke in CI.
 - **Assert a session-only outcome**: the app degrades to "anonymous" (not an error) when Supabase is down, so final assertions must be unreachable for an anonymous visitor — e.g. the exact `/campaigns/<campaignId>` URL of the seeded user plus a visible "Sign out" control. Never assert only something a signed-out visitor also sees.
 - Role/label locators; wait for island hydration (`astro-island:not([ssr])`) before filling a React form, or controlled state wipes the input.
 - The global setup's `assertLocalSupabase("e2e")` preflight fails the run with a Supabase-named error when env is missing or Supabase is unreachable; do not add skips.

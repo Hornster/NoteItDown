@@ -23,6 +23,7 @@ Install Playwright and add exactly one browser scenario — sign in → land on 
 ### Key Discoveries:
 
 - Signin form is a hydrated island (`src/pages/auth/signin.astro:14`, `client:load`) whose client validation can `preventDefault` (`src/components/auth/SignInForm.tsx:36-43`); labels "Email"/"Password", button "Sign in". It is also a native `<form method="POST" action="/api/auth/signin">` (`SignInForm.tsx:43`), so a submit before hydration (or with broken island JS) still signs in. The seed scenario therefore proves a real browser session, not that the island hydrated; island coverage (client validation) is deferred to S-01.
+  - **Addendum (impl-review phase 1, F1):** the "submit before hydration still signs in" premise is wrong in practice. In CI, React hydration mid-fill wiped the email typed into the SSR input, and client validation then blocked the submit (commit 1f94969). Any e2e scenario that fills a hydrated island must first wait for that island to hydrate.
 - Signin → `/dashboard` (`src/pages/api/auth/signin.ts:19`) → `/campaigns/<id>` (`src/pages/dashboard.ts:17-22`); a new user gets a campaign via trigger (`supabase/migrations/20260922120000_campaign_notes_schema.sql:200-202`). `createTestUser` already resolves that campaign id (`tests/integration/helpers.ts:43-`), giving an exact-URL oracle.
 - Session-only control: Topbar "Sign out" button (`src/components/Topbar.astro:49-51`).
 - Cookies use `secure: import.meta.env.PROD` (`src/lib/supabase.ts:12`): preview sets `Secure` cookies on `http://localhost`; Chromium accepts this — keep the spike Chromium-only.
@@ -93,6 +94,8 @@ Add Playwright, config, shared preflight, the seed scenario and docs so `npm run
 - `forbidOnly: !!process.env.CI`, `retries: 0`, `workers: 1`, `reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list"`.
 - `use: { baseURL: "http://localhost:4322", trace: "retain-on-failure", screenshot: "only-on-failure" }`.
 - `webServer: { command: "npm run preview -- --port 4322", url: "http://localhost:4322", reuseExistingServer: !process.env.CI, timeout: 60_000 }`.
+- **Addendum (impl-review phase 1, F2)**: the implemented `webServer` also passes `--ignore-lock` and sets `env: { ASTRO_PREVIEW_BACKGROUND: "1" }`. `--ignore-lock` is needed because astro tracks one preview per project, and this one must run alongside a preview on 4321. The env var stops astro from auto-backgrounding the preview when it detects an agent (`astro/dist/cli/preview/index.js:45`), so Playwright owns a foreground process.
+- **Addendum (impl-review phase 1, F3)**: `createTestUser` now lives in `tests/support/test-user.ts`, shared by integration and e2e. `tests/integration/helpers.ts` re-exports it.
 - Global setup file: `tests/e2e/global-setup.ts`.
 
 #### 5. Seed scenario
@@ -102,6 +105,8 @@ Add Playwright, config, shared preflight, the seed scenario and docs so `npm run
 **Intent**: Seed one user with `createTestUser`, then in the browser: open `/auth/signin`, fill the form by label, submit via the "Sign in" button, and assert outcome-only facts reachable only with a session. The scenario does not wait for or assert hydration (see Key Discoveries). Current UI labels are the recorded baseline (no PRD wording exists to pin; research §Oracle).
 
 **Contract**: Final assertions: `page` URL equals `/campaigns/<campaignId returned by createTestUser>` (exact, not a prefix), and `getByRole("button", { name: /sign out/i })` is visible. Role/label locators only; no CSS selectors; no asserting app message strings.
+
+**Addendum (impl-review phase 1, F1)**: one accepted exception to "no CSS selectors": before filling, the spec waits for the signin island to hydrate, using `page.locator("astro-island:not([ssr])", { has: page.getByRole("button", { name: "Sign in" }) })`. This is a hydration wait, not an assertion. The `has:` filter ties it to the form's own island.
 
 #### 6. Ignore Playwright output
 
