@@ -301,26 +301,26 @@ Job id rename changes the required-check name (`smoke` → `local-stack`) for an
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Type check passes: `npx astro check`
-- [x] 1.3 Unit tests pass: `npm run test:unit`
-- [x] 1.4 Integration tests still pass with the shared preflight: `npm run test:integration`
-- [x] 1.5 e2e passes and reports `1 passed`: `npm run build && npm run test:e2e`
-- [x] 1.6 e2e fails with a Supabase-named preflight error when local Supabase is stopped and when env is missing
+- [x] 1.1 Lint passes: `npm run lint` — 1b5caf4
+- [x] 1.2 Type check passes: `npx astro check` — 1b5caf4
+- [x] 1.3 Unit tests pass: `npm run test:unit` — 1b5caf4
+- [x] 1.4 Integration tests still pass with the shared preflight: `npm run test:integration` — 1b5caf4
+- [x] 1.5 e2e passes and reports `1 passed`: `npm run build && npm run test:e2e` — 1b5caf4
+- [x] 1.6 e2e fails with a Supabase-named preflight error when local Supabase is stopped and when env is missing — 1b5caf4
 
 #### Manual
 
-- [x] 1.7 Check for an already running dev/preview server on 4321/4322 and ask before stopping it
-- [x] 1.8 `TESTING.md` reads correctly and every listed command works as described
-- [x] 1.9 `git status` shows no Playwright output directories as untracked
+- [x] 1.7 Check for an already running dev/preview server on 4321/4322 and ask before stopping it — 1b5caf4
+- [x] 1.8 `TESTING.md` reads correctly and every listed command works as described — 1b5caf4
+- [x] 1.9 `git status` shows no Playwright output directories as untracked — 1b5caf4
 
 ### Phase 2: CI wiring + seam fixes
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Workflow YAML parses
-- [ ] 2.3 Smoke passes locally against preview with the tightened assertion
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Workflow YAML parses
+- [x] 2.3 Smoke passes locally against preview with the tightened assertion
 - [ ] 2.4 After the user-approved push to `main`, CI is green with `ci`, `local-stack`, `deploy` and e2e shows `1 passed`
 
 #### Manual
