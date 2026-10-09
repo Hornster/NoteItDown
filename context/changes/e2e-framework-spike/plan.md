@@ -323,10 +323,10 @@ Job id rename changes the required-check name (`smoke` → `local-stack`) for an
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint` — 1f94969
-- [x] 2.2 Workflow YAML parses — 1f94969
-- [x] 2.3 Smoke passes locally against preview with the tightened assertion — 1f94969
-- [x] 2.4 After the user-approved push to `main`, CI is green with `ci`, `local-stack`, `deploy` and e2e shows `1 passed` — 1f94969
+- [x] 2.1 Lint passes: `npm run lint` — 22ce72a
+- [x] 2.2 Workflow YAML parses — 22ce72a
+- [x] 2.3 Smoke passes locally against preview with the tightened assertion — 22ce72a
+- [x] 2.4 After the user-approved push to `main`, CI is green with `ci`, `local-stack`, `deploy` and e2e shows `1 passed` — 1f94969 (green run 37985564527; first push 37984841694 red on hydration race)
 
 #### Manual
 
