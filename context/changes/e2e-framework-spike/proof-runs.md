@@ -28,3 +28,4 @@ Date: 2026-10-09. Base: `main` @ `1f94969`.
 - The `if: failure()` upload step ran in all five red runs, so each has a `playwright-report` artifact. Only P2 has a test-level trace, because P3–P6 fail before any test executes.
 - Supabase image pulls hit `toomanyrequests: Rate exceeded` from `public.ecr.aws` in several runs when six jobs started at once. The CLI retried and every stack came up. This only matters if many CI runs start in parallel.
 - No GoTrue 429s were observed.
+- **P2 recheck after da390fe** (upload condition changed to `failure() && steps.e2e.outcome == 'failure'`): branch `e2e-proof/2-wrong-url-recheck` (same change as P2, based on `main` @ `da390fe`, since deleted). It went red at `Run npm run test:e2e` and the upload step ran (`playwright-report` artifact, 1.1 MB). Run: https://github.com/Hornster/NoteItDown/actions/runs/37992166514

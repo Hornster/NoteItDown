@@ -345,5 +345,5 @@ Job id rename changes the required-check name (`smoke` → `local-stack`) for an
 #### Manual
 
 - [x] 3.4 User approves each proof-branch push — 1890c72
-- [x] 3.5 User opens the P2 trace artifact with `npx playwright show-trace` — 1890c72
+- [x] 3.5 User opens the P2 trace artifact with `npx playwright show-trace` (trace opened by user, 2026-10-09) — 1890c72
 - [x] 3.6 CLAUDE.md, TESTING.md and test-plan read consistently — 1890c72
