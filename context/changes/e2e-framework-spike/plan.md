@@ -318,27 +318,27 @@ Job id rename changes the required-check name (`smoke` → `local-stack`) for an
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Workflow YAML parses
-- [x] 2.3 Smoke passes locally against preview with the tightened assertion
-- [ ] 2.4 After the user-approved push to `main`, CI is green with `ci`, `local-stack`, `deploy` and e2e shows `1 passed`
+- [x] 2.1 Lint passes: `npm run lint` — 1f94969
+- [x] 2.2 Workflow YAML parses — 1f94969
+- [x] 2.3 Smoke passes locally against preview with the tightened assertion — 1f94969
+- [x] 2.4 After the user-approved push to `main`, CI is green with `ci`, `local-stack`, `deploy` and e2e shows `1 passed` — 1f94969
 
 #### Manual
 
-- [ ] 2.5 User confirms push to `main` before it happens
-- [ ] 2.6 "Run workflow" button for CI appears in the GitHub Actions UI
-- [ ] 2.7 Branch protection required check updated from `smoke` to `local-stack` if present
+- [x] 2.5 User confirms push to `main` before it happens — 1f94969
+- [x] 2.6 "Run workflow" button for CI appears in the GitHub Actions UI — 1f94969
+- [x] 2.7 Branch protection required check updated from `smoke` to `local-stack` if present (waived: no branch protection available on private free-plan repo, checked via gh api 2026-10-09) — 1f94969
 
 ### Phase 3: CI proof runs + docs
 
 #### Automated
 
-- [ ] 3.1 `proof-runs.md` lists P1–P6 with run URLs and observed results matching expected
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 No `e2e-proof/*` branches remain on origin
+- [x] 3.1 `proof-runs.md` lists P1–P6 with run URLs and observed results matching expected
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 No `e2e-proof/*` branches remain on origin
 
 #### Manual
 
-- [ ] 3.4 User approves each proof-branch push
-- [ ] 3.5 User opens the P2 trace artifact with `npx playwright show-trace`
-- [ ] 3.6 CLAUDE.md, TESTING.md and test-plan read consistently
+- [x] 3.4 User approves each proof-branch push
+- [x] 3.5 User opens the P2 trace artifact with `npx playwright show-trace`
+- [x] 3.6 CLAUDE.md, TESTING.md and test-plan read consistently

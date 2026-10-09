@@ -38,9 +38,12 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `npm run smoke` — dependency-free auth-flow smoke test (`scripts/smoke.mjs`) against a running server, `BASE_URL` env (default `http://localhost:4321`). Run after dependency upgrades; CI runs it against the production preview with a local Supabase.
 - `npm run test:unit` — Vitest unit suite (`src/**/*.test.ts`). No external services required.
 - `npm run test:integration` — Vitest integration suite (`tests/integration/**/*.test.ts`). Requires local Supabase running (`npx supabase start`); refuses to run against a non-local `SUPABASE_URL` and fails loudly (not silently) if Supabase isn't reachable.
-- `npm test` — runs both suites.
+- `npm test` — runs both Vitest suites (not e2e).
+- `npm run test:e2e` — Playwright (Chromium) browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself. Requires local Supabase and a fresh `npm run build`; first run needs `npx playwright install chromium`. Fails loudly (preflight error naming Supabase) when Supabase or env is missing.
 
-`scripts/smoke.mjs` remains a smoke check only, not a substitute for the Vitest suites above (README says so explicitly). There is still no e2e test framework.
+Full testing command reference with prerequisites: `TESTING.md`.
+
+`scripts/smoke.mjs` remains a smoke check only, not a substitute for the Vitest suites or the Playwright e2e scenarios above (README says so explicitly). There is no e2e coverage beyond the sign-in seed scenario yet.
 
 Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
 
@@ -86,9 +89,10 @@ Integrations: `@astrojs/react`, `@astrojs/cloudflare`, `@astrojs/sitemap`.
 
 ## CI
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs two jobs on every push and PR to master:
-- `ci` — lint, `npx astro sync`, `npx astro check`, then build. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets.
-- `smoke` — starts local Supabase, builds, runs `npm run preview` on port 4321, then `npm run smoke` against it. No secrets needed.
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR to `main`, and on demand via `workflow_dispatch` (Actions → CI → Run workflow, or `gh workflow run ci.yml --ref <branch>`):
+- `ci` — `npx astro sync`, lint, unit tests, `npx astro check`, then build. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets.
+- `local-stack` — starts local Supabase (CLI pinned), runs integration tests, builds, runs `npm run test:e2e` (uploads a `playwright-report` artifact with traces on failure), then `npm run smoke` against a preview on port 4321. No secrets needed.
+- `deploy` — `npx wrangler deploy`, only on push to `main` after `ci` and `local-stack` pass; dispatched runs never deploy.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 

@@ -67,7 +67,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|------------|-----------------|---------------|------------|--------|---------------|
-| 1 | E2E foundation | Prove one sign-in e2e scenario runs on local Supabase and fails loudly in CI | #6, #4 (seed) | e2e + CI job | change opened | context/changes/e2e-framework-spike/ |
+| 1 | E2E foundation | Prove one sign-in e2e scenario runs on local Supabase and fails loudly in CI | #6, #4 (seed) | e2e + CI job | implemented (CI proof runs P1–P6 in change folder `proof-runs.md`) | context/changes/e2e-framework-spike/ |
 | 2 | Access control & isolation | Prove cross-user reads/writes are denied and RLS holds for existing rows; pin note text and relation behavior | #1, #3, #5 | integration (policy matrix) + targeted e2e | not started | — |
 | 3 | Auth & route guard | Prove every protected route rejects anonymous and signed-out users; pin the auth flow before S-04/S-05 edit it | #2, #4 | HTTP-level integration + e2e | not started | — |
 | 4 | Per-file feedback gate | Run lint + related unit tests for each edited file within ~10 s | cross-cutting | post-edit hook | not started | — |
@@ -88,11 +88,11 @@ Test-base profile: **sparse** — Vitest configured with `unit` and `integration
 | unit | Vitest (`unit` project) | 5.0.1 | `npm run test:unit`; no external services |
 | integration | Vitest (`integration` project) | 5.0.1 | `npm run test:integration`; local Supabase only, files run serially |
 | smoke | `scripts/smoke.mjs` | n/a | dependency-free auth smoke against a running server; not a test suite |
-| e2e | none yet — see Phase 1 | — | candidate: Playwright (current docs v1.63, checked: 2026-10-09); choice confirmed by Phase 1 research |
+| e2e | Playwright (`@playwright/test`, Chromium only) | 1.64.0 | `npm run test:e2e`; confirmed by Phase 1 (`e2e-framework-spike`); runs in CI `local-stack` job against local Supabase; `retries: 0`, `forbidOnly` in CI; checked: 2026-10-09 |
 | accessibility | none — out of scope | — | palette contrast is checked manually per prd-v2 |
 
 **Stack grounding tools (current session):**
-- Docs: Context7 — resolved Playwright (`/microsoft/playwright`, versions through v1.63); setup details deferred to Phase 1 research; checked: 2026-10-09
+- Docs: Context7 — resolved Playwright (`/microsoft/playwright`, versions through v1.63); installed 1.64.0 in Phase 1; checked: 2026-10-09
 - Search: Exa.ai — available, not used (no discovery question at plan level); checked: 2026-10-09
 - Runtime/browser: Claude in Chrome — available for manual verification only, not a test layer; checked: 2026-10-09
 - Provider/platform: none (no GitHub, Supabase or Cloudflare MCP in this session); checked: 2026-10-09
@@ -107,8 +107,8 @@ phase lands; before that, the gate is `planned`.
 |------|-------|-----------|---------|
 | lint + `astro check` + build | local + CI (`ci` job) | required (wired) | syntactic / type drift |
 | unit tests | local + CI (`ci` job) | required (wired) | logic regressions in `src/lib` |
-| integration tests | CI (`smoke` job, local Supabase) | required (wired); extended by §3 Phase 2–3 | service, DB function, RLS and route regressions |
-| e2e on risky flows | CI on push | required after §3 Phase 1 | broken auth / isolation user paths |
+| integration tests | CI (`local-stack` job, local Supabase) | required (wired); extended by §3 Phase 2–3 | service, DB function, RLS and route regressions |
+| e2e on risky flows | CI on push (`local-stack` job) | required (wired by §3 Phase 1); scenarios added by §3 Phase 2–3 | broken auth / isolation user paths |
 | per-file hook (lint + related unit tests) | local (agent / editor loop) | recommended after §3 Phase 4 | regressions at edit time |
 
 ## 6. Cookbook Patterns
@@ -131,7 +131,13 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.3 Adding an e2e test
 
-- TBD — see §3 Phase 1 for the sign-in scenario, local-Supabase setup and CI wiring.
+- **Location**: `tests/e2e/**/*.spec.ts`; requires `npx supabase start`, a fresh `npm run build` and `npx playwright install chromium` once.
+- **Run locally**: `npm run test:e2e` — Playwright starts the production preview on port 4322 itself (locally it reuses a server already on 4322, so stop stale servers first). See `TESTING.md`.
+- **Seed** users through the API with `createTestUser` (`tests/integration/helpers.ts`), which returns `email`, `password` and the user's `campaignId`; create the minimum number of users per run — local GoTrue's auth rate limit (30 / 5 min / IP) is shared with integration and smoke in CI.
+- **Assert a session-only outcome**: the app degrades to "anonymous" (not an error) when Supabase is down, so final assertions must be unreachable for an anonymous visitor — e.g. the exact `/campaigns/<campaignId>` URL of the seeded user plus a visible "Sign out" control. Never assert only something a signed-out visitor also sees.
+- Role/label locators; wait for island hydration (`astro-island:not([ssr])`) before filling a React form, or controlled state wipes the input.
+- The global setup's `assertLocalSupabase("e2e")` preflight fails the run with a Supabase-named error when env is missing or Supabase is unreachable; do not add skips.
+- CI failure: download the `playwright-report` artifact and open `trace.zip` with `npx playwright show-trace`.
 
 ### 6.4 Adding a test for a new protected route or API endpoint
 
