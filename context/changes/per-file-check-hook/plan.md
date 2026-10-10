@@ -315,30 +315,30 @@ Per-edit budget ~10 s (roadmap S-03 risk: a slow hook gets disabled). Measured: 
 
 #### Automated
 
-- [x] 1.1 `npx vitest run --project hooks` passes with all per-edit cases
-- [x] 1.2 `npm run lint` passes (including the new test file)
-- [x] 1.3 `npm run test:unit` still passes unchanged
-- [x] 1.4 `git check-ignore .claude/settings.json .claude/hooks/lint-edited-file.sh .claude/hooks/related-tests.sh` prints nothing
+- [x] 1.1 `npx vitest run --project hooks` passes with all per-edit cases — afc2a1c
+- [x] 1.2 `npm run lint` passes (including the new test file) — afc2a1c
+- [x] 1.3 `npm run test:unit` still passes unchanged — afc2a1c
+- [x] 1.4 `git check-ignore .claude/settings.json .claude/hooks/lint-edited-file.sh .claude/hooks/related-tests.sh` prints nothing — afc2a1c
 
 #### Manual
 
-- [x] 1.5 After restarting the Claude Code session, `/hooks` lists both PostToolUse hooks from `.claude/settings.json`
-- [x] 1.6 Asking the agent to add an unused variable to a `src/lib/*.ts` file makes it receive the ESLint error and fix it in the same turn
-- [x] 1.7 Asking the agent to break an assertion-relevant line in `src/lib/relation-notice.ts` makes it receive the failing related test
+- [x] 1.5 After restarting the Claude Code session, `/hooks` lists both PostToolUse hooks from `.claude/settings.json` — afc2a1c
+- [x] 1.6 Asking the agent to add an unused variable to a `src/lib/*.ts` file makes it receive the ESLint error and fix it in the same turn — afc2a1c
+- [x] 1.7 Asking the agent to break an assertion-relevant line in `src/lib/relation-notice.ts` makes it receive the failing related test — afc2a1c
 
 ### Phase 2: End-of-turn sweep
 
 #### Automated
 
-- [ ] 2.1 `npx vitest run --project hooks` passes with per-edit and sweep cases
-- [ ] 2.2 Stop script exits 0 on the clean real-repo baseline payload
-- [ ] 2.3 `npm run lint` passes
+- [x] 2.1 `npx vitest run --project hooks` passes with per-edit and sweep cases
+- [x] 2.2 Stop script exits 0 on the clean real-repo baseline payload
+- [x] 2.3 `npm run lint` passes
 
 #### Manual
 
-- [ ] 2.4 After restarting the session, `/hooks` lists the Stop hook
-- [ ] 2.5 Asking the agent to rewrite a `.ts` file via a Bash heredoc with an unused variable makes the Stop hook send it back once; it fixes the file and the turn ends
-- [ ] 2.6 A pure Q&A turn (clean tree, or a dirty tree unchanged since the last green sweep) ends with no visible hook delay or output
+- [x] 2.4 After restarting the session, `/hooks` lists the Stop hook
+- [x] 2.5 Asking the agent to rewrite a `.ts` file via a Bash heredoc with an unused variable makes the Stop hook send it back once; it fixes the file and the turn ends
+- [x] 2.6 A pure Q&A turn (clean tree, or a dirty tree unchanged since the last green sweep) ends with no visible hook delay or output
 
 ### Phase 3: Wiring, budget check and docs
 

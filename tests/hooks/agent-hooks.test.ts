@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -26,7 +26,8 @@ interface Sandbox {
 }
 
 const stubScript = (tool: string) => `#!/usr/bin/env bash
-# Stub ${tool}: fails when any file argument contains the marker.
+# Stub ${tool}: records the invocation, fails when any file argument contains the marker.
+echo "${tool} $*" >>"$TMPDIR/stub-calls.log"
 for a in "$@"; do
   if [ -f "$a" ] && grep -q "${MARKER}" "$a"; then
     echo "stub ${tool}: marker found in $a"
@@ -195,5 +196,154 @@ describe.each(PER_EDIT)("$script", ({ script, header, coversAstro }) => {
     const res = runHook(script, editPayload(file, sandbox.bare), sandbox.bare);
     expect(res.code).toBe(2);
     expect(res.stderr).toContain(header);
+  });
+});
+
+describe("end-of-turn.sh", () => {
+  const SCRIPT = "end-of-turn.sh";
+  let counter = 0;
+
+  /** Fresh git repo (node_modules ignored) with stubs, one clean file committed, and its own session id. */
+  function sweepRepo(): { dir: string; sid: string } {
+    counter += 1;
+    const dir = path.join(sandbox.root, `sweep-${String(counter)}`);
+    mkdirSync(path.join(dir, "src"), { recursive: true });
+    mkdirSync(path.join(dir, "node_modules/.bin"), { recursive: true });
+    writeFileSync(path.join(dir, ".gitignore"), "node_modules/\n");
+    writeFileSync(path.join(dir, "package.json"), JSON.stringify({ name: "sweep", private: true }));
+    writeFileSync(path.join(dir, "src/clean.ts"), "export const ok = 1;\n");
+    for (const tool of ["eslint", "vitest"]) {
+      const file = path.join(dir, "node_modules/.bin", tool);
+      writeFileSync(file, stubScript(tool));
+      chmodSync(file, 0o755);
+    }
+    git(dir, "init", "-q", "-b", "main");
+    git(dir, "add", "-A");
+    git(dir, "commit", "-q", "-m", "baseline");
+    return { dir, sid: `sweep-session-${String(counter)}` };
+  }
+
+  const stopPayload = (cwd: string, sid: string, extra: Record<string, unknown> = {}) => ({
+    session_id: sid,
+    cwd,
+    hook_event_name: "Stop",
+    stop_hook_active: false,
+    ...extra,
+  });
+
+  const stubLog = () => path.join(sandbox.scratch, "stub-calls.log");
+  const resetStubLog = () => {
+    rmSync(stubLog(), { force: true });
+  };
+  const stubCalls = () => (existsSync(stubLog()) ? readFileSync(stubLog(), "utf8") : "");
+  const rootsFile = (sid: string) => path.join(sandbox.scratch, "claude-hooks", `${sid}.roots`);
+  const register = (sid: string, root: string) => {
+    mkdirSync(path.join(sandbox.scratch, "claude-hooks"), { recursive: true });
+    writeFileSync(rootsFile(sid), `${root}\n`);
+  };
+
+  it("sweeps an untracked file written without a per-edit payload", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(2);
+    expect(res.stderr).toContain("ESLint reported errors");
+    expect(res.stderr).toContain(dir);
+    expect(res.stderr).toContain("src/new.ts");
+  });
+
+  it("sweeps a modified tracked file", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/clean.ts"), `export const ok = 2; // ${MARKER}\n`);
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(2);
+    expect(res.stderr).toContain("src/clean.ts");
+  });
+
+  it("exits 0 for a clean changed file", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/clean.ts"), "export const ok = 3;\n");
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(0);
+    expect(res.stderr).toBe("");
+  });
+
+  it("reports a failing related-test marker", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.stderr).toContain("Related unit tests failed");
+    expect(res.stderr).toContain("stub vitest: marker found");
+  });
+
+  it("skips unchanged dirty-but-green trees via the fingerprint, and re-runs after a change", () => {
+    const { dir, sid } = sweepRepo();
+    const file = path.join(dir, "src/clean.ts");
+    writeFileSync(file, "export const ok = 4;\n");
+    resetStubLog();
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(0);
+    expect(stubCalls()).toContain("eslint");
+    resetStubLog();
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(0);
+    expect(stubCalls()).toBe("");
+    writeFileSync(file, "export const ok = 5;\n");
+    resetStubLog();
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(0);
+    expect(stubCalls()).toContain("eslint");
+  });
+
+  it("does not store a fingerprint after a red sweep", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(2);
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(2);
+  });
+
+  it("empties the session roots file after a green sweep", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/clean.ts"), "export const ok = 6;\n");
+    register(sid, dir);
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(0);
+    expect(readFileSync(rootsFile(sid), "utf8")).toBe("");
+  });
+
+  it("exits 0 without running any tool when nothing changed", () => {
+    const { dir, sid } = sweepRepo();
+    resetStubLog();
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(0);
+    expect(res.stderr).toBe("");
+    expect(stubCalls()).toBe("");
+  });
+
+  it("does nothing when stop_hook_active is true", () => {
+    const { dir, sid } = sweepRepo();
+    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    const res = runHook(SCRIPT, stopPayload(dir, sid, { stop_hook_active: true }), dir);
+    expect(res.code).toBe(0);
+    expect(res.stderr).toBe("");
+  });
+
+  it("sweeps a second checkout registered in the roots file", () => {
+    const { dir, sid } = sweepRepo();
+    const sibling = sweepRepo().dir;
+    writeFileSync(path.join(sibling, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    register(sid, sibling);
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(2);
+    expect(res.stderr).toContain(sibling);
+  });
+
+  it("ignores $CLAUDE_PROJECT_DIR and sweeps the session cwd's checkout", () => {
+    const { dir, sid } = sweepRepo();
+    const elsewhere = sweepRepo().dir;
+    writeFileSync(path.join(elsewhere, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    const res = spawnSync(path.join(HOOKS_DIR, SCRIPT), [], {
+      cwd: dir,
+      input: JSON.stringify(stopPayload(dir, sid)),
+      encoding: "utf8",
+      env: { ...scriptEnv(), CLAUDE_PROJECT_DIR: elsewhere },
+    });
+    expect(res.status).toBe(0);
   });
 });
