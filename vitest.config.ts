@@ -34,6 +34,13 @@ export default defineConfig({
           fileParallelism: false,
         },
       },
+      {
+        extends: true,
+        test: {
+          name: "hooks",
+          include: ["tests/hooks/**/*.test.ts"],
+        },
+      },
     ],
   },
 });
