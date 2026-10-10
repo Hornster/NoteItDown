@@ -9,7 +9,12 @@
 
 - `npm run test:unit` runs the unit suite (`src/**/*.test.ts`) with no external services.
 - `npm run test:integration` runs the integration suite (`tests/integration/**/*.test.ts`) against local Supabase and fails loudly if it is not reachable.
-- `npm test` runs both Vitest suites (it does not include e2e).
+- `npm test` runs every Vitest project (unit, hooks, integration); it does not include e2e.
+
+## Agent hooks proof (Vitest)
+
+- `npm run test:hooks` runs `tests/hooks/agent-hooks.test.ts` (Vitest project `hooks`), which executes the real scripts in `.claude/hooks/` (per-edit lint, related tests, end-of-turn sweep).
+- It runs them in a throwaway temp git repo with stubbed `node_modules/.bin/eslint` and `vitest`, so it needs no Supabase or real lint run. Requires `jq` and git on `PATH`.
 
 ## End-to-end (Playwright)
 

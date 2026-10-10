@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "smoke": "node scripts/smoke.mjs",
     "test:unit": "vitest run --project unit",
+    "test:hooks": "vitest run --project hooks",
     "test:integration": "vitest run --project integration",
     "test": "vitest run",
     "test:e2e": "playwright test"

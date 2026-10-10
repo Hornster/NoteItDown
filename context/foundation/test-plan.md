@@ -70,7 +70,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 1 | E2E foundation | Prove one sign-in e2e scenario runs on local Supabase and fails loudly in CI | #6, #4 (seed) | e2e + CI job | implemented (CI proof runs P1–P6 in change folder `proof-runs.md`) | context/changes/e2e-framework-spike/ |
 | 2 | Access control & isolation | Prove cross-user reads/writes are denied and RLS holds for existing rows; pin note text and relation behavior | #1, #3, #5 | integration (policy matrix) + targeted e2e | not started | — |
 | 3 | Auth & route guard | Prove every protected route rejects anonymous and signed-out users; pin the auth flow before S-04/S-05 edit it | #2, #4 | HTTP-level integration + e2e | not started | — |
-| 4 | Per-file feedback gate | Run lint + related unit tests for each edited file within ~10 s | cross-cutting | post-edit hook | not started | — |
+| 4 | Per-file feedback gate | Run lint + related unit tests for each edited file within ~10 s | cross-cutting | post-edit hook | implemented (hooks + proof wired in `ci`) | context/changes/per-file-check-hook/ |
 
 Phase 2 maps to roadmap S-02 (`notes-relations-risk-tests`), Phase 3 to S-01 (`auth-risk-tests`), Phase 4 to S-03 (`per-file-check-hook`). Phases 2 and 3 depend only on Phase 1; Phase 2 is ordered first because data isolation is the top user concern (interview Q1).
 
@@ -109,7 +109,7 @@ phase lands; before that, the gate is `planned`.
 | unit tests | local + CI (`ci` job) | required (wired) | logic regressions in `src/lib` |
 | integration tests | CI (`local-stack` job, local Supabase) | required (wired); extended by §3 Phase 2–3 | service, DB function, RLS and route regressions |
 | e2e on risky flows | CI on push (`local-stack` job) | required (wired by §3 Phase 1); scenarios added by §3 Phase 2–3 | broken auth / isolation user paths |
-| per-file hook (lint + related unit tests) | local (agent / editor loop) | recommended after §3 Phase 4 | regressions at edit time |
+| per-file hook (lint + related unit tests) | local (agent / editor loop) | recommended (wired by §3 Phase 4; proof `npm run test:hooks` in `ci` job) | regressions at edit time |
 
 ## 6. Cookbook Patterns
 
@@ -121,7 +121,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 - **Location**: next to the unit under test, `src/**/<module>.test.ts`.
 - **Run locally**: `npm run test:unit`.
-- Pattern notes: TBD — see §3 Phase 4 (related-test resolution for the per-file hook).
+- Pattern notes: the per-file hook resolves related tests through Vitest's import graph (`vitest related`), so a new unit test is picked up for a file as long as it imports that file.
 
 ### 6.2 Adding an integration test
 

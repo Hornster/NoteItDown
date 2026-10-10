@@ -330,28 +330,28 @@ Per-edit budget ~10 s (roadmap S-03 risk: a slow hook gets disabled). Measured: 
 
 #### Automated
 
-- [x] 2.1 `npx vitest run --project hooks` passes with per-edit and sweep cases
-- [x] 2.2 Stop script exits 0 on the clean real-repo baseline payload
-- [x] 2.3 `npm run lint` passes
+- [x] 2.1 `npx vitest run --project hooks` passes with per-edit and sweep cases — dc9fb26
+- [x] 2.2 Stop script exits 0 on the clean real-repo baseline payload — dc9fb26
+- [x] 2.3 `npm run lint` passes — dc9fb26
 
 #### Manual
 
-- [x] 2.4 After restarting the session, `/hooks` lists the Stop hook
-- [x] 2.5 Asking the agent to rewrite a `.ts` file via a Bash heredoc with an unused variable makes the Stop hook send it back once; it fixes the file and the turn ends
-- [x] 2.6 A pure Q&A turn (clean tree, or a dirty tree unchanged since the last green sweep) ends with no visible hook delay or output
+- [x] 2.4 After restarting the session, `/hooks` lists the Stop hook — dc9fb26
+- [x] 2.5 Asking the agent to rewrite a `.ts` file via a Bash heredoc with an unused variable makes the Stop hook send it back once; it fixes the file and the turn ends — dc9fb26
+- [x] 2.6 A pure Q&A turn (clean tree, or a dirty tree unchanged since the last green sweep) ends with no visible hook delay or output — dc9fb26
 
 ### Phase 3: Wiring, budget check and docs
 
 #### Automated
 
-- [ ] 3.1 `npm run test:hooks` passes
-- [ ] 3.2 `npm test` includes the `hooks` project (output lists it) and passes for unit + hooks (integration requires local Supabase)
-- [ ] 3.3 `npm run lint` passes
-- [ ] 3.4 Removing the `stop_hook_active` guard turns `npm run test:hooks` red; restoring turns it green
-- [ ] 3.5 Per-edit lint + related-tests on a real `src/lib/*.ts` file complete in ≤ 10 s combined
-- [ ] 3.6 `git status` shows only the intended files changed
+- [x] 3.1 `npm run test:hooks` passes
+- [x] 3.2 `npm test` includes the `hooks` project (output lists it) and passes for unit + hooks (integration requires local Supabase)
+- [x] 3.3 `npm run lint` passes
+- [x] 3.4 Removing the `stop_hook_active` guard turns `npm run test:hooks` red; restoring turns it green
+- [x] 3.5 Per-edit lint + related-tests on a real `src/lib/*.ts` file complete in ≤ 10 s combined
+- [x] 3.6 `git status` shows only the intended files changed
 
 #### Manual
 
 - [ ] 3.7 The CI `ci` job on the pushed branch shows the `npm run test:hooks` step passing
-- [ ] 3.8 CLAUDE.md, TESTING.md and test-plan updates read correctly
+- [x] 3.8 CLAUDE.md, TESTING.md and test-plan updates read correctly
