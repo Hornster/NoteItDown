@@ -344,14 +344,14 @@ Per-edit budget ~10 s (roadmap S-03 risk: a slow hook gets disabled). Measured: 
 
 #### Automated
 
-- [x] 3.1 `npm run test:hooks` passes
-- [x] 3.2 `npm test` includes the `hooks` project (output lists it) and passes for unit + hooks (integration requires local Supabase)
-- [x] 3.3 `npm run lint` passes
-- [x] 3.4 Removing the `stop_hook_active` guard turns `npm run test:hooks` red; restoring turns it green
-- [x] 3.5 Per-edit lint + related-tests on a real `src/lib/*.ts` file complete in ≤ 10 s combined
-- [x] 3.6 `git status` shows only the intended files changed
+- [x] 3.1 `npm run test:hooks` passes — 7521a71
+- [x] 3.2 `npm test` includes the `hooks` project (output lists it) and passes for unit + hooks (integration requires local Supabase) — 7521a71
+- [x] 3.3 `npm run lint` passes — 7521a71
+- [x] 3.4 Removing the `stop_hook_active` guard turns `npm run test:hooks` red; restoring turns it green — 7521a71
+- [x] 3.5 Per-edit lint + related-tests on a real `src/lib/*.ts` file complete in ≤ 10 s combined — 7521a71
+- [x] 3.6 `git status` shows only the intended files changed — 7521a71
 
 #### Manual
 
-- [ ] 3.7 The CI `ci` job on the pushed branch shows the `npm run test:hooks` step passing
-- [x] 3.8 CLAUDE.md, TESTING.md and test-plan updates read correctly
+- [x] 3.7 The CI `ci` job on the pushed branch shows the `npm run test:hooks` step passing — 7521a71
+- [x] 3.8 CLAUDE.md, TESTING.md and test-plan updates read correctly — 7521a71
