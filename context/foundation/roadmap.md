@@ -44,7 +44,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | F-01 | e2e-framework-spike         | (foundation) an e2e framework runs one sign-in scenario locally and as a CI job on push               | —             | FR-007                                 | done     |
 | S-01 | auth-risk-tests             | developer can rely on named auth risk scenarios, each covered by a test that runs in CI               | F-01          | FR-007, FR-008, FR-010                 | proposed |
 | S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | proposed |
-| S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | in-progress |
+| S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | done        |
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | proposed |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | proposed |
 | S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | proposed |
@@ -128,7 +128,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Which hook surface triggers it (editor/agent file-edit hook, git hook, or watcher) and how "related tests" are resolved for a file? — Owner: user. Block: no.
 - **Risk:** Independent of the product path, so it can fill gaps in the calendar; the ~10 s budget is the failure mode — a slow hook gets disabled.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-04: Constants sweep
 
@@ -217,3 +217,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 (Empty — `/10x-archive` appends an entry here when a change whose `Change ID` matches an item above is archived.)
 - **F-01: (foundation) an e2e framework is installed and one sign-in scenario passes locally and as a CI job on push, against a local Supabase only.** — Archived 2026-10-09 → `context/archive/2026-10-09-e2e-framework-spike/`. Lesson: —.
+- **S-03: developer gets lint and the related unit tests run automatically for a modified file, finishing within ~10 s; integration tests stay on push/CI.** — Archived 2026-10-10 → `context/archive/2026-10-10-per-file-check-hook/`. Lesson: —.
