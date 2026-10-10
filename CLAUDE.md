@@ -37,7 +37,7 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `npm run format` — Prettier (includes prettier-plugin-astro + prettier-plugin-tailwindcss)
 - `npm run smoke` — dependency-free auth-flow smoke test (`scripts/smoke.mjs`) against a running server, `BASE_URL` env (default `http://localhost:4321`). Run after dependency upgrades; CI runs it against the production preview with a local Supabase.
 - `npm run test:unit` — Vitest unit suite (`src/**/*.test.ts`). No external services required.
-- `npm run test:hooks` — Vitest `hooks` project (`tests/hooks/`): proves the agent hooks below against stubbed eslint/vitest in a temp git repo. Needs `jq` and git, no Supabase.
+- `npm run test:hooks` — Vitest `hooks` project (`tests/hooks/`): proves the agent hooks below against stubbed eslint/vitest in a temp git repo. Needs `jq`, git ≥ 2.31 and bash ≥ 4 (hooks too), no Supabase.
 - `npm run test:integration` — Vitest integration suite (`tests/integration/**/*.test.ts`). Requires local Supabase running (`npx supabase start`); refuses to run against a non-local `SUPABASE_URL` and fails loudly (not silently) if Supabase isn't reachable.
 - `npm test` — runs every Vitest project: unit, hooks, integration (not e2e).
 - `npm run test:e2e` — Playwright (Chromium) browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself. Requires local Supabase and a fresh `npm run build`; first run needs `npx playwright install chromium`. Fails loudly (preflight error naming Supabase) when Supabase or env is missing.

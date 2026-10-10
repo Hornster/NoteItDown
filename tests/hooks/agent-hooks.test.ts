@@ -1,11 +1,23 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  utimesSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const HOOKS_DIR = path.resolve(import.meta.dirname, "../../.claude/hooks");
 const MARKER = "HOOK_PROOF_BROKEN";
+/** Fails only the vitest stub, so a case can prove a test-only failure. */
+const TEST_MARKER = "HOOK_PROOF_TEST_FAIL";
 
 interface HookResult {
   code: number | null;
@@ -26,10 +38,10 @@ interface Sandbox {
 }
 
 const stubScript = (tool: string) => `#!/usr/bin/env bash
-# Stub ${tool}: records the invocation, fails when any file argument contains the marker.
+# Stub ${tool}: records the invocation, fails when any file argument contains a marker.
 echo "${tool} $*" >>"$TMPDIR/stub-calls.log"
 for a in "$@"; do
-  if [ -f "$a" ] && grep -q "${MARKER}" "$a"; then
+  if [ -f "$a" ] && grep -qE "${tool === "vitest" ? `${MARKER}|${TEST_MARKER}` : MARKER}" "$a"; then
     echo "stub ${tool}: marker found in $a"
     exit 1
   fi
@@ -252,6 +264,17 @@ describe("end-of-turn.sh", () => {
     expect(res.stderr).toContain("src/new.ts");
   });
 
+  it("sweeps staged files in a repository without a commit", () => {
+    const { dir, sid } = sweepRepo();
+    rmSync(path.join(dir, ".git"), { recursive: true, force: true });
+    git(dir, "init", "-q", "-b", "main");
+    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    git(dir, "add", "-A");
+    const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(2);
+    expect(res.stderr).toContain("src/new.ts");
+  });
+
   it("sweeps a modified tracked file", () => {
     const { dir, sid } = sweepRepo();
     writeFileSync(path.join(dir, "src/clean.ts"), `export const ok = 2; // ${MARKER}\n`);
@@ -270,8 +293,10 @@ describe("end-of-turn.sh", () => {
 
   it("reports a failing related-test marker", () => {
     const { dir, sid } = sweepRepo();
-    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${TEST_MARKER}\n`);
     const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
+    expect(res.code).toBe(2);
+    expect(res.stderr).not.toContain("ESLint reported errors");
     expect(res.stderr).toContain("Related unit tests failed");
     expect(res.stderr).toContain("stub vitest: marker found");
   });
@@ -296,6 +321,17 @@ describe("end-of-turn.sh", () => {
     const { dir, sid } = sweepRepo();
     writeFileSync(path.join(dir, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
     expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(2);
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(2);
+  });
+
+  it("re-sweeps an untracked file rewritten with the same size and mtime", () => {
+    const { dir, sid } = sweepRepo();
+    const file = path.join(dir, "src/new.ts");
+    writeFileSync(file, `export const x = 1; // ${"A".repeat(MARKER.length)}\n`);
+    expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(0);
+    const { atime, mtime } = statSync(file);
+    writeFileSync(file, `export const x = 1; // ${MARKER}\n`);
+    utimesSync(file, atime, mtime);
     expect(runHook(SCRIPT, stopPayload(dir, sid), dir).code).toBe(2);
   });
 
@@ -332,6 +368,32 @@ describe("end-of-turn.sh", () => {
     const res = runHook(SCRIPT, stopPayload(dir, sid), dir);
     expect(res.code).toBe(2);
     expect(res.stderr).toContain(sibling);
+  });
+
+  it("skips a checkout over the file cap with a note, exit 0 and no tools", () => {
+    const { dir, sid } = sweepRepo();
+    for (const name of ["a", "b", "c"]) {
+      writeFileSync(path.join(dir, `src/${name}.ts`), `export const x = 1; // ${MARKER}\n`);
+    }
+    resetStubLog();
+    const res = spawnSync(path.join(HOOKS_DIR, SCRIPT), [], {
+      cwd: dir,
+      input: JSON.stringify(stopPayload(dir, sid)),
+      encoding: "utf8",
+      env: { ...scriptEnv(), HOOK_SWEEP_MAX_FILES: "2" },
+    });
+    expect(res.status).toBe(0);
+    expect(res.stderr).toContain("Sweep skipped");
+    expect(stubCalls()).toBe("");
+  });
+
+  it("ignores a planted nosession roots file when the payload has no session_id", () => {
+    const { dir } = sweepRepo();
+    const sibling = sweepRepo().dir;
+    writeFileSync(path.join(sibling, "src/new.ts"), `export const x = 1; // ${MARKER}\n`);
+    register("nosession", sibling);
+    const res = runHook(SCRIPT, { cwd: dir, hook_event_name: "Stop", stop_hook_active: false }, dir);
+    expect(res.code).toBe(0);
   });
 
   it("ignores $CLAUDE_PROJECT_DIR and sweeps the session cwd's checkout", () => {

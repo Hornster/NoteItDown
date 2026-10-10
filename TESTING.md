@@ -14,7 +14,7 @@
 ## Agent hooks proof (Vitest)
 
 - `npm run test:hooks` runs `tests/hooks/agent-hooks.test.ts` (Vitest project `hooks`), which executes the real scripts in `.claude/hooks/` (per-edit lint, related tests, end-of-turn sweep).
-- It runs them in a throwaway temp git repo with stubbed `node_modules/.bin/eslint` and `vitest`, so it needs no Supabase or real lint run. Requires `jq` and git on `PATH`.
+- It runs them in a throwaway temp git repo with stubbed `node_modules/.bin/eslint` and `vitest`, so it needs no Supabase or real lint run. Requires `jq`, git ≥ 2.31 and bash ≥ 4 on `PATH` (the hooks themselves need the same; stock macOS bash 3.2 is too old).
 
 ## End-to-end (Playwright)
 

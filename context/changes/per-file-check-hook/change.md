@@ -1,7 +1,7 @@
 ---
 change_id: per-file-check-hook
 title: Per-file hook that runs lint and related unit tests on a modified file
-status: implemented
+status: impl_reviewed
 created: 2026-10-10
 updated: 2026-10-10
 archived_at: null

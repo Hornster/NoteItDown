@@ -25,7 +25,7 @@ cd "$ROOT" || exit 0
 
 # Register the checkout so the Stop hook sweeps it too.
 SID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null | tr -cd 'A-Za-z0-9_-')
-if [ -n "$SID" ] && mkdir -p "${TMPDIR:-/tmp}/claude-hooks"; then
+if [ -n "$SID" ] && mkdir -p -m 700 "${TMPDIR:-/tmp}/claude-hooks"; then
   printf '%s\n' "$ROOT" >>"${TMPDIR:-/tmp}/claude-hooks/$SID.roots"
 fi
 

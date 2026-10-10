@@ -12,10 +12,12 @@ LOOPS=$(printf '%s' "$INPUT" | jq -r '.loop_count // 0' 2>/dev/null)
 case "$LOOPS" in '' | *[!0-9]*) ;; *) [ "$LOOPS" -gt 0 ] && exit 0 ;; esac
 
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
-SID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null | tr -cd 'A-Za-z0-9_-')
-SID=${SID:-nosession}
+RAW_SID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null | tr -cd 'A-Za-z0-9_-')
+SID=${RAW_SID:-nosession}
 STATE="${TMPDIR:-/tmp}/claude-hooks"
-ROOTS_FILE="$STATE/$SID.roots"
+# No session id → no registered roots: never trust a predictable shared file.
+ROOTS_FILE=""
+[ -n "$RAW_SID" ] && ROOTS_FILE="$STATE/$SID.roots"
 
 # Checkouts to sweep: the session cwd's checkout plus every checkout the per-edit hooks registered.
 CANDIDATES=()
@@ -37,6 +39,10 @@ truncate_roots() { [ -f "$ROOTS_FILE" ] && : >"$ROOTS_FILE"; return 0; }
 
 LINT_RE='\.(ts|tsx|js|jsx|mjs|cjs|astro)$'
 TEST_RE='\.(ts|tsx|js|jsx|mjs|cjs)$'
+# Above this many lintable files per checkout the sweep is skipped (argv limits, 120 s timeout); CI lints the tree.
+MAX_FILES=${HOOK_SWEEP_MAX_FILES:-200}
+case "$MAX_FILES" in '' | *[!0-9]*) MAX_FILES=200 ;; esac
+NOTES=""
 
 # Per-checkout state of the run, parallel arrays indexed like TODO_ROOTS.
 TODO_ROOTS=()
@@ -46,11 +52,14 @@ TODO_LINT=()
 TODO_TEST=()
 
 for root in "${ROOTS[@]}"; do
+  # Unborn HEAD (fresh repo, orphan branch): diff against the empty tree so staged files are still swept.
+  BASE=HEAD
+  git -C "$root" rev-parse --verify -q HEAD >/dev/null || BASE=$(git -C "$root" hash-object -t tree /dev/null)
   FILES=()
   while IFS= read -r -d '' f; do
     [ -f "$root/$f" ] && FILES+=("$f")
   done < <({
-    git -C "$root" diff --name-only -z HEAD 2>/dev/null
+    git -C "$root" diff --name-only -z "$BASE" 2>/dev/null
     git -C "$root" ls-files --others --exclude-standard -z 2>/dev/null
   } | sort -zu)
   [ "${#FILES[@]}" -gt 0 ] || continue
@@ -58,17 +67,26 @@ for root in "${ROOTS[@]}"; do
   LINT=()
   TEST=()
   for f in "${FILES[@]}"; do
-    [[ $f =~ $LINT_RE ]] && LINT+=("$f")
-    [[ $f =~ $TEST_RE ]] && TEST+=("$f")
+    [[ $f =~ $LINT_RE ]] && LINT+=("./$f")
+    [[ $f =~ $TEST_RE ]] && TEST+=("./$f")
   done
   [ "${#LINT[@]}" -gt 0 ] || continue
+  if [ "${#LINT[@]}" -gt "$MAX_FILES" ]; then
+    NOTES+="Sweep skipped for $root: ${#LINT[@]} changed lintable files (cap $MAX_FILES); run npm run lint or rely on CI."$'\n'
+    continue
+  fi
 
-  # Fingerprint: tracked diff + untracked lintable files with size and mtime.
+  # Fingerprint: tracked diff + untracked lintable files by path and content hash.
+  UNTRACKED=()
+  while IFS= read -r -d '' f; do
+    [[ $f =~ $LINT_RE ]] && [ -f "$root/$f" ] && UNTRACKED+=("$f")
+  done < <(git -C "$root" ls-files --others --exclude-standard -z 2>/dev/null | sort -z)
   FP=$({
-    git -C "$root" diff HEAD 2>/dev/null
-    while IFS= read -r -d '' f; do
-      [[ $f =~ $LINT_RE ]] && [ -f "$root/$f" ] && printf '%s %s %s\n' "$f" "$(stat -c '%s %Y' "$root/$f" 2>/dev/null || stat -f '%z %m' "$root/$f")"
-    done < <(git -C "$root" ls-files --others --exclude-standard -z 2>/dev/null | sort -z)
+    git -C "$root" diff "$BASE" 2>/dev/null
+    if [ "${#UNTRACKED[@]}" -gt 0 ]; then
+      printf '%s\n' "${UNTRACKED[@]}"
+      printf '%s\n' "${UNTRACKED[@]}" | git -C "$root" hash-object --stdin-paths 2>/dev/null
+    fi
   } | sha1sum | cut -d' ' -f1)
   FP_FILE="$STATE/$SID.$(printf '%s' "$root" | sha1sum | cut -c1-12).fp"
   [ -f "$FP_FILE" ] && [ "$(cat "$FP_FILE" 2>/dev/null)" = "$FP" ] && continue
@@ -81,6 +99,7 @@ for root in "${ROOTS[@]}"; do
 done
 
 if [ "${#TODO_ROOTS[@]}" -eq 0 ]; then
+  [ -n "$NOTES" ] && printf '%s' "$NOTES" >&2
   truncate_roots
   exit 0
 fi
@@ -111,10 +130,11 @@ if [ "$FAILED" = 1 ]; then
 fi
 
 # Green: remember the state and stop sweeping sibling checkouts on later turns.
-if mkdir -p "$STATE"; then
+if mkdir -p -m 700 "$STATE"; then
   for i in "${!TODO_ROOTS[@]}"; do
     printf '%s\n' "${TODO_FPS[$i]}" >"${TODO_FP_FILES[$i]}"
   done
 fi
+[ -n "$NOTES" ] && printf '%s' "$NOTES" >&2
 truncate_roots
 exit 0
