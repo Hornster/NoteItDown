@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 
 import { createTestUser } from "../support/test-user";
+import { expectApiUnauthorized, expectSigninRedirect } from "./support/assertions";
 import { createJar, send, type Jar } from "./support/client";
 import { protectedApi, protectedPages } from "./support/route-inventory";
 
@@ -66,14 +67,12 @@ describe("signout", () => {
 describe("replaying the pre-signout session against protected pages", () => {
   it("GET /campaigns/<campaignId> redirects to sign-in", async () => {
     const res = await send(`/campaigns/${campaignId}`, { jar: replayJar() });
-    expect(res.status).toBe(302);
-    expect(res.location).toBe("/auth/signin");
+    expectSigninRedirect(res);
   });
 
   it.each(pages.map((r) => [`${r.method} ${r.path}`, r] as const))("%s redirects to sign-in", async (_name, route) => {
     const res = await send(route.path, { method: route.method, jar: replayJar() });
-    expect(res.status).toBe(302);
-    expect(res.location).toBe("/auth/signin");
+    expectSigninRedirect(res);
   });
 });
 
@@ -86,12 +85,7 @@ describe("replaying the pre-signout session against protected API methods", () =
         route.path,
         route.method === "GET" ? { method: "GET", jar } : { method: route.method, jar, json: {} },
       );
-      expect(res.status).toBe(HTTP_STATUS.UNAUTHORIZED);
-      expect(res.contentType).toContain("application/json");
-      const parsed: unknown = JSON.parse(res.body);
-      expect(parsed).toEqual(expect.objectContaining({ error: expect.any(String) as unknown }));
-      const error = (parsed as { error: string }).error;
-      expect(error.length).toBeGreaterThan(0);
+      expectApiUnauthorized(res);
     },
   );
 });

@@ -182,7 +182,9 @@ Prove that a signed-out session loses access server-side (not just client-side c
 
 **Intent**: Prove, at the app level, that the normalization research verified in `astro@7.3.2` internals never lets a path variant through. An Astro upgrade that lets a variant reach a protected page (200) fails CI; a switch between 302 and 404 is allowed.
 
-**Contract**: Anonymous `GET` on `/%63ampaigns/<zero-uuid>`, `//dashboard`, `/Campaigns/<zero-uuid>`, `/dashboard/` → each is "denied": 302 to `/auth/signin` or 404; never 200.
+**Contract**: Anonymous `GET` on `/%63ampaigns/<zero-uuid>`, `//campaigns/<zero-uuid>`, `/Campaigns/<zero-uuid>`, `/dashboard/` → each is "denied": 302 to `/auth/signin` or 404; never 200.
+
+> Addendum (implementation, `330e4d0`): `//dashboard` was replaced by `//campaigns/<zero-uuid>`. A leading `//` is read as a protocol-relative URL (host `dashboard`, path `/`), so it serves the public index page with a 200 without reaching the guard. That is not a bypass. See `lessons.md` → "Probe double-slash path variants with a deeper path".
 
 ### Success Criteria:
 

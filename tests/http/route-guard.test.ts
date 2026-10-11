@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 
+import { expectApiUnauthorized, expectSigninRedirect } from "./support/assertions";
 import { send } from "./support/client";
 import {
   protectedApi,
@@ -39,8 +40,7 @@ describe("anonymous positive controls", () => {
 describe("anonymous access to protected pages", () => {
   it.each(pages.map((r) => [`${r.method} ${r.path}`, r] as const))("%s redirects to sign-in", async (_name, route) => {
     const res = await send(route.path, { method: route.method });
-    expect(res.status).toBe(302);
-    expect(res.location).toBe("/auth/signin");
+    expectSigninRedirect(res);
   });
 });
 
@@ -56,8 +56,7 @@ describe("anonymous path variants are never served", () => {
       const res = await send(path);
       expect(res.status).not.toBe(HTTP_STATUS.OK);
       if (res.status === HTTP_STATUS.NOT_FOUND) return;
-      expect(res.status).toBe(302);
-      expect(res.location).toBe("/auth/signin");
+      expectSigninRedirect(res);
     },
   );
 });
@@ -70,12 +69,7 @@ describe("anonymous access to protected API methods", () => {
         route.path,
         route.method === "GET" ? { method: "GET" } : { method: route.method, json: {} },
       );
-      expect(res.status).toBe(HTTP_STATUS.UNAUTHORIZED);
-      expect(res.contentType).toContain("application/json");
-      const parsed: unknown = JSON.parse(res.body);
-      expect(parsed).toEqual(expect.objectContaining({ error: expect.any(String) as unknown }));
-      const error = (parsed as { error: string }).error;
-      expect(error.length).toBeGreaterThan(0);
+      expectApiUnauthorized(res);
     },
   );
 });
