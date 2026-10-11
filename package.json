@@ -19,7 +19,6 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@ast-grep/napi": "^0.50.0",
     "@astrojs/check": "^0.9.10",
     "@astrojs/cloudflare": "^14.3.4",
     "@astrojs/react": "^6.0.5",
@@ -48,6 +47,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@ast-grep/napi": "^0.50.0",
     "@eslint/compat": "^2.1.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.64.0",

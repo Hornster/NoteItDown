@@ -140,6 +140,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:**
   - Which repeated strings in `.astro` / `.tsx` count as "duplicated user-facing messages" versus one-off copy? — Owner: `/10x-plan`. Block: no.
+- **Inherited from S-01:** four logged auth defects (`test-plan.md` §6.6: malformed-body 500, prefix over-match, raw Supabase message / enumeration, literal 401s), and `UI_BASELINE.signupDuplicateEmail` in `tests/e2e/auth-session.spec.ts` must change on purpose.
 - **Risk:** Touches auth routes and the relation-notice text, so it waits for S-01/S-02 to pin that behavior; it is its own change, landed before S-05 so refactor and theming diffs don't mix.
 - **Status:** proposed
 
