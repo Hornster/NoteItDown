@@ -339,29 +339,29 @@ The HTTP suite is ~25 routes × 2 jar states of local requests plus one preview 
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Type check passes: `npx astro check`
-- [x] 1.3 `npm test` still runs unit, hooks and integration only (http not included)
-- [x] 1.4 `npm run test:http` passes locally after `npm run build` with local Supabase running
-- [x] 1.5 `npm run test:http` without local Supabase fails with a Supabase-named error; without `dist/` it fails naming `npm run build`
+- [x] 1.1 Lint passes: `npm run lint` — e9a7e01
+- [x] 1.2 Type check passes: `npx astro check` — e9a7e01
+- [x] 1.3 `npm test` still runs unit, hooks and integration only (http not included) — e9a7e01
+- [x] 1.4 `npm run test:http` passes locally after `npm run build` with local Supabase running — e9a7e01
+- [x] 1.5 `npm run test:http` without local Supabase fails with a Supabase-named error; without `dist/` it fails naming `npm run build` — e9a7e01
 
 #### Manual
 
-- [x] 1.6 Temporarily add a throwaway page `src/pages/zz-probe.astro` (outside the prefixes): `npm run build && npm run test:http` fails naming `/zz-probe`; remove it and confirm green again
-- [x] 1.7 Temporarily remove the `if (!context.locals.user)` check from one API handler, `npm run build && npm run test:http`: its matrix row fails; revert and rebuild
-- [ ] 1.8 CI `local-stack` run on the branch shows the `npm run test:http` step green
+- [x] 1.6 Temporarily add a throwaway page `src/pages/zz-probe.astro` (outside the prefixes): `npm run build && npm run test:http` fails naming `/zz-probe`; remove it and confirm green again — e9a7e01
+- [x] 1.7 Temporarily remove the `if (!context.locals.user)` check from one API handler, `npm run build && npm run test:http`: its matrix row fails; revert and rebuild — e9a7e01
+- [x] 1.8 CI `local-stack` run on the branch shows the `npm run test:http` step green — e9a7e01
 
 ### Phase 2: Session revocation and path variants
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 `npm run test:http` passes (anonymous, revocation and path-variant cases)
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 `npm run test:http` passes (anonymous, revocation and path-variant cases)
 
 #### Manual
 
-- [ ] 2.3 Temporarily make `src/pages/api/auth/signout.ts` skip `supabase.auth.signOut()` (still redirect to `/`): the revocation rows fail while the anonymous matrix stays green; revert
-- [ ] 2.4 Test output lists each replayed route by name (readable failure report)
+- [x] 2.3 Temporarily make `src/pages/api/auth/signout.ts` skip `supabase.auth.signOut()` (still redirect to `/`): the revocation rows fail while the anonymous matrix stays green; revert
+- [x] 2.4 Test output lists each replayed route by name (readable failure report)
 
 ### Phase 3: E2E auth session chain and approved messages
 

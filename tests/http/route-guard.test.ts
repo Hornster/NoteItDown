@@ -44,6 +44,24 @@ describe("anonymous access to protected pages", () => {
   });
 });
 
+describe("anonymous path variants are never served", () => {
+  const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
+
+  // `//dashboard` is not probed: a leading `//` parses as a protocol-relative URL (host "dashboard",
+  // path "/"), so it serves the public index page — 200 without reaching the guard. A deeper path keeps
+  // the double-slash variant meaningful.
+  it.each([`/%63ampaigns/${ZERO_UUID}`, `//campaigns/${ZERO_UUID}`, `/Campaigns/${ZERO_UUID}`, "/dashboard/"])(
+    "GET %s is denied (302 to sign-in or 404, never 200)",
+    async (path) => {
+      const res = await send(path);
+      expect(res.status).not.toBe(HTTP_STATUS.OK);
+      if (res.status === HTTP_STATUS.NOT_FOUND) return;
+      expect(res.status).toBe(302);
+      expect(res.location).toBe("/auth/signin");
+    },
+  );
+});
+
 describe("anonymous access to protected API methods", () => {
   it.each(api.map((r) => [`${r.method} ${r.path}`, r] as const))(
     "%s is rejected with 401 JSON",
