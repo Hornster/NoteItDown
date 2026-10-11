@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { createTestUser } from "../support/test-user";
+import { waitForHydration } from "./support/hydration";
 
 // UI baseline approved by the user on 2026-10-11 (auth-risk-tests Progress 3.3, 3.4); changing it is a deliberate wording
 // decision (S-04). Deliberately literal — never import from `MESSAGES`; the oracle must not come from the code under test.
@@ -11,11 +12,6 @@ const UI_BASELINE = {
 };
 
 const CAMPAIGN_URL = /\/campaigns\/[0-9a-f-]{36}$/;
-
-// Wait for the island to hydrate; filling the SSR inputs earlier gets wiped by React's controlled state.
-async function waitForHydration(page: Page, buttonName: string) {
-  await page.locator("astro-island:not([ssr])", { has: page.getByRole("button", { name: buttonName }) }).waitFor();
-}
 
 test("signup, signin, protected page and signout form one working session chain", async ({ page, context }) => {
   // Auth calls: 2 (signup + signin); signout is not in the sign-in/sign-up rate bucket. Unique email, no seeded user.

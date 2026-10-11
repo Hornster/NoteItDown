@@ -376,7 +376,7 @@ The HTTP suite is ~25 routes × 2 jar states of local requests plus one preview 
 
 - [x] 3.3 User approves the observed wrong-password text as the UI baseline — 0c318cc
 - [x] 3.4 User approves the observed duplicate-signup text as the UI baseline, knowing it characterizes the S-04 enumeration defect — 0c318cc
-- [x] 3.5 Temporarily change the signin redirect target in the spec's expectation (or break signout in `src/pages/api/auth/signout.ts`) and confirm the chain fails with a trace in the report; revert — 0c318cc
+- [x] 3.5 Temporarily change the signin redirect target in the spec's expectation (or break signout in `src/pages/api/auth/signout.ts`) and confirm the chain fails with a trace in the report; revert — 0c318cc (ran: spec-expectation variant — changed the signin redirect target in the spec; the app-defect variant via `signout.ts` was not run)
 
 ### Phase 4: Smoke seams and documentation
 
