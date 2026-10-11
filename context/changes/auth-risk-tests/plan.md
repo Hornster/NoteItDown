@@ -355,26 +355,26 @@ The HTTP suite is ~25 routes × 2 jar states of local requests plus one preview 
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 `npm run test:http` passes (anonymous, revocation and path-variant cases)
+- [x] 2.1 Lint passes: `npm run lint` — 330e4d0
+- [x] 2.2 `npm run test:http` passes (anonymous, revocation and path-variant cases) — 330e4d0
 
 #### Manual
 
-- [x] 2.3 Temporarily make `src/pages/api/auth/signout.ts` skip `supabase.auth.signOut()` (still redirect to `/`): the revocation rows fail while the anonymous matrix stays green; revert
-- [x] 2.4 Test output lists each replayed route by name (readable failure report)
+- [x] 2.3 Temporarily make `src/pages/api/auth/signout.ts` skip `supabase.auth.signOut()` (still redirect to `/`): the revocation rows fail while the anonymous matrix stays green; revert — 330e4d0
+- [x] 2.4 Test output lists each replayed route by name (readable failure report) — 330e4d0
 
 ### Phase 3: E2E auth session chain and approved messages
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 `npm run build && npm run test:e2e` passes (existing sign-in scenario + new ones)
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 `npm run build && npm run test:e2e` passes (existing sign-in scenario + new ones)
 
 #### Manual
 
-- [ ] 3.3 User approves the observed wrong-password text as the UI baseline
-- [ ] 3.4 User approves the observed duplicate-signup text as the UI baseline, knowing it characterizes the S-04 enumeration defect
-- [ ] 3.5 Temporarily change the signin redirect target in the spec's expectation (or break signout in `src/pages/api/auth/signout.ts`) and confirm the chain fails with a trace in the report; revert
+- [x] 3.3 User approves the observed wrong-password text as the UI baseline
+- [x] 3.4 User approves the observed duplicate-signup text as the UI baseline, knowing it characterizes the S-04 enumeration defect
+- [x] 3.5 Temporarily change the signin redirect target in the spec's expectation (or break signout in `src/pages/api/auth/signout.ts`) and confirm the chain fails with a trace in the report; revert
 
 ### Phase 4: Smoke seams and documentation
 
