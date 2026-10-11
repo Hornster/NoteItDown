@@ -14,7 +14,8 @@
     "test:unit": "vitest run --project unit",
     "test:hooks": "vitest run --project hooks",
     "test:integration": "vitest run --project integration",
-    "test": "vitest run",
+    "test:http": "vitest run --project http",
+    "test": "vitest run --project unit --project hooks --project integration",
     "test:e2e": "playwright test"
   },
   "dependencies": {

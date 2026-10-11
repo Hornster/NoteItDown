@@ -50,6 +50,7 @@ jobs:
           cp .env .dev.vars
       - run: npm run test:integration
       - run: npm run build
+      - run: npm run test:http
       - run: npx playwright install --with-deps chromium
       - id: e2e
         run: npm run test:e2e

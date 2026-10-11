@@ -37,6 +37,16 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: "http",
+          include: ["tests/http/**/*.test.ts"],
+          globalSetup: ["tests/http/global-setup.ts"],
+          // The HTTP suite shares one preview server (and later one Supabase database).
+          fileParallelism: false,
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: "hooks",
           include: ["tests/hooks/**/*.test.ts"],
         },
