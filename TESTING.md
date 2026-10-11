@@ -30,5 +30,16 @@
 
 ## Smoke and infrastructure
 
-- `npm run smoke` runs the dependency-free auth-flow check (`scripts/smoke.mjs`) against a running server at `BASE_URL` (default `http://localhost:4321`).
+- `npm run smoke` runs the dependency-free auth-flow check (`scripts/smoke.mjs`) against a running server at `BASE_URL` (default `http://localhost:4321`). Run it against the production preview (`npm run build && npm run preview`), as CI does — not against `astro dev` (see below).
 - `npx supabase start` starts the local Supabase stack that the integration and e2e suites require.
+
+### Known issue: `astro dev` fails the request after an unread request body
+
+Under `astro dev`, a request whose body the handler never reads makes the **next** request on the same connection fail with a 500 `fetch failed` (Astro dev error page). The production preview and deployed Workers are not affected.
+
+- **Mechanism**: `@cloudflare/vite-plugin` (1.63.0) forwards each dev request to workerd through `miniflare.dispatchFetch`, which uses undici (7.29.1). When the Worker responds without consuming the request body, the pooled connection is left dirty and the next dispatch on it throws `fetch failed` (stack: `undici/lib/web/fetch/index.js` ← `miniflare` `fetch4` ← `_Miniflare.dispatchFetch` ← `@cloudflare/vite-plugin`). The app code is never reached for the failing request.
+- **Trigger in this app**: any API handler that returns early — 401, or 404 on a malformed id — before `await context.request.json()`, called with a body. Requests without a body, and requests whose body is read (including 400 validation errors), leave the connection healthy.
+- **How it shows up**: smoke's "rename-campaign API 404s a malformed id" (PATCH with body, rejected before the body is read) poisons the connection, so the next step "edit-note API 404s a malformed note id" gets 500 instead of 404. Repeating that PATCH alternates 404, 500, 404, 500. Found 2026-10-11 during `auth-risk-tests` Phase 4.
+- **Repro** (against `npx astro dev` on 4321): `PATCH /api/campaigns/not-a-uuid` with `Content-Type: application/json`, `Origin: http://localhost:4321` and body `{"name":"x"}` → 404; immediately `GET /` → 500 `fetch failed`; `GET /` again → 200.
+- **Workaround**: run smoke, `test:http` and e2e against the production preview (they already do in CI). Expect occasional dev-only 500s after rejected requests while clicking through the UI under `astro dev`.
+- **Possible fixes (not done)**: upgrade `@cloudflare/vite-plugin` / miniflare once fixed upstream (check for an existing issue first, file one with the repro if none), or drain the request body before early returns in API handlers. Tracked in `context/foundation/roadmap.md` → Observations.

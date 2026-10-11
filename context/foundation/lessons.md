@@ -43,3 +43,10 @@
 - **Problem**: Tests that expect either 302 or 401 (verification against unauthorized access so either redirect or unauthorized response) face a sudden 200 because of internal treatment of such routes by Astro.
 - **Rule**: Path-variant probes (such as double-slashed paths) should use a deeper path. I.e. //campaigns/<uuid>
 - **Applies to**: plan, plan-review, implement, impl-review
+
+## Run HTTP-level checks against the production preview, not `astro dev`
+
+- **Context**: context/changes/auth-risk-tests Phase 4 — smoke's "edit-note API 404s a malformed note id" step returned 500 under `npx astro dev` but passed against `npm run preview` and in CI. Full explanation: `TESTING.md` → "Known issue: `astro dev` fails the request after an unread request body".
+- **Problem**: Under `astro dev`, the Cloudflare dev proxy (`@cloudflare/vite-plugin` → miniflare → undici) fails the request that follows any response sent without reading the request body. A 500 seen only in dev looks like an app bug and costs debugging time.
+- **Rule**: Run smoke, `test:http` and e2e against the production preview (`npm run build && npm run preview`). Before treating a 500 from `astro dev` as an app bug, reproduce it against the preview; if it only happens in dev right after a rejected request with a body, it is this known issue.
+- **Applies to**: implement, impl-review

@@ -200,6 +200,10 @@ Foundations below assume these are present and do NOT re-scaffold them.
 1. **Does the new e2e framework fit the 3-week estimate?** The estimate covers 8 threads including a new e2e framework; the early e2e spike (F-01) is the validation checkpoint. — Owner: user. Block: no (resolved at the end of F-01; the integration suite is the fallback).
 2. **If time runs short before 2026-10-29, which in-scope item gives way next after mobile?** Mobile is already parked; the PRD names no second cut. — Owner: user. Block: no (relevant only if F-01 resolves Question 1 negatively).
 
+## Observations
+
+- **`astro dev` returns 500 `fetch failed` on the request after one whose body was never read** — dev-only bug in the Cloudflare dev tooling (`@cloudflare/vite-plugin` → `miniflare.dispatchFetch` → undici), not in app code; the production preview and deployed Workers are unaffected. Makes smoke's edit-note step fail under `astro dev`. Found 2026-10-11 during `auth-risk-tests`. Full explanation, repro and fix options: `TESTING.md` → "Known issue: `astro dev` fails the request after an unread request body". Not scheduled; revisit on a Cloudflare tooling upgrade or if it starts disrupting manual testing.
+
 ## Parked
 
 - **Mobile / phone-width layouts** — Why parked: PRD §Non-Goals; deferred to a later milestone, theme goes through palette tokens so later work changes layout only.
