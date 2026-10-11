@@ -11,6 +11,8 @@ const POLL_INTERVAL_MS = 250;
 function newestMtimeMs(dir: string): number {
   let newest = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    // Colocated unit tests never reach dist/; editing one must not demand a rebuild.
+    if (entry.isFile() && entry.name.endsWith(".test.ts")) continue;
     const full = join(dir, entry.name);
     const mtime = entry.isDirectory() ? newestMtimeMs(full) : statSync(full).mtimeMs;
     newest = Math.max(newest, mtime);

@@ -1,7 +1,7 @@
 ---
 change_id: auth-risk-tests
 title: Named auth risk scenarios, each covered by a test that runs in CI
-status: implemented
+status: impl_reviewed
 created: 2026-10-10
 updated: 2026-10-11
 archived_at: null

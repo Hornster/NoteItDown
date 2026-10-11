@@ -92,6 +92,9 @@ function enumerate(): { routes: Route[]; unrecognized: string[] } {
           routes.push({ kind: "page", method: method === "ALL" ? "GET" : method, path, file: relFile });
         }
       }
+    } else {
+      // .md/.mdx/.html/.js/... are routable by Astro but not mapped here; fail rather than drop them.
+      unrecognized.push(relFile);
     }
   }
 
@@ -112,7 +115,10 @@ export function publicRoutes(): Route[] {
   return enumerate().routes.filter((r) => isPublic(r.path));
 }
 
-/** Route `.ts` files with no detectable method export; the suite fails naming them. */
+/**
+ * Files under src/pages the inventory cannot map: `.ts` files with no detectable method export,
+ * and any extension other than `.astro`/`.ts`. The suite fails naming them.
+ */
 export function unrecognizedRouteFiles(): string[] {
   return enumerate().unrecognized;
 }
