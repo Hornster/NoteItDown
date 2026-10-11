@@ -121,3 +121,6 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR t
 
 For implementation purposes with subagents aim to use Sonnet with Medium effort. For research and planning use Sonnet with High effort. Inform which subagent do you plan to instantiate.
 <!-- END @przeprogramowani/10x-cli -->
+
+## Creating, planning, implementing changes
+All new changes should end up in their own branch. Merging with main should be done after completed implementation review or after archiving.
