@@ -39,12 +39,13 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `npm run test:unit` — Vitest unit suite (`src/**/*.test.ts`). No external services required.
 - `npm run test:hooks` — Vitest `hooks` project (`tests/hooks/`): proves the agent hooks below against stubbed eslint/vitest in a temp git repo. Needs `jq`, git ≥ 2.31 and bash ≥ 4 (hooks too), no Supabase.
 - `npm run test:integration` — Vitest integration suite (`tests/integration/**/*.test.ts`). Requires local Supabase running (`npx supabase start`); refuses to run against a non-local `SUPABASE_URL` and fails loudly (not silently) if Supabase isn't reachable.
-- `npm test` — runs every Vitest project: unit, hooks, integration (not e2e).
+- `npm run test:http` — Vitest `http` project (`tests/http/`): raw-HTTP route-guard matrix (anonymous and signed-out access to every page and API route) against its own production preview on port 4323. Requires local Supabase and a fresh `npm run build`; fails loudly when either is missing.
+- `npm test` — runs the unit, hooks and integration projects; not `http` (needs a build) and not e2e.
 - `npm run test:e2e` — Playwright (Chromium) browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself. Requires local Supabase and a fresh `npm run build`; first run needs `npx playwright install chromium`. Fails loudly (preflight error naming Supabase) when Supabase or env is missing.
 
 Full testing command reference with prerequisites: `TESTING.md`.
 
-`scripts/smoke.mjs` remains a smoke check only, not a substitute for the Vitest suites or the Playwright e2e scenarios above (README says so explicitly). There is no e2e coverage beyond the sign-in seed scenario yet.
+`scripts/smoke.mjs` remains a smoke check only, not a substitute for the Vitest suites or the Playwright e2e scenarios above (README says so explicitly).
 
 Agent hooks (Claude Code; scripts in `.claude/hooks/`, registered in `.claude/settings.json`): after every Write/Edit, `lint-edited-file.sh` runs eslint (check-only) and `related-tests.sh` runs `vitest related <file> --run --project unit` on the edited file; at end of turn `end-of-turn.sh` (Stop) sweeps all changed and untracked files with one eslint and one related-tests run, skipping when nothing changed since the last green sweep. Failures exit 2 with stderr fed back to the agent. Restart the session after editing `settings.json`; use `/hooks` to inspect.
 
@@ -94,7 +95,7 @@ Integrations: `@astrojs/react`, `@astrojs/cloudflare`, `@astrojs/sitemap`.
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR to `main`, and on demand via `workflow_dispatch` (Actions → CI → Run workflow, or `gh workflow run ci.yml --ref <branch>`):
 - `ci` — `npx astro sync`, lint, unit tests, hook proof (`npm run test:hooks`), `npx astro check`, then build. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets.
-- `local-stack` — starts local Supabase (CLI pinned), runs integration tests, builds, runs `npm run test:e2e` (uploads a `playwright-report` artifact with traces on failure), then `npm run smoke` against a preview on port 4321. No secrets needed.
+- `local-stack` — starts local Supabase (CLI pinned), runs integration tests, builds, runs `npm run test:http`, runs `npm run test:e2e` (uploads a `playwright-report` artifact with traces on failure), then `npm run smoke` against a preview on port 4321. No secrets needed.
 - `deploy` — `npx wrangler deploy`, only on push to `main` after `ci` and `local-stack` pass; dispatched runs never deploy.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->

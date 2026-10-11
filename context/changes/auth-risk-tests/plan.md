@@ -367,24 +367,24 @@ The HTTP suite is ~25 routes × 2 jar states of local requests plus one preview 
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 `npm run build && npm run test:e2e` passes (existing sign-in scenario + new ones)
+- [x] 3.1 Lint passes: `npm run lint` — 0c318cc
+- [x] 3.2 `npm run build && npm run test:e2e` passes (existing sign-in scenario + new ones) — 0c318cc
 
 #### Manual
 
-- [x] 3.3 User approves the observed wrong-password text as the UI baseline
-- [x] 3.4 User approves the observed duplicate-signup text as the UI baseline, knowing it characterizes the S-04 enumeration defect
-- [x] 3.5 Temporarily change the signin redirect target in the spec's expectation (or break signout in `src/pages/api/auth/signout.ts`) and confirm the chain fails with a trace in the report; revert
+- [x] 3.3 User approves the observed wrong-password text as the UI baseline — 0c318cc
+- [x] 3.4 User approves the observed duplicate-signup text as the UI baseline, knowing it characterizes the S-04 enumeration defect — 0c318cc
+- [x] 3.5 Temporarily change the signin redirect target in the spec's expectation (or break signout in `src/pages/api/auth/signout.ts`) and confirm the chain fails with a trace in the report; revert — 0c318cc
 
 ### Phase 4: Smoke seams and documentation
 
 #### Automated
 
-- [ ] 4.1 `npm run build`, then a preview on 4321 and `BASE_URL=http://localhost:4321 npm run smoke` → all steps PASS
-- [ ] 4.2 Lint/format pass: `npm run lint`
+- [x] 4.1 `npm run build`, then a preview on 4321 and `BASE_URL=http://localhost:4321 npm run smoke` → all steps PASS
+- [x] 4.2 Lint/format pass: `npm run lint`
 - [ ] 4.3 Full CI `local-stack` and `ci` jobs green on a branch push or `gh workflow run ci.yml --ref <branch>` (a push to `main` also deploys)
 
 #### Manual
 
-- [ ] 4.4 Temporarily change `src/pages/api/auth/signout.ts` to redirect to `/licenses`: smoke's signout step now FAILS (previously passed); revert
-- [ ] 4.5 `test-plan.md` §6.4 is enough for someone to add a new protected page without reading this plan
+- [x] 4.4 Temporarily change `src/pages/api/auth/signout.ts` to redirect to `/licenses`: smoke's signout step now FAILS (previously passed); revert
+- [x] 4.5 `test-plan.md` §6.4 is enough for someone to add a new protected page without reading this plan

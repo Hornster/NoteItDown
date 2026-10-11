@@ -54,7 +54,11 @@ const steps = [
   ],
   [
     "signin accepts correct password",
-    () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
+    () => {
+      // Clear the jar so the next step only passes with cookies set by this signin request.
+      jar.clear();
+      return request("/api/auth/signin", { method: "POST", form: { email, password } });
+    },
     { status: 302, location: "/dashboard" },
   ],
   [
@@ -104,7 +108,11 @@ const steps = [
     () => request(`/api${dashboardLocation}/notes/00000000-0000-0000-0000-000000000000`, { method: "DELETE" }),
     { status: 404 },
   ],
-  ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
+  [
+    "signout clears session",
+    () => request("/api/auth/signout", { method: "POST" }),
+    { status: 302, location: "/", exact: true },
+  ],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
   [
     "campaigns route redirects anonymous user",
@@ -123,7 +131,8 @@ for (const [name, run, expected] of steps) {
   const actual = await run();
   const ok =
     actual.status === expected.status &&
-    (expected.location === undefined || actual.location.startsWith(expected.location));
+    (expected.location === undefined ||
+      (expected.exact ? actual.location === expected.location : actual.location.startsWith(expected.location)));
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}  -> ${actual.status} ${actual.location}`);
   if (!ok) {
     failed++;

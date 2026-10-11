@@ -29,3 +29,17 @@
 - **Problem**: Components possess inline logic instead of dealing with render
 - **Rule**: Extract fetch/state logic of React islands into hooks in src/components/hooks/
 - **Applies to**: implement
+
+## Always save the plan-review report, one file per reviewed phase
+
+- **Context**: Any /10x-plan-review run, including phase-scoped reviews. Seen in context/changes/auth-risk-tests: the Phase 1 and Phase 2 reviews were triaged without a saved report.
+- **Problem**: Choosing 'Triage findings' skips the save step. The only record of the findings, fix options and decisions is a one-line note in change.md, so the reasoning behind each plan edit is lost to later impl-review and to readers.
+- **Rule**: Always save the plan-review report, even when triaging right away. Full reviews shall be written into reviews/plan-review.md. Phase-by-phase reviews shall be written into reviews/plan-review-<phase>.md files, one file per phase.
+- **Applies to**: plan-review, impl-review
+
+## Probe double-slash path variants with a deeper path
+
+- **Context**: HTTP route-guard tests that probe path variants
+- **Problem**: Tests that expect either 302 or 401 (verification against unauthorized access so either redirect or unauthorized response) face a sudden 200 because of internal treatment of such routes by Astro.
+- **Rule**: Path-variant probes (such as double-slashed paths) should use a deeper path. I.e. //campaigns/<uuid>
+- **Applies to**: plan, plan-review, implement, impl-review

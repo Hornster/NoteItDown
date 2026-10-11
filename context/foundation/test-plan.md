@@ -69,7 +69,7 @@ orchestrator updates Status as artifacts appear on disk.
 |---|------------|-----------------|---------------|------------|--------|---------------|
 | 1 | E2E foundation | Prove one sign-in e2e scenario runs on local Supabase and fails loudly in CI | #6, #4 (seed) | e2e + CI job | implemented (CI proof runs P1–P6 in change folder `proof-runs.md`) | context/changes/e2e-framework-spike/ |
 | 2 | Access control & isolation | Prove cross-user reads/writes are denied and RLS holds for existing rows; pin note text and relation behavior | #1, #3, #5 | integration (policy matrix) + targeted e2e | not started | — |
-| 3 | Auth & route guard | Prove every protected route rejects anonymous and signed-out users; pin the auth flow before S-04/S-05 edit it | #2, #4 | HTTP-level integration + e2e | not started | — |
+| 3 | Auth & route guard | Prove every protected route rejects anonymous and signed-out users; pin the auth flow before S-04/S-05 edit it | #2, #4 | HTTP-level integration + e2e | implemented | context/changes/auth-risk-tests/ |
 | 4 | Per-file feedback gate | Run lint + related unit tests for each edited file within ~10 s | cross-cutting | post-edit hook | implemented (hooks + proof wired in `ci`) | context/changes/per-file-check-hook/ |
 
 Phase 2 maps to roadmap S-02 (`notes-relations-risk-tests`), Phase 3 to S-01 (`auth-risk-tests`), Phase 4 to S-03 (`per-file-check-hook`). Phases 2 and 3 depend only on Phase 1; Phase 2 is ordered first because data isolation is the top user concern (interview Q1).
@@ -81,12 +81,13 @@ The classic test base for this project. AI-native tools (if any) carry a
 Recommendations in this section must be grounded in local manifests/configs
 plus the MCP/tools actually exposed in the current session.
 
-Test-base profile: **sparse** — Vitest configured with `unit` and `integration` projects; 17 test files (11 unit under `src/lib/`, 6 integration under `tests/integration/`); no tests for middleware, API/page routes or UI.
+Test-base profile: **sparse** — Vitest configured with `unit`, `hooks`, `integration` and `http` projects; middleware and every page/API route are covered by the `http` route-guard matrix, the auth session chain by Playwright e2e; no component-level UI tests.
 
 | Layer | Tool | Version | Notes |
 |-------|------|---------|-------|
 | unit | Vitest (`unit` project) | 5.0.1 | `npm run test:unit`; no external services |
 | integration | Vitest (`integration` project) | 5.0.1 | `npm run test:integration`; local Supabase only, files run serially |
+| http | Vitest (`http` project) | 5.0.1 | `npm run test:http`; raw `fetch` against its own production preview on port 4323; needs local Supabase and a fresh build; not part of `npm test`; added by Phase 3 (`auth-risk-tests`); checked: 2026-10-11 |
 | smoke | `scripts/smoke.mjs` | n/a | dependency-free auth smoke against a running server; not a test suite |
 | e2e | Playwright (`@playwright/test`, Chromium only) | 1.64.0 | `npm run test:e2e`; confirmed by Phase 1 (`e2e-framework-spike`); runs in CI `local-stack` job against local Supabase; `retries: 0`, `forbidOnly` in CI; checked: 2026-10-09 |
 | accessibility | none — out of scope | — | palette contrast is checked manually per prd-v2 |
@@ -107,7 +108,7 @@ phase lands; before that, the gate is `planned`.
 |------|-------|-----------|---------|
 | lint + `astro check` + build | local + CI (`ci` job) | required (wired) | syntactic / type drift |
 | unit tests | local + CI (`ci` job) | required (wired) | logic regressions in `src/lib` |
-| integration tests | CI (`local-stack` job, local Supabase) | required (wired); extended by §3 Phase 2–3 | service, DB function, RLS and route regressions |
+| integration tests | CI (`local-stack` job, local Supabase) | required (wired); extended by §3 Phase 2–3; the `http` route-guard suite (`npm run test:http`) runs in the same job right after `build` | service, DB function, RLS and route regressions |
 | e2e on risky flows | CI on push (`local-stack` job) | required (wired by §3 Phase 1); scenarios added by §3 Phase 2–3 | broken auth / isolation user paths |
 | per-file hook (lint + related unit tests) | local (agent / editor loop) | recommended (wired by §3 Phase 4; proof `npm run test:hooks` in `ci` job) | regressions at edit time |
 
@@ -135,13 +136,19 @@ the relevant rollout phase ships; before that, the sub-section reads
 - **Run locally**: `npm run test:e2e` — Playwright starts the production preview on port 4322 itself (locally it reuses a server already on 4322, so stop stale servers first). See `TESTING.md`.
 - **Seed** users through the API with `createTestUser` (`tests/support/test-user.ts`), which returns `email`, `password` and the user's `campaignId`; create the minimum number of users per run — local GoTrue's auth rate limit (30 / 5 min / IP) is shared with integration and smoke in CI.
 - **Assert a session-only outcome**: the app degrades to "anonymous" (not an error) when Supabase is down, so final assertions must be unreachable for an anonymous visitor — e.g. the exact `/campaigns/<campaignId>` URL of the seeded user plus a visible "Sign out" control. Never assert only something a signed-out visitor also sees.
+- Pin UI wording via a user-approved `UI_BASELINE` literal in the spec, never imported from `MESSAGES` (oracle problem).
 - Role/label locators; wait for island hydration (`astro-island:not([ssr])`) before filling a React form, or controlled state wipes the input.
 - The global setup's `assertLocalSupabase("e2e")` preflight fails the run with a Supabase-named error when env is missing or Supabase is unreachable; do not add skips.
 - CI failure: download the `playwright-report` artifact and open `trace.zip` with `npx playwright show-trace`.
 
 ### 6.4 Adding a test for a new protected route or API endpoint
 
-- TBD — see §3 Phase 3 for the anonymous / signed-out rejection pattern, and §3 Phase 2 for the forged-ID ownership pattern.
+- **Location**: `tests/http/**/*.test.ts` (Vitest `http` project); `npm run test:http` needs local Supabase and a fresh `npm run build`, and starts its own preview on port 4323. See `TESTING.md`.
+- **New protected page** (`src/pages/**/*.astro`): nothing to write. The matrix derives routes from the file tree and fails if the page does not redirect anonymous users to sign-in. Register the prefix in `PROTECTED_ROUTES` (`src/middleware.ts`) or the suite will fail.
+- **New public page**: add its path to `PUBLIC_ROUTES` in `tests/http/support/route-inventory.ts`; the suite then excludes it from the denial matrix and fails if the entry no longer exists on disk (it does not assert the page is reachable).
+- **New API handler** (`src/pages/api/**/*.ts`): automatically covered by its exported method (`GET`, `POST`, ...); anonymous callers must get 401. A route file with no detectable method export fails the suite by name.
+- Send `Origin: <base URL>` on every POST (Astro `checkOrigin`). Probe double-slash variants with a deeper path (e.g. `//campaigns/<uuid>`).
+- For the forged-ID ownership pattern see §3 Phase 2 (TBD).
 
 ### 6.5 Adding a test for a new migration or RLS policy
 
@@ -150,6 +157,16 @@ the relevant rollout phase ships; before that, the sub-section reads
 ### 6.6 Per-rollout-phase notes
 
 (Appended by each phase's final sub-phase.)
+
+**Phase 3 - Auth & route guard (`auth-risk-tests`, implemented 2026-10-11)**
+
+- `UI_BASELINE` in `tests/e2e/auth-session.spec.ts` pins the sign-in and duplicate-signup wording; approved by the user 2026-10-11. `signupDuplicateEmail` is a labelled characterization of the current (enumerable) wording, so S-04 must change it on purpose.
+- Smoke seams fixed: the signout step now requires an exact `/` location, and the signin step clears the cookie jar so the dashboard step proves signin set the session.
+- Known defects deliberately left for S-04 (logged, not pinned, not fixed):
+  - a malformed (non-form) body to `/api/auth/signin|signup` returns 500 (`formData()` before validation, no zod);
+  - the prefix match over-matches (`/mapping`, `/notesX`); harmless today, no such routes exist;
+  - raw Supabase `error.message` is passed in `?error=` (no `MESSAGES` mapping; possible account enumeration);
+  - 4 API files use literal 401s instead of `HTTP_STATUS`/`MESSAGES` (constants sweep).
 
 ## 7. What We Deliberately Don't Test
 
@@ -162,7 +179,7 @@ contributors should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-10-09
+- Strategy (§1–§5) last reviewed: 2026-10-11
 - Stack versions last verified: 2026-10-09
 - AI-native tool references last verified: 2026-10-09
 
