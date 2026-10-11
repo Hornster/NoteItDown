@@ -380,11 +380,11 @@ The HTTP suite is ~25 routes × 2 jar states of local requests plus one preview 
 
 #### Automated
 
-- [x] 4.1 `npm run build`, then a preview on 4321 and `BASE_URL=http://localhost:4321 npm run smoke` → all steps PASS
-- [x] 4.2 Lint/format pass: `npm run lint`
-- [ ] 4.3 Full CI `local-stack` and `ci` jobs green on a branch push or `gh workflow run ci.yml --ref <branch>` (a push to `main` also deploys)
+- [x] 4.1 `npm run build`, then a preview on 4321 and `BASE_URL=http://localhost:4321 npm run smoke` → all steps PASS — 4137dfe
+- [x] 4.2 Lint/format pass: `npm run lint` — 4137dfe
+- [x] 4.3 Full CI `local-stack` and `ci` jobs green on a branch push or `gh workflow run ci.yml --ref <branch>` (a push to `main` also deploys) — 4137dfe
 
 #### Manual
 
-- [x] 4.4 Temporarily change `src/pages/api/auth/signout.ts` to redirect to `/licenses`: smoke's signout step now FAILS (previously passed); revert
-- [x] 4.5 `test-plan.md` §6.4 is enough for someone to add a new protected page without reading this plan
+- [x] 4.4 Temporarily change `src/pages/api/auth/signout.ts` to redirect to `/licenses`: smoke's signout step now FAILS (previously passed); revert — 4137dfe
+- [x] 4.5 `test-plan.md` §6.4 is enough for someone to add a new protected page without reading this plan — 4137dfe
