@@ -43,7 +43,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | ---- | --------------------------- | ----------------------------------------------------------------------------------------------------- | ------------- | -------------------------------------- | -------- |
 | F-01 | e2e-framework-spike         | (foundation) an e2e framework runs one sign-in scenario locally and as a CI job on push               | —             | FR-007                                 | done     |
 | S-01 | auth-risk-tests             | developer can rely on named auth risk scenarios, each covered by a test that runs in CI               | F-01          | FR-007, FR-008, FR-010                 | done        |
-| S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | proposed |
+| S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | planning |
 | S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | done        |
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | proposed |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | proposed |
@@ -115,7 +115,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Which scenarios need e2e versus the existing integration suite (extend, don't duplicate)? — Owner: `/10x-plan`. Block: no.
 - **Risk:** Binding PRD constraint — relation-notice wording is pinned by tests before S-04 moves the text; the gap is in isolation and end-to-end coverage, since relation unit/integration tests already exist.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-03: Per-file check hook
 
