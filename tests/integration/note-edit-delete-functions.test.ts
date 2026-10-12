@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PostgrestMaybeSingleResponse, PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase-js";
 
-import { createTestUser } from "./helpers";
+import { createTestUser, roundTripContents } from "./helpers";
 
 import type { Note, Relation } from "@/types";
 
@@ -137,6 +137,46 @@ describe("update_note / delete_note", () => {
     const relations = await relationsOf(tenantA.client, note.id);
     expect(relations).toHaveLength(1);
     expect([relations[0]?.note_a_id, relations[0]?.note_b_id]).toContain(other.id);
+  });
+
+  it("one edit that both adds and removes a relation reports both sets", async () => {
+    const oldFriend = await createNote(tenantA.client, tenantA.campaignId, "Quillon Drift", "x");
+    const newFriend = await createNote(tenantA.client, tenantA.campaignId, "Marrow Fen", "x");
+    const note = await createNote(tenantA.client, tenantA.campaignId, "Swap Subject", "Travels with Quillon Drift.");
+    expect(await relationsOf(tenantA.client, note.id)).toHaveLength(1);
+
+    const { data, error } = await callUpdateNote(tenantA.client, {
+      p_campaign_id: tenantA.campaignId,
+      p_note_id: note.id,
+      p_name: note.name,
+      p_content: "Now travels with Marrow Fen.",
+      p_type_id: note.type_id,
+    });
+
+    expect(error).toBeNull();
+    expect(data?.rechecked).toBe(true);
+    expect(data?.added).toEqual([{ note_id: newFriend.id, name: "Marrow Fen" }]);
+    expect(data?.removed).toEqual([{ note_id: oldFriend.id, name: "Quillon Drift" }]);
+
+    const after = await relationsOf(tenantA.client, note.id);
+    expect(after).toHaveLength(1);
+    expect([after[0]?.note_a_id, after[0]?.note_b_id]).toContain(newFriend.id);
+  });
+
+  it.each(roundTripContents())("update round-trips $label content exactly", async ({ label, content }) => {
+    const note = await createNote(tenantA.client, tenantA.campaignId, `Update round trip ${label}`, "before");
+
+    const { data, error } = await callUpdateNote(tenantA.client, {
+      p_campaign_id: tenantA.campaignId,
+      p_note_id: note.id,
+      p_name: note.name,
+      p_content: content,
+      p_type_id: note.type_id,
+    });
+
+    expect(error).toBeNull();
+    expect(data?.note.content).toBe(content);
+    expect((await getNote(tenantA.client, note.id))?.content).toBe(content);
   });
 
   it("rename breaking a mention reports `removed`; an unchanged relation keeps its id", async () => {

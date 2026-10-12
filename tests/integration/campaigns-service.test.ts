@@ -117,9 +117,26 @@ describe("campaigns service", () => {
   });
 
   it("renaming tenant B's campaign as tenant A maps to not_found", async () => {
+    const bBefore = await getCampaign(tenantB.client, tenantB.campaignId);
+    expect(bBefore?.name).toBe("My Campaign");
+
     const result = await renameCampaign(tenantA.client, tenantB.campaignId, "Hijacked Name");
     expect(result.success).toBe(false);
     expect(!result.success && result.reason).toBe("not_found");
+
+    // not_found must mean no row was written: the owner still sees the original name.
+    expect((await getCampaign(tenantB.client, tenantB.campaignId))?.name).toBe(bBefore?.name);
+  });
+
+  it("renaming tenant A's campaign as tenant B maps to not_found and leaves A's name unchanged", async () => {
+    const aBefore = await getCampaign(tenantA.client, tenantA.campaignId);
+    expect(aBefore).not.toBeNull();
+
+    const result = await renameCampaign(tenantB.client, tenantA.campaignId, "Hijacked Name");
+    expect(result.success).toBe(false);
+    expect(!result.success && result.reason).toBe("not_found");
+
+    expect((await getCampaign(tenantA.client, tenantA.campaignId))?.name).toBe(aBefore?.name);
   });
 
   it("renaming a malformed id maps to not_found", async () => {
@@ -144,6 +161,18 @@ describe("campaigns service", () => {
     expect(campaigns[0].id).toBe(tenantA.campaignId);
     expect(campaigns[0].name).toBe("My Campaign");
     expect(campaigns.slice(-2).map((c) => c.id)).toEqual([first.campaign.id, second.campaign.id]);
+  });
+
+  it("listCampaigns never contains another tenant's campaign ids", async () => {
+    const own = await listCampaigns(tenantA.client);
+    const foreign = await listCampaigns(tenantB.client);
+    expect(own.length).toBeGreaterThan(0);
+    expect(foreign.length).toBeGreaterThan(0);
+
+    const foreignIds = new Set(foreign.map((c) => c.id));
+    expect(own.some((c) => foreignIds.has(c.id))).toBe(false);
+    expect(own.map((c) => c.id)).not.toContain(tenantB.campaignId);
+    expect(foreign.map((c) => c.id)).not.toContain(tenantA.campaignId);
   });
 
   it("resolveLandingCampaign returns the cookie campaign when owned", async () => {

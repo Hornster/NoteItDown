@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PostgrestMaybeSingleResponse, PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase-js";
 
-import { createTestUser } from "./helpers";
+import { createTestUser, roundTripContents } from "./helpers";
 
+import { getNote } from "@/lib/services/notes";
 import type { Note } from "@/types";
 
 function errorCode(error: PostgrestSingleResponse<unknown>["error"]): string | undefined {
@@ -148,6 +149,21 @@ describe("create_note", () => {
       p_content: "",
     });
     expect(errorCode(neither.error)).toBe("22023");
+  });
+
+  it.each(roundTripContents())("round-trips $label content exactly", async ({ label, content }) => {
+    const npcTypeId = await findTypeId(tenantA.client, tenantA.campaignId, "npc");
+    const { data, error } = await callCreateNote(tenantA.client, {
+      p_campaign_id: tenantA.campaignId,
+      p_name: `Round trip ${label}`,
+      p_content: content,
+      p_type_id: npcTypeId,
+    });
+    expect(error).toBeNull();
+    expect(data?.content).toBe(content);
+
+    const stored = await getNote(tenantA.client, data?.id ?? "");
+    expect(stored?.content).toBe(content);
   });
 
   it("rejects tenant B using tenant A's campaign id with an existing type id, unchanged counts", async () => {

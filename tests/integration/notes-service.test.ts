@@ -152,6 +152,21 @@ describe("notes service", () => {
       expect(!foreign.success && foreign.reason).toBe("not_found");
     });
 
+    it("updateNote with A's campaign id and B's client maps to not_found and writes nothing", async () => {
+      const { id, typeId } = await makeNote("Svc Upd Protected", "original body");
+
+      const result = await updateNote(tenantB.client, tenantA.campaignId, id, {
+        name: "Svc Upd Hijacked",
+        content: "hijacked body",
+        type: { kind: "existing", id: typeId },
+      });
+      expect(!result.success && result.reason).toBe("not_found");
+
+      const stored = await getNote(tenantA.client, id);
+      expect(stored?.name).toBe("Svc Upd Protected");
+      expect(stored?.content).toBe("original body");
+    });
+
     it("updateNote maps a duplicate name to duplicate_name", async () => {
       await makeNote("Svc Upd Dup Taken");
       const { id, typeId } = await makeNote("Svc Upd Dup Other");

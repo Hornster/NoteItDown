@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase-js";
 
-import { createTestNote, createTestUser, jpegFixture, webpFixture } from "./helpers";
+import { createTestNote, createTestUser, expectRlsDenied, jpegFixture, webpFixture } from "./helpers";
 
 import { DB_CONSTRAINT } from "@/lib/constants/db-constraints";
 import { PG_ERROR } from "@/lib/constants/db-error-codes";
@@ -52,13 +52,6 @@ function rowFor(tenant: Tenant, note: Note, position: number, overrides: Record<
     alt_text: null,
     ...overrides,
   };
-}
-
-// Storage reports a policy denial as HTTP 400 with body statusCode "403"; asserting the message
-// proves the policy fired rather than some unrelated (network, MIME) failure.
-function expectRlsDenied(error: unknown) {
-  expect(error).toMatchObject({ statusCode: String(HTTP_STATUS.FORBIDDEN) });
-  expect((error as Error).message).toMatch(/row-level security/);
 }
 
 async function upload(client: SupabaseClient, path: string, body: Uint8Array = webpFixture()) {
@@ -174,10 +167,40 @@ describe("note_images table", () => {
     const foreignDelete = await b.client.from("note_images").delete().eq("note_id", note.id).select("id");
     expect(foreignDelete.data).toEqual([]);
 
+    // Zero rows from B must mean nothing was deleted: A's row is still there.
+    const stillThere = await a.client.from("note_images").select("id").eq("note_id", note.id);
+    expect(stillThere.data).toHaveLength(1);
+
     const del = await a.client.from("notes").delete().eq("id", note.id);
     expect(del.error).toBeNull();
     const after = await a.client.from("note_images").select("id").eq("note_id", note.id);
     expect(after.data).toEqual([]);
+  });
+});
+
+describe("note_images table: tenant B writes", () => {
+  it("denies B inserting a row for A's note and leaves A's alt_text untouched on B's update", async () => {
+    const note = await createTestNote(a.client, a.campaignId);
+    const inserted = await a.client
+      .from("note_images")
+      .insert(rowFor(a, note, 0, { alt_text: "A's alt" }))
+      .select("id")
+      .single<{ id: string }>();
+    expect(inserted.error).toBeNull();
+    const id = inserted.data?.id ?? "";
+
+    // Both fail the campaign-ownership check: with B's own path and with a path in A's folder.
+    const intoA = await b.client.from("note_images").insert(rowFor(b, note, 1));
+    expect(intoA.error?.code).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
+    const withAPath = await b.client.from("note_images").insert(rowFor(a, note, 1));
+    expect(withAPath.error?.code).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
+
+    const update = await b.client.from("note_images").update({ alt_text: "hijacked" }).eq("id", id).select("id");
+    expect(update.error).toBeNull();
+    expect(update.data).toEqual([]);
+
+    const rows = await a.client.from("note_images").select("id, alt_text").eq("note_id", note.id);
+    expect(rows.data).toEqual([{ id, alt_text: "A's alt" }]);
   });
 });
 
@@ -347,6 +370,43 @@ describe("note-images service flow", () => {
     if (urls.success) {
       expect((await fetch(urls.urls.url)).status).toBe(HTTP_STATUS.OK);
     }
+  });
+
+  it("tenant B cannot read A's committed image through the services (1.12)", async () => {
+    const note = await createTestNote(a.client, a.campaignId);
+    const upload = await prepareAndPut(note, true);
+    const committed = await commitImage(a.client, a.userId, a.campaignId, note.id, {
+      path: upload.image.path,
+      thumb_path: upload.thumbnail?.path ?? null,
+      width: 1000,
+      height: 800,
+      thumb_width: 512,
+      thumb_height: 410,
+      alt_text: "A secret map",
+    });
+    expect(committed.success).toBe(true);
+
+    // Positive control: the owner sees the row and gets real URLs, so B's empty results mean something.
+    const ownImages = await listNoteImages(a.client, note.id);
+    expect(ownImages).toHaveLength(1);
+    const imageId = ownImages[0]?.id ?? "";
+    const ownUrls = await getImageUrls(a.client, a.campaignId, note.id, imageId);
+    expect(ownUrls.success).toBe(true);
+    if (ownUrls.success) {
+      expect(ownUrls.urls.url).toMatch(/^http/);
+      expect(ownUrls.urls.thumb_url).toMatch(/^http/);
+    }
+    const ownViews = await toImageViews(a.client, ownImages);
+    expect(ownViews[0]?.thumb_url).toMatch(/^http/);
+
+    expect(await listNoteImages(b.client, note.id)).toEqual([]);
+    expect(await getImageUrls(b.client, a.campaignId, note.id, imageId)).toMatchObject({
+      success: false,
+      reason: "not_found",
+    });
+    const foreignViews = await toImageViews(b.client, ownImages);
+    expect(foreignViews).toHaveLength(1);
+    expect(foreignViews[0]?.thumb_url).toBeNull();
   });
 
   it("commits a JPEG (Safari fallback) with a .jpg path", async () => {

@@ -329,14 +329,14 @@ New auth calls: integration +2, http +4, e2e ≤5 → ~35 of 50 per 5 min in `lo
 
 #### Automated
 
-- [ ] 1.1 `npm run test:integration` passes, including `rls-policy-matrix.test.ts` and the extended files
-- [ ] 1.2 `npm run lint` passes
-- [ ] 1.3 `grep -rn "service_role\|SERVICE_ROLE" tests/` returns no hits
-- [ ] 1.4 `supabase/config.toml` has `sign_in_sign_ups = 50`
+- [x] 1.1 `npm run test:integration` passes, including `rls-policy-matrix.test.ts` and the extended files
+- [x] 1.2 `npm run lint` passes
+- [x] 1.3 `grep -rn "service_role\|SERVICE_ROLE" tests/` returns no hits
+- [x] 1.4 `supabase/config.toml` has `sign_in_sign_ups = 50`
 
 #### Manual
 
-- [ ] 1.5 Temporarily weakening one policy locally makes a matrix row fail; revert afterwards
+- [x] 1.5 Temporarily weakening one policy locally makes a matrix row fail; revert afterwards
 
 ### Phase 2: HTTP — forged-ID route matrix
 

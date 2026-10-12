@@ -7,7 +7,7 @@ import { createClient, type PostgrestResponse, type SupabaseClient } from "@supa
  * Relies on local email confirmations being off (same assumption as scripts/smoke.mjs):
  * signUp returns a session directly, with no separate signInWithPassword call.
  *
- * Auth rate-limit budget: local GoTrue allows 30 sign_in_sign_ups per 5 min per IP,
+ * Auth rate-limit budget: local GoTrue allows 50 sign_in_sign_ups per 5 min per IP,
  * shared with the smoke step that runs right after in CI. Call this once per test file
  * (in beforeAll) per tenant, not once per test.
  */
