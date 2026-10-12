@@ -11,7 +11,6 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - Avoid orphan horizontal work such as "build the whole database", "build all API endpoints", or "design the whole UI" before the first user-visible flow.
 - Roadmap is not a calendar estimate. Do not invent dates, story points, or sprint velocity unless the user explicitly asks for a separate planning artifact.
 
-
 ## Foundation paths
 
 - `context/foundation/tech-stack.md` — input (Lesson 2 hand-off, hard constraints)
@@ -25,7 +24,6 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `context/changes/<change-id>/change.md` - change identity
 - `context/changes/<change-id>/plan.md` - implementation contract
 - `context/changes/<change-id>/plan-brief.md` - compressed handoff
-
 
 ## Commands
 
@@ -94,6 +92,7 @@ Integrations: `@astrojs/react`, `@astrojs/cloudflare`, `@astrojs/sitemap`.
 ## CI
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR to `main`, and on demand via `workflow_dispatch` (Actions → CI → Run workflow, or `gh workflow run ci.yml --ref <branch>`):
+
 - `ci` — `npx astro sync`, lint, unit tests, hook proof (`npm run test:hooks`), `npx astro check`, then build. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets.
 - `local-stack` — starts local Supabase (CLI pinned), runs integration tests, builds, runs `npm run test:http`, runs `npm run test:e2e` (uploads a `playwright-report` artifact with traces on failure), then `npm run smoke` against a preview on port 4321. No secrets needed.
 - `deploy` — `npx wrangler deploy`, only on push to `main` after `ci` and `local-stack` pass; dispatched runs never deploy.
@@ -123,4 +122,5 @@ For implementation purposes with subagents aim to use Sonnet with Medium effort.
 <!-- END @przeprogramowani/10x-cli -->
 
 ## Creating, planning, implementing changes
+
 All new changes should end up in their own branch. Merging with main should be done after completed implementation review or after archiving.
