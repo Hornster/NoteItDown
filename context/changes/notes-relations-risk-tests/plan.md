@@ -329,25 +329,25 @@ New auth calls: integration +2, http +4, e2e ≤5 → ~35 of 50 per 5 min in `lo
 
 #### Automated
 
-- [x] 1.1 `npm run test:integration` passes, including `rls-policy-matrix.test.ts` and the extended files
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `grep -rn "service_role\|SERVICE_ROLE" tests/` returns no hits
-- [x] 1.4 `supabase/config.toml` has `sign_in_sign_ups = 50`
+- [x] 1.1 `npm run test:integration` passes, including `rls-policy-matrix.test.ts` and the extended files — deb66e6
+- [x] 1.2 `npm run lint` passes — deb66e6
+- [x] 1.3 `grep -rn "service_role\|SERVICE_ROLE" tests/` returns no hits — deb66e6
+- [x] 1.4 `supabase/config.toml` has `sign_in_sign_ups = 50` — deb66e6
 
 #### Manual
 
-- [x] 1.5 Temporarily weakening one policy locally makes a matrix row fail; revert afterwards
+- [x] 1.5 Temporarily weakening one policy locally makes a matrix row fail; revert afterwards — deb66e6
 
 ### Phase 2: HTTP — forged-ID route matrix
 
 #### Automated
 
-- [ ] 2.1 `npm run build && npm run test:http` passes (route-guard, session-revocation and forged-id)
-- [ ] 2.2 `npm run lint` passes
+- [x] 2.1 `npm run build && npm run test:http` passes (route-guard, session-revocation and forged-id)
+- [x] 2.2 `npm run lint` passes
 
 #### Manual
 
-- [ ] 2.3 Temporarily removing the note-to-campaign check in `notes/[noteId].astro` makes a 1.14 row fail; revert afterwards
+- [x] 2.3 Temporarily removing the note-to-campaign check in `notes/[noteId].astro` makes a 1.14 row fail; revert afterwards
 
 ### Phase 3: E2E — forged URL, note CRUD with pinned notice, map click
 

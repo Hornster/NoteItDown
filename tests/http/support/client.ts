@@ -3,6 +3,8 @@ import { HTTP_BASE_URL } from "../server";
 export interface Jar {
   header(): string;
   store(res: Response): void;
+  /** Plants a cookie the way a browser (or an attacker) could set one by hand. */
+  set(name: string, value: string): void;
   clone(): Jar;
 }
 
@@ -18,6 +20,9 @@ function makeJar(initial: Map<string, string>): Jar {
         if (expired) cookies.delete(name.trim());
         else cookies.set(name.trim(), rest.join("="));
       }
+    },
+    set(name, value) {
+      cookies.set(name, value);
     },
     clone: () => makeJar(cookies),
   };

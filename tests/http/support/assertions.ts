@@ -19,3 +19,18 @@ export function expectApiUnauthorized(res: SendResult): void {
   const error = (parsed as { error: string }).error;
   expect(error.length).toBeGreaterThan(0);
 }
+
+/** A denied-by-ownership API request: 404 JSON `{ error }` (shape only, never wording). */
+export function expectApiNotFound(res: SendResult): void {
+  expect(res.status).toBe(HTTP_STATUS.NOT_FOUND);
+  expect(res.contentType).toContain("application/json");
+  const parsed: unknown = JSON.parse(res.body);
+  expect(parsed).toEqual(expect.objectContaining({ error: expect.any(String) as unknown }));
+}
+
+/** The response body must not contain any of the given identifying strings. */
+export function expectBodyLacks(res: SendResult, secrets: readonly string[]): void {
+  for (const secret of secrets) {
+    expect(res.body).not.toContain(secret);
+  }
+}

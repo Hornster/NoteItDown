@@ -4,8 +4,9 @@ import { HTTP_STATUS } from "@/lib/constants/http-status";
 
 import { createTestUser } from "../support/test-user";
 import { expectApiUnauthorized, expectSigninRedirect } from "./support/assertions";
-import { createJar, send, type Jar } from "./support/client";
+import { send, type Jar } from "./support/client";
 import { protectedApi, protectedPages } from "./support/route-inventory";
+import { signInJar } from "./support/session";
 
 const pages = protectedPages();
 const api = protectedApi();
@@ -19,16 +20,7 @@ let preSignout: Jar;
 beforeAll(async () => {
   const user = await createTestUser();
   campaignId = user.campaignId;
-  liveJar = createJar();
-
-  const signin = await send("/api/auth/signin", {
-    method: "POST",
-    jar: liveJar,
-    form: { email: user.email, password: user.password },
-  });
-  expect(signin.status).toBe(302);
-  expect(signin.location).toBe("/dashboard");
-  expect(liveJar.header()).toContain("sb-");
+  liveJar = await signInJar(user);
 
   preSignout = liveJar.clone();
 });
