@@ -183,7 +183,7 @@ Three browser scenarios: one forged-URL isolation check (Risk #1), note create/e
 - `deleted(name)` → `Deleted "<name>".`
 - `noRelationsTouched` → `No relations touched.`
 
-Each `<p>` inside the `role="status"` notice is asserted with exact full text (`toHaveText` per line, line count asserted), and relation links' `href`s point to `/campaigns/{cid}/notes/{id}`. Scenarios run as **one `test()` with a `test.step` per scenario** (Playwright gives each `test()` a fresh context, so separate tests would each cost a UI sign-in): one seeded user (`createTestUser`, 1 auth call), signed in once through the UI (1 auth call); notes created via the UI form:
+Each `<p>` inside the `role="status"` notice is asserted with exact full text (`toHaveText` per line, line count asserted), and relation links' `href`s point to `/campaigns/{cid}/notes/{id}`. Scenarios run as **one `test()` with a `test.step` per scenario** (Playwright gives each `test()` a fresh context, so separate tests would each cost a UI sign-in; the test calls `test.setTimeout(120_000)` with a one-line comment, since ~25 page loads would exceed the 30 s default): one seeded user (`createTestUser`, 1 auth call), signed in once through the UI (1 auth call); notes created via the UI form:
 - create a note → lands on its page with the entered content;
 - edit adding a mention → saved + added line;
 - edit removing it → saved + removed line;
