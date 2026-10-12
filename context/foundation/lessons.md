@@ -50,3 +50,10 @@
 - **Problem**: Under `astro dev`, the Cloudflare dev proxy (`@cloudflare/vite-plugin` → miniflare → undici) fails the request that follows any response sent without reading the request body. A 500 seen only in dev looks like an app bug and costs debugging time.
 - **Rule**: Run smoke, `test:http` and e2e against the production preview (`npm run build && npm run preview`). Before treating a 500 from `astro dev` as an app bug, reproduce it against the preview; if it only happens in dev right after a rejected request with a body, it is this known issue.
 - **Applies to**: implement, impl-review
+
+## Weaken both notes SELECT and UPDATE policies when break-testing RLS
+
+- **Context**: RLS, database policies testing
+- **Problem**: Loosening only one policy (either notes_select_own_campaign or notes_update_own_campaign) will not catch access violation of user B to user A's notes.
+- **Rule**: Whenever testing RLS access control over notes between users make sure to weaken both notes_select_own_campaign and notes_update_own_campaign policies.
+- **Applies to**: plan, plan-review, implement, impl-review
