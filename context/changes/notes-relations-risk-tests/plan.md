@@ -342,25 +342,25 @@ New auth calls: integration +2, http +4, e2e ≤5 → ~35 of 50 per 5 min in `lo
 
 #### Automated
 
-- [x] 2.1 `npm run build && npm run test:http` passes (route-guard, session-revocation and forged-id)
-- [x] 2.2 `npm run lint` passes
+- [x] 2.1 `npm run build && npm run test:http` passes (route-guard, session-revocation and forged-id) — 533cd96
+- [x] 2.2 `npm run lint` passes — 533cd96
 
 #### Manual
 
-- [x] 2.3 Temporarily removing the note-to-campaign check in `notes/[noteId].astro` makes a 1.14 row fail; revert afterwards
+- [x] 2.3 Temporarily removing the note-to-campaign check in `notes/[noteId].astro` makes a 1.14 row fail; revert afterwards — 533cd96
 
 ### Phase 3: E2E — forged URL, note CRUD with pinned notice, map click
 
 #### Automated
 
-- [ ] 3.1 `npm run build && npm run test:e2e` passes (existing auth/signin specs + new ones)
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `grep -n "MESSAGES" tests/e2e/notes-relations.spec.ts` returns no hits
+- [x] 3.1 `npm run build && npm run test:e2e` passes (existing auth/signin specs + new ones)
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `grep -n "MESSAGES" tests/e2e/notes-relations.spec.ts` returns no hits
 
 #### Manual
 
-- [ ] 3.4 Temporarily changing one notice phrase makes the wording scenario fail with a readable diff; revert afterwards
-- [ ] 3.5 The `UI_BASELINE` literals match the copy approved during planning
+- [x] 3.4 Temporarily changing one notice phrase makes the wording scenario fail with a readable diff; revert afterwards
+- [x] 3.5 The `UI_BASELINE` literals match the copy approved during planning
 
 ### Phase 4: Docs and scenario register
 
