@@ -14,7 +14,7 @@
 ## HTTP route guard (Vitest `http`)
 
 - Prerequisites: local Supabase running, a fresh `npm run build`, and port 4323 free (the project starts its own production preview there; stop stale servers first).
-- `npm run test:http` runs `tests/http/**/*.test.ts`: an anonymous route matrix derived from the `src/pages` file tree (every non-public page redirects to sign-in, every API handler returns 401) plus session-revocation and path-variant checks. Public pages are listed in `PUBLIC_ROUTES` (`tests/http/support/route-inventory.ts`).
+- `npm run test:http` runs `tests/http/**/*.test.ts`: an anonymous route matrix derived from the `src/pages` file tree (every non-public page redirects to sign-in, every API handler returns 401) plus session-revocation and path-variant checks, and a signed-in forged-ID matrix (`tests/http/forged-id.test.ts`: user B's session on user A's campaign, note and image ids must get 404 with no A data). Public pages are listed in `PUBLIC_ROUTES` (`tests/http/support/route-inventory.ts`).
 - Fails loudly when Supabase or env is missing; it never skips.
 
 ## Agent hooks proof (Vitest)
@@ -25,7 +25,7 @@
 ## End-to-end (Playwright)
 
 - `npx playwright install chromium` downloads the Chromium browser Playwright drives (once per machine or Playwright upgrade).
-- `npm run test:e2e` runs the browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself.
+- `npm run test:e2e` runs the browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself. Scenarios: sign-in and auth session chain, note create/edit/delete with the pinned relation-change notice wording, memory-map node click, and a forged note URL (`notes-relations.spec.ts`).
 - `npx playwright show-trace <zip>` opens a `trace.zip` downloaded from a failed CI run's `playwright-report` artifact.
 
 ## Smoke and infrastructure

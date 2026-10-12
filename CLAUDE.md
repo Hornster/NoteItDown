@@ -37,9 +37,9 @@ Skills must not write to `context/archive/`. Archived changes are immutable; if 
 - `npm run test:unit` — Vitest unit suite (`src/**/*.test.ts`). No external services required.
 - `npm run test:hooks` — Vitest `hooks` project (`tests/hooks/`): proves the agent hooks below against stubbed eslint/vitest in a temp git repo. Needs `jq`, git ≥ 2.31 and bash ≥ 4 (hooks too), no Supabase.
 - `npm run test:integration` — Vitest integration suite (`tests/integration/**/*.test.ts`). Requires local Supabase running (`npx supabase start`); refuses to run against a non-local `SUPABASE_URL` and fails loudly (not silently) if Supabase isn't reachable.
-- `npm run test:http` — Vitest `http` project (`tests/http/`): raw-HTTP route-guard matrix (anonymous and signed-out access to every page and API route) against its own production preview on port 4323. Requires local Supabase and a fresh `npm run build`; fails loudly when either is missing.
+- `npm run test:http` — Vitest `http` project (`tests/http/`): raw-HTTP route-guard matrix (anonymous and signed-out access to every page and API route) plus a signed-in forged-ID matrix (`forged-id.test.ts`: user B on user A's ids) against its own production preview on port 4323. Requires local Supabase and a fresh `npm run build`; fails loudly when either is missing.
 - `npm test` — runs the unit, hooks and integration projects; not `http` (needs a build) and not e2e.
-- `npm run test:e2e` — Playwright (Chromium) browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself. Requires local Supabase and a fresh `npm run build`; first run needs `npx playwright install chromium`. Fails loudly (preflight error naming Supabase) when Supabase or env is missing.
+- `npm run test:e2e` — Playwright (Chromium) browser scenarios in `tests/e2e/` (auth session, note CRUD with the relation-change notice, memory-map click, forged note URL) against the production preview on port 4322, which Playwright starts itself. Requires local Supabase and a fresh `npm run build`; first run needs `npx playwright install chromium`. Fails loudly (preflight error naming Supabase) when Supabase or env is missing.
 
 Full testing command reference with prerequisites: `TESTING.md`.
 

@@ -353,24 +353,24 @@ New auth calls: integration +2, http +4, e2e ≤5 → ~35 of 50 per 5 min in `lo
 
 #### Automated
 
-- [x] 3.1 `npm run build && npm run test:e2e` passes (existing auth/signin specs + new ones)
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 `grep -n "MESSAGES" tests/e2e/notes-relations.spec.ts` returns no hits
+- [x] 3.1 `npm run build && npm run test:e2e` passes (existing auth/signin specs + new ones) — 34a8b31
+- [x] 3.2 `npm run lint` passes — 34a8b31
+- [x] 3.3 `grep -n "MESSAGES" tests/e2e/notes-relations.spec.ts` returns no hits — 34a8b31
 
 #### Manual
 
-- [x] 3.4 Temporarily changing one notice phrase makes the wording scenario fail with a readable diff; revert afterwards
-- [x] 3.5 The `UI_BASELINE` literals match the copy approved during planning
+- [x] 3.4 Temporarily changing one notice phrase makes the wording scenario fail with a readable diff; revert afterwards — 34a8b31
+- [x] 3.5 The `UI_BASELINE` literals match the copy approved during planning — 34a8b31
 
 ### Phase 4: Docs and scenario register
 
 #### Automated
 
-- [ ] 4.1 `npx prettier --check context/foundation/test-plan.md TESTING.md CLAUDE.md` passes
-- [ ] 4.2 `grep -nE "TBD — see §3 Phase 2|Phase 2 \(TBD\)" context/foundation/test-plan.md` returns no hits
-- [ ] 4.3 `grep -n "30 / 5 min" context/foundation/test-plan.md` returns no hits
+- [x] 4.1 `npx prettier --check context/foundation/test-plan.md TESTING.md CLAUDE.md` passes
+- [x] 4.2 `grep -nE "TBD — see §3 Phase 2|Phase 2 \(TBD\)" context/foundation/test-plan.md` returns no hits
+- [x] 4.3 `grep -n "30 / 5 min" context/foundation/test-plan.md` returns no hits
 
 #### Manual
 
-- [ ] 4.4 Every research scenario id appears in the §6.6 register with a test reference or "not applicable"
+- [x] 4.4 Every research scenario id appears in the §6.6 register with a test reference or "not applicable"
 - [ ] 4.5 CI run on the branch is green across `ci` and `local-stack`
