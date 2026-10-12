@@ -178,6 +178,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 - Known defects deliberately left for S-04 (logged, not pinned, not fixed):
   - an uppercase UUID in `campaignId`/`noteId` on image upload/commit returns 500 (`isUuid` is case-insensitive, `isOwnImagePath` embeds the URL ids verbatim, the DB path-shape check is lowercase);
   - a replayed image commit returns 500 when a free slot exists (unique `path`, 23505, falls into "unexpected"); `note-images.test.ts` asserts only that the replay fails and the objects survive.
+- Constants gap left for S-04 (impl-review F3): `HTTP_STATUS` has no `FOUND`, so `tests/http/` asserts redirects with a literal `302` (`support/assertions.ts`, `support/session.ts`, `session-revocation.test.ts`, `forged-id.test.ts`). S-04 adds `HTTP_STATUS.FOUND` and replaces those literals.
 - Named scenario register (scenario ids from `research.md`; test names abbreviated). Matrix cell names in `rls-policy-matrix.test.ts` are the `it.each` `name` values.
 
 | Id   | Scenario                                                               | Test (file → name)                                                                                                                                                                                                                                                                                               | Verdict / notes                                         |

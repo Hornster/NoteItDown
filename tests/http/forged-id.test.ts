@@ -35,6 +35,7 @@ let b: Tenant;
 let aJar: Jar;
 let bJar: Jar;
 let campaign2Id = "";
+let bCampaign2Id = "";
 let noteA = "";
 let note2 = "";
 let imageA = "";
@@ -92,6 +93,10 @@ beforeAll(async () => {
   });
   if (!committed.success) throw new Error(`seed: commitImage failed: ${committed.reason}`);
   imageA = committed.image.id;
+
+  const bSecond = await createCampaign(b.client, b.userId, `Forged-B-secondary-${RUN}`);
+  if (!bSecond.success) throw new Error("seed: creating B's second campaign failed");
+  bCampaign2Id = bSecond.campaign.id;
 });
 
 interface ApiRow {
@@ -151,6 +156,21 @@ describe("positive control", () => {
     const res = await send(`/campaigns/${a.campaignId}/notes/${noteA}`, { jar: aJar });
     expect(res.status).toBe(HTTP_STATUS.OK);
     expect(res.body).toContain(A_NOTE_NAME);
+  });
+
+  // The API rows below only prove denial if the same routes serve their owner.
+  it("A's own jar is served A's image through the image API", async () => {
+    const res = await send(`/api/campaigns/${a.campaignId}/notes/${noteA}/images/${imageA}`, { jar: aJar.clone() });
+    expect(res.status).toBe(HTTP_STATUS.OK);
+  });
+
+  it("A's own jar gets an upload slot on A's note", async () => {
+    const res = await send(`/api/campaigns/${a.campaignId}/notes/${noteA}/images/uploads`, {
+      method: "POST",
+      jar: aJar.clone(),
+      json: { mime: "image/webp", with_thumbnail: false },
+    });
+    expect(res.status).toBe(HTTP_STATUS.OK);
   });
 });
 
@@ -275,6 +295,15 @@ describe("1.2 forged last_campaign_id cookie (route level)", () => {
     expect(res.status).toBe(302);
     expect(res.location).toBe(expected(b.campaignId));
     expect(res.body).not.toContain(a.campaignId);
+  });
+
+  // Control: B2 is newer than B's oldest (fallback) campaign, so landing on it proves the cookie is read.
+  it("GET /dashboard honours B's own non-default campaign cookie (control)", async () => {
+    const jar = bJar.clone();
+    jar.set(LAST_CAMPAIGN_COOKIE, bCampaign2Id);
+    const res = await send("/dashboard", { jar });
+    expect(res.status).toBe(302);
+    expect(res.location).toBe(`/campaigns/${bCampaign2Id}`);
   });
 });
 

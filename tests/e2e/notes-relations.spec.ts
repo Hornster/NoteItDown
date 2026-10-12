@@ -112,6 +112,9 @@ test("note create, edit and delete through the UI show the approved relation not
     }
     await page.goto(`/campaigns/${cid}/notes/${ids[BRASSWICK]}`);
     await expect(page.getByText("Plain text.", { exact: true })).toBeVisible();
+    // The notice island renders nothing (no button for waitForHydration), so wait for it to hydrate
+    // before asserting that no notice appeared.
+    await page.locator('astro-island[component-url*="RelationChangeNotice"]:not([ssr])').waitFor({ state: "attached" });
     await expect(page.getByRole("status")).toHaveCount(0);
   });
 
