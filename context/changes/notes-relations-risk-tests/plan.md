@@ -366,11 +366,11 @@ New auth calls: integration +2, http +4, e2e ≤5 → ~35 of 50 per 5 min in `lo
 
 #### Automated
 
-- [x] 4.1 `npx prettier --check context/foundation/test-plan.md TESTING.md CLAUDE.md` passes
-- [x] 4.2 `grep -nE "TBD — see §3 Phase 2|Phase 2 \(TBD\)" context/foundation/test-plan.md` returns no hits
-- [x] 4.3 `grep -n "30 / 5 min" context/foundation/test-plan.md` returns no hits
+- [x] 4.1 `npx prettier --check context/foundation/test-plan.md TESTING.md CLAUDE.md` passes — dd0f171
+- [x] 4.2 `grep -nE "TBD — see §3 Phase 2|Phase 2 \(TBD\)" context/foundation/test-plan.md` returns no hits — dd0f171
+- [x] 4.3 `grep -n "30 / 5 min" context/foundation/test-plan.md` returns no hits — dd0f171
 
 #### Manual
 
-- [x] 4.4 Every research scenario id appears in the §6.6 register with a test reference or "not applicable"
-- [ ] 4.5 CI run on the branch is green across `ci` and `local-stack`
+- [x] 4.4 Every research scenario id appears in the §6.6 register with a test reference or "not applicable" — dd0f171
+- [x] 4.5 CI run on the branch is green across `ci` and `local-stack` — dd0f171
