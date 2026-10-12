@@ -66,7 +66,7 @@ Raise the local auth cap, add one RLS policy-matrix file (Risk #3 and the direct
 
 **Intent**: Give CI headroom for S-02's ~10 new auth calls (24 → ~34) without flaky 429s; the user chose 50 and will raise it further if needed.
 
-**Contract**: `[auth.rate_limit] sign_in_sign_ups = 50` with a one-line comment naming the shared local-stack budget. Update the `createTestUser` JSDoc budget sentence from 30 to 50; keep the "create the minimum users" guidance.
+**Contract**: `[auth.rate_limit] sign_in_sign_ups = 50` with a one-line comment naming the shared local-stack budget. Update the `createTestUser` JSDoc budget sentence from 30 to 50; keep the "create the minimum users" guidance. A running local GoTrue only picks the new value up after `npx supabase stop && npx supabase start` (CI starts fresh); restart before running the suites, otherwise local runs still cap at 30.
 
 #### 2. RLS policy matrix
 
@@ -74,10 +74,15 @@ Raise the local auth cap, add one RLS policy-matrix file (Risk #3 and the direct
 
 **Intent**: Prove per table × operation that the owner keeps CRUD on existing rows, owner-denied operations stay denied, and user B gets nothing — reusing existing tests where they already fit (1.1–1.11 remain where they are; the matrix covers only the untested cells).
 
-**Contract**: One tenant pair in `beforeAll` (2 auth calls), A's rows seeded via A's client (campaign, two notes so a relation exists, a custom note type). `it.each` tables:
+**Contract**: One tenant pair in `beforeAll` (2 auth calls). Fixtures are split so no row depends on another's order:
+- **Shared, never mutated**: A's rows seeded via A's client (campaign, two related notes, a custom note type), used only by select, owner-denied and B cells.
+- **Per-row disposable**: every owner `delete`/`insert`/`update` cell creates its own target inside the row (a throwaway campaign to delete, a third note to update/delete, an unrelated note pair without mentions for the `relations` insert/delete — never the auto-detected pair, which `relations_unique_pair` already holds and re-detection rewrites on any note write).
+- Every "unchanged" owner re-read first asserts the row still exists, so a B "zero rows" result can't come from an already-deleted row.
+
+`it.each` tables:
 - Owner on existing rows (3.2): select / insert / update granted columns / delete on `campaigns`, `notes`, `relations`, `note_types` (select + insert only), `note_images` (alt_text update).
-- Owner denied (3.3): `campaigns.owner_id` update and `notes.campaign_id` update → 42501; `relations` update and `note_types` update/delete → zero rows affected and the owner re-read unchanged.
-- B direct-table (3.1): B `insert` into A's campaign for `notes`/`relations`/`note_types` → denied (RLS error), B `update`/`delete` on A's `campaigns`/`notes`/`relations` rows → zero rows, then A re-reads and the row is unchanged.
+- Owner denied (3.3): `campaigns.owner_id` update and `notes.campaign_id` update → `PG_ERROR.INSUFFICIENT_PRIVILEGE`; `relations` update and `note_types` update/delete → zero rows affected and the owner re-read unchanged; storage `upload(path, …, { upsert: true })` over the owner's own existing object in the note-images bucket → denied (no `storage.objects` UPDATE policy) and the object unchanged (same `expectRlsDenied` shape as `note-images.test.ts`).
+- B direct-table (3.1): B `insert` into A's campaign for `notes`/`relations`/`note_types` → `PG_ERROR.INSUFFICIENT_PRIVILEGE` (RLS WITH CHECK fires before FK checks), B `update`/`delete` on A's `campaigns`/`notes`/`relations` rows → zero rows, then A re-reads and the row is unchanged.
 
 #### 3. Extensions to existing tests
 
@@ -90,8 +95,8 @@ Raise the local auth cap, add one RLS policy-matrix file (Risk #3 and the direct
 - C.1 (`campaigns-service.test.ts:136`): A's list contains none of B's campaign ids.
 - 1.7 (`notes-service.test.ts:144`): add the case with **A's campaign id** and B's client; A re-reads name/content unchanged.
 - 1.10 (`note-images.test.ts:167`): A re-reads its `note_images` row after B's delete; B insert into `note_images` for A's note is denied; B `alt_text` update on A's row affects zero rows and A's value is unchanged.
-- 1.12 (`note-images.test.ts`, new `it`): B calling `getImageUrls`, `listNoteImages` and `toImageViews` against A's note/image gets no A data (empty / no signed URL).
-- 5.1: content round-trip on create (`create-note-function.test.ts`) and update (`note-edit-delete-functions.test.ts`) for multi-line text, Unicode/emoji, leading/trailing whitespace and content near the 20000-char limit; re-read via `getNote` and compare exactly.
+- 1.12 (`note-images.test.ts`, new `it`): seed a real image via `prepareUpload` → storage upload → `commitImage` (pattern at `note-images.test.ts:340`). Positive control first: A's `listNoteImages`, `getImageUrls` and `toImageViews` return the row and non-null URLs. Then B: `listNoteImages` → `[]`, `getImageUrls` → `not_found`, `toImageViews` with A's `NoteImage` objects → `thumb_url: null`.
+- 5.1: content round-trip on create (`create-note-function.test.ts`) and update (`note-edit-delete-functions.test.ts`) for multi-line text, Unicode/emoji, leading/trailing whitespace and a limit case; re-read via `getNote` and compare exactly. Limit case: exactly 20000 characters built from multibyte UTF-8 BMP characters (e.g. `ż`, `ł`, `é`) mixed with spaces/newlines, including leading/trailing whitespace — each is 1 code point (DB `char_length`) and 1 UTF-16 unit (zod `.max`), so both layers agree at the boundary. Emoji (astral, 1 code point but 2 UTF-16 units) stay in a separate short string. UTF-8 bytes can't be the unit tests-only: neither the DB nor zod counts bytes.
 - 5.4 (`note-edit-delete-functions.test.ts`, sibling of :119/:142): one edit both adds and removes a relation; both `added` and `removed` are non-empty and correct.
 
 ### Success Criteria:
@@ -105,7 +110,7 @@ Raise the local auth cap, add one RLS policy-matrix file (Risk #3 and the direct
 
 #### Manual Verification:
 
-- Temporarily weakening one policy locally makes a matrix row fail; revert afterwards (e.g. drop `notes_update_own_campaign`'s `using` clause in an uncommitted scratch migration)
+- Temporarily weakening one policy locally makes a matrix row fail; revert afterwards (e.g. an uncommitted scratch migration that drops `notes_update_own_campaign` and recreates it with `using (true)`, applied via `npx supabase db reset`; revert by deleting the scratch file and running `npx supabase db reset` again)
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation from the human that the manual testing was successful before proceeding to the next phase.
 
@@ -125,7 +130,7 @@ Pin the route-boundary isolation (Risk #1): B's signed-in session on A's ids acr
 
 **Intent**: Extract the inline signin from `session-revocation.test.ts:24-31` so both files share it.
 
-**Contract**: `signInJar(user: { email; password }): Promise<Jar>` — POSTs `/api/auth/signin` with `Origin`, asserts 302 to `/dashboard` and an `sb-` cookie. `session-revocation.test.ts` switches to it with unchanged behaviour.
+**Contract**: `signInJar(user: { email; password }): Promise<Jar>` — POSTs `/api/auth/signin` with `Origin`, asserts 302 to `/dashboard` and an `sb-` cookie. `session-revocation.test.ts` switches to it with unchanged behaviour. Add `set(name, value)` to `Jar` in `client.ts` so a test can plant a cookie (the jar otherwise only stores `Set-Cookie` from responses).
 
 #### 2. Forged-ID matrix
 
@@ -133,11 +138,11 @@ Pin the route-boundary isolation (Risk #1): B's signed-in session on A's ids acr
 
 **Intent**: For every route taking a campaign or note id, B gets 404 with none of A's identifying data in the body, and A's data is unchanged afterwards (`test-plan.md:55`).
 
-**Contract**: `beforeAll`: two `createTestUser` + two `signInJar` (4 auth calls). A seeds through its client: a second campaign, a note with distinctive name/content in campaign 1, a note in campaign 2, and one committed image on A's note (upload via storage + commit, same pattern as `note-images.test.ts`). Rows:
-- 1.13 pages (B jar, GET → 404, body lacks A's note/campaign names): `/campaigns/{A}`, `/campaigns/{A}/edit`, `/campaigns/{A}/map`, `/campaigns/{A}/notes/new`, `/campaigns/{A}/notes/{noteA}`, `/campaigns/{A}/notes/{noteA}/edit`, `/notes/{noteA}`.
-- 1.13 API (B jar, JSON 404): `PATCH /api/campaigns/{A}`, `POST /api/campaigns/{A}/notes`, `PATCH` and `DELETE /api/campaigns/{A}/notes/{noteA}`, and the image routes `POST .../images/uploads`, `POST .../images`, `GET|PATCH|DELETE .../images/{imageA}` — with schema-valid bodies.
+**Contract**: `beforeAll`: two `createTestUser` + two `signInJar` (4 auth calls). A seeds through its client: renames its auto-created campaign to a distinctive unique name (every user's first campaign is `'My Campaign'`, which B's own Topbar also renders), a second campaign with a distinctive unique name, a note with distinctive name/content in campaign 1, a note in campaign 2, and one committed image on A's note (upload via storage + commit, same pattern as `note-images.test.ts`). Rows:
+- 1.13 pages (B jar, GET → 404, body lacks A's distinctive campaign names and note name/content): `/campaigns/{A}`, `/campaigns/{A}/edit`, `/campaigns/{A}/map`, `/campaigns/{A}/notes/new`, `/campaigns/{A}/notes/{noteA}`, `/campaigns/{A}/notes/{noteA}/edit`, `/notes/{noteA}`.
+- 1.13 API (B jar, JSON 404): `PATCH /api/campaigns/{A}`, `POST /api/campaigns/{A}/notes`, `PATCH` and `DELETE /api/campaigns/{A}/notes/{noteA}`, and the image routes `POST .../images/uploads`, `POST .../images`, `GET|PATCH|DELETE .../images/{imageA}` — with schema-valid bodies. The commit (`POST .../images`) body must also pass `isOwnImagePath` for the caller, or it answers 400 before the ownership check: `path` = `` `${b.userId}/${campaignId}/${noteId}/${crypto.randomUUID()}.webp` `` (the ids under test), `thumb_path`/`thumb_width`/`thumb_height` null, `width`/`height` 1, `alt_text` null.
 - 1.14 mixed ids: B's own `campaignId` with A's `noteId` on the note pages and note/image APIs → 404; A's own note under A's **other** campaign (A jar) → 404.
-- Forged cookie (1.2 route level): B jar plus `last_campaign_id={A}` on `/dashboard`, `/map`, `/notes/new`, `/campaigns` → 302 to B's own campaign path (with `/map`, `/notes/new` suffixes).
+- Forged cookie (1.2 route level): a fresh clone of B's post-signin jar (earlier rows plant `last_campaign_id={B}` via `rememberCampaign`) with `jar.set("last_campaign_id", A)`, first asserting `jar.header()` contains it, on `/dashboard`, `/map`, `/notes/new`, `/campaigns` → 302 to B's own campaign path (with `/map`, `/notes/new` suffixes).
 - After all writes: A's client re-reads campaign name, note name/content and image row — unchanged.
 - Positive control: A's jar on its own note page → 200, so a 404 can't come from a broken setup.
 
@@ -150,7 +155,7 @@ Pin the route-boundary isolation (Risk #1): B's signed-in session on A's ids acr
 
 #### Manual Verification:
 
-- Temporarily removing the note-to-campaign check in `notes/[noteId].astro` makes a 1.14 row fail; revert afterwards (the `found?.campaign_id === campaign.id` check at :37)
+- Temporarily removing the note-to-campaign check in `notes/[noteId].astro` makes a 1.14 row fail; revert afterwards (the `found?.campaign_id === campaign.id` check at :37). Expected failure: the A-jar row (A's note under A's other campaign); the B-campaign + A-note row stays 404 because RLS hides A's note
 
 **Implementation Note**: Pause for manual confirmation before Phase 3.
 
@@ -178,7 +183,7 @@ Three browser scenarios: one forged-URL isolation check (Risk #1), note create/e
 - `deleted(name)` → `Deleted "<name>".`
 - `noRelationsTouched` → `No relations touched.`
 
-Each `<p>` inside the `role="status"` notice is asserted with exact full text (`toHaveText` per line, line count asserted), and relation links' `href`s point to `/campaigns/{cid}/notes/{id}`. Scenarios (one seeded user, signed in through the UI; notes created via the UI form):
+Each `<p>` inside the `role="status"` notice is asserted with exact full text (`toHaveText` per line, line count asserted), and relation links' `href`s point to `/campaigns/{cid}/notes/{id}`. Scenarios run as **one `test()` with a `test.step` per scenario** (Playwright gives each `test()` a fresh context, so separate tests would each cost a UI sign-in): one seeded user (`createTestUser`, 1 auth call), signed in once through the UI (1 auth call); notes created via the UI form:
 - create a note → lands on its page with the entered content;
 - edit adding a mention → saved + added line;
 - edit removing it → saved + removed line;
@@ -188,16 +193,31 @@ Each `<p>` inside the `role="status"` notice is asserted with exact full text (`
 - delete a note with relations → deleted + removed line;
 - delete a note without relations → deleted + "No relations touched.".
 
+Fixture (relation matching is bidirectional, case-insensitive, whole-word — `note_mentions`, `20260926120000_relation_detection.sql:10-60`; so names share no word with each other or with any content, and only the edited note's content ever mentions another note). Notes created via the UI: `Brasswick`, `Quillmoor`, `Zephyr Harbor`, `Larkspur Vale`, each with content `Plain text.`. All edits are to `Brasswick`:
+
+| Step | Brasswick content / action | Expected notice lines | Relations after |
+| --- | --- | --- | --- |
+| add (two names) | `Meets Quillmoor and Zephyr Harbor.` | Saved; `Relations added: Quillmoor, Zephyr Harbor` | B–Q, B–Z |
+| remove | `Meets Zephyr Harbor.` | Saved; `Relations removed: Quillmoor` | B–Z |
+| add + remove | `Meets Larkspur Vale.` | Saved; `Relations added: Larkspur Vale`; `Relations removed: Zephyr Harbor` | B–L |
+| content-only | `Meets Larkspur Vale again.` | Saved; `Relations unchanged.` | B–L |
+| type-only | another predefined type | Saved only | B–L |
+| map (M.2, §2) | open map, click `Larkspur Vale` | — | B–L |
+| delete with relations | delete `Brasswick` | `Deleted "Brasswick".`; `Relations removed: Larkspur Vale` | none |
+| delete without relations | delete `Quillmoor` | `Deleted "Quillmoor".`; `No relations touched.` | none |
+
+Builders take names in the server's order, `lower(name)` then id (`20260930120000_note_edit_delete_functions.sql`, `update_note`/`delete_note`). The delete confirmation has a second "Delete" button; scope the confirm click to `getByRole("alertdialog")`.
+
 #### 2. Forged URL and map scenarios
 
-**File**: `tests/e2e/isolation-and-map.spec.ts` (new) — or the same file in separate `describe`s, sharing seeded users
+**File**: `tests/e2e/notes-relations.spec.ts` (forged URL as a separate `test()`; map as a step of the CRUD `test()`)
 
 **Intent**: One UI-level forged-URL proof and one map navigation proof.
 
 **Contract**:
-- Forged URL (1.15): A seeded via `createTestUser` with a distinctive note (via A's client RPC); B seeded and signed in through the UI; `page.goto(A's note URL)` → response status 404 and A's note name/content not visible. Assert a session-only outcome first (B's own campaign URL + "Sign out" visible), per test-plan §6.3.
-- Map click (M.2): signed-in user with two related notes; open `/campaigns/{cid}/map`, wait for `.react-flow__node` (not `waitForHydration` — the map is `client:only`), click the node by note name → URL is `/campaigns/{cid}/notes/{noteId}`.
-- Auth calls total for the new specs ≤ 5 (state the count in a comment, like `auth-session.spec.ts:19`).
+- Forged URL (1.15), its own `test()` (3 auth calls): A seeded via `createTestUser` with a distinctive note (via A's client RPC); B seeded and signed in through the UI; `page.goto(A's note URL)` → response status 404 and A's note name/content not visible. Assert a session-only outcome first (B's own campaign URL + "Sign out" visible), per test-plan §6.3.
+- Map click (M.2): a `test.step` inside the CRUD `test()` (no extra auth call), run while two of its notes are still related (before the delete steps); open `/campaigns/{cid}/map`, wait for `.react-flow__node` (not `waitForHydration` — the map is `client:only`), click the node by note name → URL is `/campaigns/{cid}/notes/{noteId}`.
+- Auth calls total for the new specs = 5 (CRUD + map 2, forged URL 3); state the count in a comment, like `auth-session.spec.ts:19`.
 
 ### Success Criteria:
 
@@ -209,7 +229,7 @@ Each `<p>` inside the `role="status"` notice is asserted with exact full text (`
 
 #### Manual Verification:
 
-- Temporarily changing one notice phrase makes the wording scenario fail with a readable diff; revert afterwards (e.g. drop the colon after "Relations added")
+- Temporarily changing one notice phrase makes the wording scenario fail with a readable diff; revert afterwards (e.g. drop the colon after "Relations added"; stop any preview on 4322 — Playwright reuses it locally — then `npm run build && npm run test:e2e` must fail; revert, rebuild, rerun → green)
 - The `UI_BASELINE` literals match the copy approved during planning (see Key Decisions in `plan-brief.md`)
 
 **Implementation Note**: Pause for manual confirmation before Phase 4.
@@ -224,6 +244,14 @@ Record the named scenario register, cookbook patterns and logged defects so S-04
 
 ### Changes Required:
 
+#### 0. Formatting baseline
+
+**File**: `context/foundation/test-plan.md`, `TESTING.md`, `CLAUDE.md`
+
+**Intent**: `prettier --check` already fails on `test-plan.md` (~85 lines: §2 table padding, `*emph*` → `_emph_`) and `CLAUDE.md` (6 lines) before any Phase 4 edit; lint-staged would otherwise mix that reformat into the register diff.
+
+**Contract**: First step of the phase: `npx prettier --write` on the three files, committed alone as a formatting-only commit (no content changes). The content edits below follow in separate commits.
+
 #### 1. Test plan
 
 **File**: `context/foundation/test-plan.md`
@@ -231,32 +259,35 @@ Record the named scenario register, cookbook patterns and logged defects so S-04
 **Intent**: Close §3 Phase 2 and fill the TBD cookbook sections this phase owns.
 
 **Contract**:
-- §3 Phase 2 row: status `implemented`, change folder `context/changes/notes-relations-risk-tests/`.
+- §3 Phase 2 row: status `implemented`, change folder `context/changes/notes-relations-risk-tests/`, Test types `integration (policy matrix) + http forged-ID + targeted e2e`.
+- §6.3: the rate-limit sentence (`test-plan.md:137`, "30 / 5 min / IP") → 50.
 - §6.2: two-user cross-ownership pattern (`createTestUser` pair, assert "no row written" by owner re-read; RLS denial is silent).
 - §6.4: replace "(TBD)" with the forged-ID pattern (`signInJar`, B jar on A ids → 404, no A data, owner re-read; valid bodies on image routes).
 - §6.5: existing-rows owner-access / other-user-denial pattern pointing at `rls-policy-matrix.test.ts`.
 - §6.6 Phase 2 notes: the **named scenario register** (scenario id from research → test file/name, including "Fits" rows and C.2 not applicable), the `UI_BASELINE` approval date, and the two **known defects left for S-04** (uppercase-UUID 500 on image upload/commit; replayed image commit 500 via 23505).
-- §4 Stack / §8 ledger dates as touched.
+- §4 Stack: the test-base profile sentence adds the http forged-ID matrix (signed-in B on A's ids) and the UI note CRUD / notice / map e2e; the http row note mentions `forged-id.test.ts`.
+- §8: "Strategy (§1–§5) last reviewed" set to the date the phase lands.
 
 #### 2. Testing docs
 
-**File**: `TESTING.md`, `CLAUDE.md` (only where they state the auth rate-limit number or list suites' coverage)
+**File**: `TESTING.md`, `CLAUDE.md` (suite-coverage lines only; neither states the rate-limit number)
 
-**Intent**: Keep the documented rate cap (50) and coverage claims accurate.
+**Intent**: Keep the coverage claims accurate.
 
-**Contract**: Update any "30 / 5 min" mention to 50; mention the forged-ID http file and the new e2e specs where suites are described.
+**Contract**: Where suites are described — `CLAUDE.md` `npm run test:http` line ("route-guard matrix (anonymous and signed-out …)"), `TESTING.md:17` — mention the forged-ID http file; mention the new e2e specs where e2e coverage is described.
 
 ### Success Criteria:
 
 #### Automated Verification:
 
 - `npx prettier --check context/foundation/test-plan.md TESTING.md CLAUDE.md` passes
-- `grep -n "TBD — see §3 Phase 2" context/foundation/test-plan.md` returns no hits
+- `grep -nE "TBD — see §3 Phase 2|Phase 2 \(TBD\)" context/foundation/test-plan.md` returns no hits
+- `grep -n "30 / 5 min" context/foundation/test-plan.md` returns no hits
 
 #### Manual Verification:
 
 - Every research scenario id appears in the §6.6 register with a test reference or "not applicable" (1.1–1.15, 3.1–3.4, 5.1–5.5, C.1–C.3, M.1–M.2)
-- CI run on the branch is green across `ci` and `local-stack` (`gh workflow run ci.yml --ref notes-relations-risk-tests`)
+- CI run on the branch is green across `ci` and `local-stack`: after the user approves pushing the branch, `gh workflow run ci.yml --ref notes-relations-risk-tests`, and the run's `headSha` (`gh run list --branch notes-relations-risk-tests --json headSha`) equals `git rev-parse HEAD`
 
 **Implementation Note**: Final phase; hand over to `/10x-impl-review`.
 
@@ -336,9 +367,10 @@ New auth calls: integration +2, http +4, e2e ≤5 → ~35 of 50 per 5 min in `lo
 #### Automated
 
 - [ ] 4.1 `npx prettier --check context/foundation/test-plan.md TESTING.md CLAUDE.md` passes
-- [ ] 4.2 `grep -n "TBD — see §3 Phase 2" context/foundation/test-plan.md` returns no hits
+- [ ] 4.2 `grep -nE "TBD — see §3 Phase 2|Phase 2 \(TBD\)" context/foundation/test-plan.md` returns no hits
+- [ ] 4.3 `grep -n "30 / 5 min" context/foundation/test-plan.md` returns no hits
 
 #### Manual
 
-- [ ] 4.3 Every research scenario id appears in the §6.6 register with a test reference or "not applicable"
-- [ ] 4.4 CI run on the branch is green across `ci` and `local-stack`
+- [ ] 4.4 Every research scenario id appears in the §6.6 register with a test reference or "not applicable"
+- [ ] 4.5 CI run on the branch is green across `ci` and `local-stack`
