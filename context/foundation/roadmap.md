@@ -43,7 +43,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | ---- | --------------------------- | ----------------------------------------------------------------------------------------------------- | ------------- | -------------------------------------- | -------- |
 | F-01 | e2e-framework-spike         | (foundation) an e2e framework runs one sign-in scenario locally and as a CI job on push               | —             | FR-007                                 | done     |
 | S-01 | auth-risk-tests             | developer can rely on named auth risk scenarios, each covered by a test that runs in CI               | F-01          | FR-007, FR-008, FR-010                 | done        |
-| S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | in-progress |
+| S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | done |
 | S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | done        |
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | proposed |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | proposed |
@@ -115,7 +115,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Which scenarios need e2e versus the existing integration suite (extend, don't duplicate)? — Owner: `/10x-plan`. Block: no.
 - **Risk:** Binding PRD constraint — relation-notice wording is pinned by tests before S-04 moves the text; the gap is in isolation and end-to-end coverage, since relation unit/integration tests already exist.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-03: Per-file check hook
 
@@ -224,3 +224,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-01: (foundation) an e2e framework is installed and one sign-in scenario passes locally and as a CI job on push, against a local Supabase only.** — Archived 2026-10-09 → `context/archive/2026-10-09-e2e-framework-spike/`. Lesson: —.
 - **S-03: developer gets lint and the related unit tests run automatically for a modified file, finishing within ~10 s; integration tests stay on push/CI.** — Archived 2026-10-10 → `context/archive/2026-10-10-per-file-check-hook/`. Lesson: —.
 - **S-01: developer can rely on an explicit list of named auth risk scenarios (signup, signin, signout, session behavior, protected-route redirect), each covered by at least one test that runs on push in CI.** — Archived 2026-10-11 → `context/archive/2026-10-10-auth-risk-tests/`. Lesson: —.
+- **S-02: developer can rely on an explicit list of named risk scenarios for notes & campaigns CRUD, automatic relation management (including pinned relation-change notice wording), memory-map navigation and per-user/per-campaign data isolation — each with at least one test running in CI.** — Archived 2026-10-12 → `context/archive/2026-10-11-notes-relations-risk-tests/`. Lesson: —.

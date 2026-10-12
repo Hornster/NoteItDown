@@ -1,10 +1,10 @@
 ---
 change_id: notes-relations-risk-tests
 title: Risk-first tests for notes CRUD, relations and data isolation
-status: impl_reviewed
+status: archived
 created: 2026-10-11
 updated: 2026-10-12
-archived_at: null
+archived_at: 2026-10-12T20:34:04Z
 ---
 
 ## Notes
