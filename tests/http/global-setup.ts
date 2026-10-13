@@ -2,6 +2,8 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+
 import { assertLocalSupabase } from "../support/supabase-preflight";
 import { HTTP_BASE_URL, HTTP_PORT } from "./server";
 
@@ -76,7 +78,7 @@ export default async function globalSetup(): Promise<() => void> {
         throw new Error(`http tests: preview server exited before becoming ready.\n${output}`);
       }
       const ready = await fetch(`${HTTP_BASE_URL}/`, { redirect: "manual" })
-        .then((res) => res.status === 200)
+        .then((res) => res.status === HTTP_STATUS.OK)
         .catch(() => false);
       if (ready) break;
       if (Date.now() > deadline) {

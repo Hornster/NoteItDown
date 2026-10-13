@@ -70,6 +70,28 @@ const astroConfig = defineConfig({
   },
 });
 
+const httpStatusLiteralConfig = defineConfig({
+  files: ["src/**/*.{ts,tsx,astro}"],
+  ignores: ["src/**/*.test.ts"],
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      ...[
+        "Property[key.name='status'] > Literal[raw=/^[1-5][0-9]{2}$/]",
+        "Property[key.name='status'] > ConditionalExpression > Literal[raw=/^[1-5][0-9]{2}$/]",
+        "AssignmentExpression[left.type='MemberExpression'][left.property.name='status'] > Literal.right[raw=/^[1-5][0-9]{2}$/]",
+        "CallExpression[callee.name='jsonError'] > Literal.arguments:nth-child(2)[raw=/^[1-5][0-9]{2}$/]",
+        "BinaryExpression[operator=/^[!=]==?$/]:has(MemberExpression[property.name='status']) > Literal[raw=/^[1-5][0-9]{2}$/]",
+        "VariableDeclarator[id.name=/[sS]tatus/] Literal[raw=/^[1-5][0-9]{2}$/]",
+        "CallExpression[callee.property.name='redirect'] > Literal.arguments:nth-child(2)[raw=/^[1-5][0-9]{2}$/]",
+      ].map((selector) => ({
+        selector,
+        message: "Use HTTP_STATUS from @/lib/constants/http-status instead of a numeric status literal.",
+      })),
+    ],
+  },
+});
+
 const scriptsConfig = defineConfig({
   files: ["scripts/**/*.mjs"],
   extends: [tseslint.configs.disableTypeChecked],
@@ -86,6 +108,7 @@ export default defineConfig(
   eslintPluginAstro.configs["flat/recommended"],
   eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
+  httpStatusLiteralConfig,
   scriptsConfig,
   eslintPluginPrettier,
 );

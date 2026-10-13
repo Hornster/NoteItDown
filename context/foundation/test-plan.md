@@ -145,7 +145,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 ### 6.4 Adding a test for a new protected route or API endpoint
 
 - **Location**: `tests/http/**/*.test.ts` (Vitest `http` project); `npm run test:http` needs local Supabase and a fresh `npm run build`, and starts its own preview on port 4323. See `TESTING.md`.
-- **New protected page** (`src/pages/**/*.astro`): nothing to write. The matrix derives routes from the file tree and fails if the page does not redirect anonymous users to sign-in. Register the prefix in `PROTECTED_ROUTES` (`src/middleware.ts`) or the suite will fail.
+- **New protected page** (`src/pages/**/*.astro`): nothing to write. The matrix derives routes from the file tree and fails if the page does not redirect anonymous users to sign-in. Register the prefix in `PROTECTED_ROUTES` (`src/lib/protected-routes.ts`, matched as the exact path or path + `/`) or the suite will fail.
 - **New public page**: add its path to `PUBLIC_ROUTES` in `tests/http/support/route-inventory.ts`; the suite then excludes it from the denial matrix and fails if the entry no longer exists on disk (it does not assert the page is reachable).
 - **New API handler** (`src/pages/api/**/*.ts`): automatically covered by its exported method (`GET`, `POST`, ...); anonymous callers must get 401. A route file with no detectable method export fails the suite by name.
 - Send `Origin: <base URL>` on every POST (Astro `checkOrigin`). Probe double-slash variants with a deeper path (e.g. `//campaigns/<uuid>`).
@@ -212,6 +212,11 @@ the relevant rollout phase ships; before that, the sub-section reads
 | C.3  | Note create, view, edit, delete through the UI                         | `notes-relations.spec.ts` → steps "create notes through the form" through "delete a note without relations ..."                                                                                                                                                                                                  | New                                                     |
 | M.1  | Map shows only the campaign's own notes; foreign map is 404            | `relation-detection.test.ts` → "listRelations" cases; route level: `forged-id.test.ts` → "1.13 ... pages" row `/campaigns/{A}/map`                                                                                                                                                                               | Fits (service) + New (http)                             |
 | M.2  | Clicking a map node opens the note page                                | `notes-relations.spec.ts` → step "map node click opens the note page"                                                                                                                                                                                                                                            | New                                                     |
+
+**S-04 - Constants sweep (`constants-sweep`)**
+
+- Resolved in S-04: the four Phase 3 auth defects (malformed body 500 on `/api/auth/signin|signup`, prefix over-match in the protected-route check, raw Supabase `error.message` in `?error=` / account enumeration, literal 401s) and the Phase 2 `HTTP_STATUS.FOUND` gap (`tests/http/` now asserts redirects with `HTTP_STATUS.FOUND`).
+- Deferred, not resolved: the uppercase-UUID 500 and the replayed-commit 500 on image upload/commit (the two Phase 2 defects above). They are recorded in `context/changes/constants-sweep/follow-ups/deferred-image-defects.md` (change id `constants-sweep`; the folder moves to `context/archive/` when the change is archived).
 
 ## 7. What We Deliberately Don't Test
 

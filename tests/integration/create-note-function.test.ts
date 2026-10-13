@@ -3,6 +3,7 @@ import type { PostgrestMaybeSingleResponse, PostgrestSingleResponse, SupabaseCli
 
 import { createTestUser, roundTripContents } from "./helpers";
 
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
 import { getNote } from "@/lib/services/notes";
 import type { Note } from "@/types";
 
@@ -125,7 +126,7 @@ describe("create_note", () => {
       p_new_type_name: "Another New Type",
     });
 
-    expect(errorCode(second.error)).toBe("23505");
+    expect(errorCode(second.error)).toBe(PG_ERROR.UNIQUE_VIOLATION);
 
     const typeCountAfter = await countRows(tenantA.client, "note_types", tenantA.campaignId);
     expect(typeCountAfter).toBe(typeCountBefore);
@@ -141,14 +142,14 @@ describe("create_note", () => {
       p_type_id: npcTypeId,
       p_new_type_name: "Some New Type",
     });
-    expect(errorCode(both.error)).toBe("22023");
+    expect(errorCode(both.error)).toBe(PG_ERROR.INVALID_PARAMETER_VALUE);
 
     const neither = await callCreateNote(tenantA.client, {
       p_campaign_id: tenantA.campaignId,
       p_name: "Neither Arg Note",
       p_content: "",
     });
-    expect(errorCode(neither.error)).toBe("22023");
+    expect(errorCode(neither.error)).toBe(PG_ERROR.INVALID_PARAMETER_VALUE);
   });
 
   it.each(roundTripContents())("round-trips $label content exactly", async ({ label, content }) => {
@@ -178,7 +179,7 @@ describe("create_note", () => {
       p_type_id: npcTypeIdA,
     });
 
-    expect(errorCode(error)).toBe("42501");
+    expect(errorCode(error)).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
     expect(await countRows(tenantA.client, "notes", tenantA.campaignId)).toBe(notesCountBefore);
     expect(await countRows(tenantA.client, "note_types", tenantA.campaignId)).toBe(typesCountBefore);
   });
@@ -194,7 +195,7 @@ describe("create_note", () => {
       p_new_type_name: "Faction",
     });
 
-    expect(errorCode(error)).toBe("42501");
+    expect(errorCode(error)).toBe(PG_ERROR.INSUFFICIENT_PRIVILEGE);
     expect(await countRows(tenantA.client, "notes", tenantA.campaignId)).toBe(notesCountBefore);
     expect(await countRows(tenantA.client, "note_types", tenantA.campaignId)).toBe(typesCountBefore);
   });
@@ -209,7 +210,7 @@ describe("create_note", () => {
       p_type_id: npcTypeIdA,
     });
 
-    expect(errorCode(error)).toBe("23503");
+    expect(errorCode(error)).toBe(PG_ERROR.FOREIGN_KEY_VIOLATION);
   });
 
   it("rejects a name over 120 chars and content over 20000 chars with 23514", async () => {
@@ -221,7 +222,7 @@ describe("create_note", () => {
       p_content: "",
       p_type_id: npcTypeId,
     });
-    expect(errorCode(tooLongName.error)).toBe("23514");
+    expect(errorCode(tooLongName.error)).toBe(PG_ERROR.CHECK_VIOLATION);
 
     const tooLongContent = await callCreateNote(tenantA.client, {
       p_campaign_id: tenantA.campaignId,
@@ -229,6 +230,6 @@ describe("create_note", () => {
       p_content: "a".repeat(20001),
       p_type_id: npcTypeId,
     });
-    expect(errorCode(tooLongContent.error)).toBe("23514");
+    expect(errorCode(tooLongContent.error)).toBe(PG_ERROR.CHECK_VIOLATION);
   });
 });

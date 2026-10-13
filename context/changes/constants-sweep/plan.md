@@ -625,31 +625,31 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 
 #### Automated
 
-- [x] 3.1 Type check passes: `npx astro check`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 New unit tests pass (`auth.test.ts`, `auth-errors.test.ts`, `protected-routes.test.ts`): `npm run test:unit`
-- [x] 3.4 HTTP suite passes, including new auth-route tests and the `/mapping` probe: `npm run build && npm run test:http`
-- [x] 3.5 e2e passes with duplicate signup landing on confirm-email and wrong-password baseline unchanged: `npm run test:e2e`
-- [x] 3.6 Smoke passes against the preview: `npm run smoke`
-- [x] 3.7 No raw Supabase message is passed through (grep prints nothing)
+- [x] 3.1 Type check passes: `npx astro check` — 5d458e9
+- [x] 3.2 Lint passes: `npm run lint` — 5d458e9
+- [x] 3.3 New unit tests pass (`auth.test.ts`, `auth-errors.test.ts`, `protected-routes.test.ts`): `npm run test:unit` — 5d458e9
+- [x] 3.4 HTTP suite passes, including new auth-route tests and the `/mapping` probe: `npm run build && npm run test:http` — 5d458e9
+- [x] 3.5 e2e passes with duplicate signup landing on confirm-email and wrong-password baseline unchanged: `npm run test:e2e` — 5d458e9
+- [x] 3.6 Smoke passes against the preview: `npm run smoke` — 5d458e9
+- [x] 3.7 No raw Supabase message is passed through (grep prints nothing) — 5d458e9
 
 #### Manual
 
-- [x] 3.8 Browser check: existing-email signup, wrong password, JS-disabled empty password
-- [x] 3.9 curl JSON-body probe to signin returns 302 with `?error=Email%20is%20required`
+- [x] 3.8 Browser check: existing-email signup, wrong password, JS-disabled empty password — 5d458e9
+- [x] 3.9 curl JSON-body probe to signin returns 302 with `?error=Email%20is%20required` — 5d458e9
 
 ### Phase 4: Test literals, regression guard and docs
 
 #### Automated
 
-- [ ] 4.1 Lint passes with the new rule enabled: `npm run lint`
-- [ ] 4.2 The rule fires on a probe via `eslint --stdin` (output contains `no-restricted-syntax`)
-- [ ] 4.3 Hook proof still passes: `npm run test:hooks`
-- [ ] 4.4 Full suite passes: `npm test`, then `npm run build && npm run test:http && npm run test:e2e`
-- [ ] 4.5 No literal 302 is left in tests/http assertions (grep prints nothing)
-- [ ] 4.6 No SQLSTATE literal is left in the integration assertions (grep prints nothing)
+- [x] 4.1 Lint passes with the new rule enabled: `npm run lint`
+- [x] 4.2 The rule fires on a probe via `eslint --stdin` (output contains `no-restricted-syntax`)
+- [x] 4.3 Hook proof still passes: `npm run test:hooks`
+- [x] 4.4 Full suite passes: `npm test`, then `npm run build && npm run test:http && npm run test:e2e`
+- [x] 4.5 No literal 302 is left in tests/http assertions (grep prints nothing)
+- [x] 4.6 No SQLSTATE literal is left in the integration assertions (grep prints nothing)
 
 #### Manual
 
-- [ ] 4.7 Per-edit lint hook reports a deliberately added literal status, then revert
-- [ ] 4.8 New lesson and contract-surfaces entries read accurately against the final code
+- [x] 4.7 Per-edit lint hook reports a deliberately added literal status, then revert
+- [x] 4.8 New lesson and contract-surfaces entries read accurately against the final code

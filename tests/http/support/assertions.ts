@@ -6,7 +6,7 @@ import type { SendResult } from "./client";
 
 /** A denied page request: the middleware redirects to sign-in. */
 export function expectSigninRedirect(res: SendResult): void {
-  expect(res.status).toBe(302);
+  expect(res.status).toBe(HTTP_STATUS.FOUND);
   expect(res.location).toBe("/auth/signin");
 }
 

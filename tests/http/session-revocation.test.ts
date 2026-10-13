@@ -51,7 +51,7 @@ describe("signed-in positive controls (before signout)", () => {
 describe("signout", () => {
   it("POST /api/auth/signout redirects to /", async () => {
     const res = await send("/api/auth/signout", { method: "POST", jar: liveJar });
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(HTTP_STATUS.FOUND);
     expect(res.location).toBe("/");
   });
 });

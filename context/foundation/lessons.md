@@ -57,3 +57,10 @@
 - **Problem**: Loosening only one policy (either notes_select_own_campaign or notes_update_own_campaign) will not catch access violation of user B to user A's notes.
 - **Rule**: Whenever testing RLS access control over notes between users make sure to weaken both notes_select_own_campaign and notes_update_own_campaign policies.
 - **Applies to**: plan, plan-review, implement, impl-review
+
+## Use the central dictionaries in all code, not only new code
+
+- **Context**: context/changes/constants-sweep. Supersedes "Use the central error/status/message dictionaries in new code": the sweep moved existing routes, services, UI and tests onto the dictionaries.
+- **Problem**: Numeric statuses, SQLSTATEs and message literals creep back in when the rule only covers new code. Over-extracting every string into `MESSAGES` is the opposite failure.
+- **Rule**: Use `HTTP_STATUS`, `PG_ERROR`, `DB_CONSTRAINT` and `MESSAGES` (all in `src/lib/constants/`) everywhere, including tests for statuses and SQLSTATEs. Duplication boundary: any error, validation, notice or response-body message is always a key, even if used once; any other UI string (label, title, h1, link, button, aria-label, placeholder) becomes a key when its exact text appears 2+ times in `src/` (repeats within one file count; an interpolated string counts by its rendered template and gets a helper); strings used once, `src/components/ui/` and starter copy stay inline. Naming: SCREAMING_SNAKE_CASE keys, helper functions for interpolated texts, `_LABEL` suffix for labels, `_TITLE` for page-title fallbacks. Enforcement: `jsonError` takes `HttpStatus`, and the ESLint `no-restricted-syntax` block in `eslint.config.js` rejects numeric status literals in `src/` (the per-edit hook reports it). Known gap: a status in `switch (res.status) { case 404: }` is not caught, so review covers it. e2e and http oracles of expected message text (e.g. `UI_BASELINE`, `?error=` text) stay literal and never import `MESSAGES`, so a wording change fails them on purpose.
+- **Applies to**: plan, implement, impl-review

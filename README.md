@@ -158,7 +158,7 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/campaigns/[campaignId]/edit`                                  | Rename-campaign form (protected; 404 if not yours)       |
 | `/dashboard`, `/campaigns`, `/map`, `/notes/new`, `/notes/[id]` | Redirects to the resolved-campaign URL above (protected) |
 
-Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
+Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array in `src/lib/protected-routes.ts` to require authentication; a route matches its exact path or the path followed by `/` (`/map` gates `/map/x`, not `/mapping`).
 
 ## Deployment
 

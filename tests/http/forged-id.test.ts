@@ -292,7 +292,7 @@ describe("1.2 forged last_campaign_id cookie (route level)", () => {
     expect(jar.header()).toContain(`${LAST_CAMPAIGN_COOKIE}=${a.campaignId}`);
 
     const res = await send(path, { jar });
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(HTTP_STATUS.FOUND);
     expect(res.location).toBe(expected(b.campaignId));
     expect(res.body).not.toContain(a.campaignId);
   });
@@ -302,7 +302,7 @@ describe("1.2 forged last_campaign_id cookie (route level)", () => {
     const jar = bJar.clone();
     jar.set(LAST_CAMPAIGN_COOKIE, bCampaign2Id);
     const res = await send("/dashboard", { jar });
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(HTTP_STATUS.FOUND);
     expect(res.location).toBe(`/campaigns/${bCampaign2Id}`);
   });
 });

@@ -3,6 +3,7 @@ import type { PostgrestResponse, SupabaseClient } from "@supabase/supabase-js";
 
 import { createTestUser } from "./helpers";
 
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
 import {
   createCampaign,
   getCampaign,
@@ -73,7 +74,7 @@ describe("campaigns service", () => {
       owner_id: tenantA.userId,
       name: " padded",
     });
-    expect(error?.code).toBe("23514");
+    expect(error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
   });
 
   it("a direct insert with an 81-char name fails with 23514", async () => {
@@ -81,7 +82,7 @@ describe("campaigns service", () => {
       owner_id: tenantA.userId,
       name: "a".repeat(81),
     });
-    expect(error?.code).toBe("23514");
+    expect(error?.code).toBe(PG_ERROR.CHECK_VIOLATION);
   });
 
   it("renameCampaign succeeds, and the DB check rejects an untrimmed name", async () => {
@@ -101,7 +102,9 @@ describe("campaigns service", () => {
     const padded = await renameCampaign(tenantA.client, created.campaign.id, "  Renamed Campaign  ");
     expect(padded.success).toBe(false);
     expect(!padded.success && padded.reason).toBe("unexpected");
-    expect(!padded.success && padded.reason === "unexpected" && (padded.error as { code?: string }).code).toBe("23514");
+    expect(!padded.success && padded.reason === "unexpected" && (padded.error as { code?: string }).code).toBe(
+      PG_ERROR.CHECK_VIOLATION,
+    );
   });
 
   it("renameCampaign to another own campaign's name maps to duplicate_name", async () => {

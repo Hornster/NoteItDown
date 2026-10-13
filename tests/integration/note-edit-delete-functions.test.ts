@@ -3,6 +3,7 @@ import type { PostgrestMaybeSingleResponse, PostgrestSingleResponse, SupabaseCli
 
 import { createTestUser, roundTripContents } from "./helpers";
 
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
 import type { Note, Relation } from "@/types";
 
 interface RelatedNote {
@@ -295,9 +296,9 @@ describe("update_note / delete_note", () => {
     };
 
     const both = await callUpdateNote(tenantA.client, { ...base, p_type_id: npcTypeId, p_new_type_name: "Z" });
-    expect(both.error?.code).toBe("22023");
+    expect(both.error?.code).toBe(PG_ERROR.INVALID_PARAMETER_VALUE);
     const neither = await callUpdateNote(tenantA.client, base);
-    expect(neither.error?.code).toBe("22023");
+    expect(neither.error?.code).toBe(PG_ERROR.INVALID_PARAMETER_VALUE);
   });
 
   it("rename to another note's name in a different case fails with 23505; own case-only rename succeeds", async () => {
@@ -311,7 +312,7 @@ describe("update_note / delete_note", () => {
       p_content: "x",
       p_type_id: note.type_id,
     });
-    expect(clash.error?.code).toBe("23505");
+    expect(clash.error?.code).toBe(PG_ERROR.UNIQUE_VIOLATION);
 
     const caseOnly = await callUpdateNote(tenantA.client, {
       p_campaign_id: tenantA.campaignId,
@@ -338,7 +339,7 @@ describe("update_note / delete_note", () => {
       p_new_type_name: "Ghosttype",
     });
 
-    expect(clash.error?.code).toBe("23505");
+    expect(clash.error?.code).toBe(PG_ERROR.UNIQUE_VIOLATION);
     expect(await countTypes(tenantA.client, tenantA.campaignId)).toBe(typesBefore);
   });
 
@@ -352,7 +353,7 @@ describe("update_note / delete_note", () => {
       p_content: "hijacked",
       p_type_id: npcTypeId,
     });
-    expect(foreign.error?.code).toBe("P0002");
+    expect(foreign.error?.code).toBe(PG_ERROR.NO_DATA_FOUND);
 
     const wrongCampaign = await callUpdateNote(tenantA.client, {
       p_campaign_id: tenantB.campaignId,
@@ -361,13 +362,13 @@ describe("update_note / delete_note", () => {
       p_content: "hijacked",
       p_type_id: npcTypeId,
     });
-    expect(wrongCampaign.error?.code).toBe("P0002");
+    expect(wrongCampaign.error?.code).toBe(PG_ERROR.NO_DATA_FOUND);
 
     const foreignDelete = await callDeleteNote(tenantB.client, {
       p_campaign_id: tenantA.campaignId,
       p_note_id: note.id,
     });
-    expect(foreignDelete.error?.code).toBe("P0002");
+    expect(foreignDelete.error?.code).toBe(PG_ERROR.NO_DATA_FOUND);
 
     const stored = await getNote(tenantA.client, note.id);
     expect(stored?.name).toBe("Protected Note");
@@ -408,6 +409,6 @@ describe("update_note / delete_note", () => {
       p_campaign_id: tenantA.campaignId,
       p_note_id: crypto.randomUUID(),
     });
-    expect(error?.code).toBe("P0002");
+    expect(error?.code).toBe(PG_ERROR.NO_DATA_FOUND);
   });
 });
