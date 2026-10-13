@@ -63,7 +63,7 @@ Verify with `npm run lint`, `npm test`, `npx astro check`, `npm run build`, `npm
 - **Image-path defects:** not fixing the uppercase-UUID 500 or the replayed-commit 500 (test-plan §6.6, Phase 2). They are recorded in a follow-up note for a new change.
 - **Starter and Polish copy:** not touching it (`Layout.astro` banner `Uwaga:`/`Dokumentacja`, `config-status.ts:15,17`, default title `10x Astro Starter`, `Welcome.astro` copy and its `Sign In`/`Sign Up` casing). This is deferred to S-05.
 - **Campaign error wording:** not unifying it. Create, rename and save stay 3 distinct keys.
-- **Single-use UI strings:** not moving them (`Create note`, `Save changes`, `Create campaign`, `Save name`, `Dashboard`, `Map`, `Sign out`, `Rename`, `Edit`, placeholders other than the repeated email one, the delete-dialog body, the map hints, `confirm-email.astro` copy, `Signing in…`, `Creating account…`). Their text is fixed only where an accepted exception applies (the ellipsis).
+- **Single-use UI strings:** not moving them (`Create note`, `Save changes`, `Create campaign`, `Save name`, `Dashboard`, `Map`, `Sign out`, the `Rename` link, `Edit`, placeholders other than the repeated email one, the delete-dialog body, the map hints, `confirm-email.astro` copy, `Signing in…`, `Creating account…`). Their text is fixed only where an accepted exception applies (the ellipsis).
 - **`src/components/ui/`:** not touching it (shadcn boilerplate such as `Close`).
 - **Error-class defaults:** not touching `src/lib/images/errors.ts` (developer-facing).
 - **Service `reason` unions and the routes' `FIELDS` sets:** not sharing them (typed discriminants, not magic values).
@@ -81,7 +81,7 @@ Verify with `npm run lint`, `npm test`, `npx astro check`, `npm run build`, `npm
 **Duplication boundary**, the answer to the S-04 unknown, recorded in the lesson:
 
 - **Always a key:** any error, validation, notice or response-body message, even if it is used once.
-- **A key when repeated:** any other UI string (label, title, h1, link, button, aria-label, placeholder) whose exact text appears 2+ times in `src/`, counting repeats within the same file.
+- **A key when repeated:** any other UI string (label, title, h1, link, button, aria-label, placeholder) whose exact text appears 2+ times in `src/`, counting repeats within the same file. An interpolated string counts by its rendered template (e.g. `Rename ${name}` as both title and h1) and gets a helper.
 - **Inline:** strings used once, `src/components/ui/`, and starter copy.
 
 **Key naming:** literal keys in `SCREAMING_SNAKE_CASE`, matching the existing `NOTE_NOT_FOUND` style. Interpolated texts get small helper functions next to `imageLabel()`. Labels use a `_LABEL` suffix and page-title fallbacks use `_TITLE`.
@@ -238,6 +238,7 @@ Convert pages, hooks, forms and components to the dictionaries. Every repeated U
 | | `NOTES_EMPTY_CTA` | `Create your first note` |
 | Title fallbacks | `CAMPAIGN_NOT_FOUND_TITLE` | `Campaign not found` |
 | | `NOTE_NOT_FOUND_TITLE` | `Note not found` |
+| Page titles | `renameCampaignTitle(name)` | `Rename ${name}` |
 | Client validation (no trailing periods, as today) | `EMAIL_REQUIRED` | `Email is required` |
 | | `EMAIL_INVALID` | `Enter a valid email address` |
 | | `PASSWORD_REQUIRED` | `Password is required` |
@@ -260,6 +261,8 @@ Convert pages, hooks, forms and components to the dictionaries. Every repeated U
 - The 8 `Astro.response.status = 404` become `HTTP_STATUS.NOT_FOUND`.
 - Repeated titles, h1s, links, empty states and not-found `<p>`s use the keys above, plus `CAMPAIGN_NOT_FOUND` and `NOTE_NOT_FOUND`.
 - The map h1 `{campaign.name} &mdash; Memory map` may compose `MEMORY_MAP_LABEL` while keeping the em dash.
+- The rename page's title and h1 (`edit.astro:25,33`) use `renameCampaignTitle(campaign.name)`.
+- The `licenses.astro` title and h1 use `LICENSES_LABEL` (renamed in phase 1).
 
 **Contract**: rendered HTML text unchanged; `Loading map&hellip;` (single-use) stays inline.
 
@@ -281,9 +284,9 @@ Convert pages, hooks, forms and components to the dictionaries. Every repeated U
 - Accessible names stay identical.
 - `Signing in...` becomes `Signing in…` and `Creating account...` becomes `Creating account…` (accepted exception 2). They stay inline, because each is used once.
 
-#### 5. Notice, dialog and Layout
+#### 5. Notice and dialog
 
-**File**: `src/components/notes/RelationChangeNotice.tsx`, `src/components/notes/DeleteNoteButton.tsx`, `src/layouts/Layout.astro`
+**File**: `src/components/notes/RelationChangeNotice.tsx`, `src/components/notes/DeleteNoteButton.tsx` (`Layout.astro` was already updated in phase 1)
 
 **Intent**:
 - The notice wording comes from the relation-notice keys and helpers, and `aria-label` uses `NOTICE_DISMISS_LABEL`.
@@ -300,10 +303,11 @@ Convert pages, hooks, forms and components to the dictionaries. Every repeated U
 - Type check passes: `npx astro check`
 - Lint passes: `npm run lint`
 - Unit tests pass: `npm run test:unit`
-- The e2e suite passes with no e2e file edited, on a fresh build: `npm run build && npm run test:e2e`
+- The http matrices (all 8 page 404s, `forged-id.test.ts`) and the e2e suite pass with no test file edited, on a fresh build: `npm run build && npm run test:http && npm run test:e2e`
 - No `.astro` page assigns a literal status: `grep -rnE "response\.status = [0-9]" src` prints nothing
 - No repeated copy is left inline: `grep -rnE "No notes yet|Name is required|Something went wrong while|Network error\. Please|doesn't exist or isn't yours" src --include=*.tsx --include=*.astro --include=*.ts | grep -v 'src/lib/constants/'` prints nothing
 - No ASCII ellipsis is left in UI labels: `grep -rn '\.\.\."' src/components` prints nothing (spread syntax is excluded by the quote)
+- No repeated label or client-validation text is left inline: `grep -rnE '^\s*(Sign in|Sign up|Cancel|Delete|New campaign|New note|Memory map|Create your first note|Third-party licences)\s*$|>(Cancel|Delete)<|"(Sign in|Sign up|Cancel|Delete|Email|Password|Name|Dismiss|New campaign|New note|Memory map|Campaign not found|Note not found|you@example\.com|Third-party licences|Relations (added|removed)|Creating…|Saving…)"|&mdash; Memory map|Rename \$?\{campaign|Relations unchanged|No relations touched|Email is required|Enter a valid email|Password is required|Password must be at least|Please confirm your password|Passwords do not match|Choose a type|(Saved|Deleted) &quot;' src --include=*.tsx --include=*.astro --include=*.ts | grep -v -e src/lib/constants/ -e src/components/ui/` prints nothing (60 hits before the change, all in phase 2 files)
 
 #### Manual Verification:
 
@@ -324,15 +328,17 @@ Fix the four inherited S-01 auth defects as deliberate, tested behavior changes.
 
 #### 1. Auth form schema
 
-**File**: `src/lib/schemas/auth.ts` (new), `src/lib/schemas/auth.test.ts` (new)
+**File**: `src/lib/schemas/auth.ts` (new), `src/lib/schemas/auth.test.ts` (new), `src/components/auth/SignUpForm.tsx`
 
-**Intent**: Validate the signin and signup form bodies on the server, so missing or non-string fields never reach Supabase or crash the route.
+**Intent**: Validate the signin and signup form bodies on the server, so missing, non-string or malformed fields never reach Supabase or crash the route.
 
 **Contract**:
-- `authFormSchema = z.object({ email: z.string().trim().min(1, MESSAGES.EMAIL_REQUIRED), password: z.string().min(1, MESSAGES.PASSWORD_REQUIRED) })`.
+- `export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/`. This is the regex at `SignUpForm.tsx:27`, which now imports it instead of keeping its own copy. It follows the same pattern as the note limits that `schemas/notes.ts` shares with `NoteForm`.
+- `authFormSchema = z.object({ email: z.string({ error: MESSAGES.EMAIL_REQUIRED }).trim().min(1, MESSAGES.EMAIL_REQUIRED).regex(EMAIL_PATTERN, MESSAGES.EMAIL_INVALID), password: z.string({ error: MESSAGES.PASSWORD_REQUIRED }).min(1, MESSAGES.PASSWORD_REQUIRED) })`.
+- The type-level `error` is required: an absent form field reaches zod as `undefined` (and a file as a `Blob`), which fails the type check before `.min` runs. Without it, zod's default `Invalid input: expected string, received undefined` would reach `?error=`.
 - It is not `.strict()`, because `SignUpForm` also posts `confirmPassword`.
-- Format and strength checks stay with Supabase.
-- Tests cover: a valid pair, missing email, missing password, extra `confirmPassword` accepted, and non-string values rejected.
+- The email format is checked here, because GoTrue reports a malformed address as `validation_failed`, which §2 cannot map to an email message. Password strength stays with Supabase. A malformed email at signin now shows `Enter a valid email address` instead of GoTrue's answer (accepted; it reveals nothing about accounts).
+- Tests cover: a valid pair, extra `confirmPassword` accepted, and these rejects, each asserting the literal `issues[0].message`: missing email → `Email is required`; missing password → `Password is required`; whitespace-only email → `Email is required`; a non-string email → `Email is required`; `foo` as email → `Enter a valid email address`.
 
 #### 2. Supabase auth error mapping
 
@@ -485,25 +491,31 @@ AssignmentExpression[left.type='MemberExpression'][left.property.name='status'] 
 CallExpression[callee.name='jsonError'] > Literal.arguments:nth-child(2)[raw=/^[1-5][0-9]{2}$/]
 BinaryExpression[operator=/^[!=]==?$/]:has(MemberExpression[property.name='status']) > Literal[raw=/^[1-5][0-9]{2}$/]
 VariableDeclarator[id.name=/[sS]tatus/] Literal[raw=/^[1-5][0-9]{2}$/]
+CallExpression[callee.property.name='redirect'] > Literal.arguments:nth-child(2)[raw=/^[1-5][0-9]{2}$/]
 ```
+
+- The last selector catches an explicit status in `Astro.redirect`, `context.redirect` or `Response.redirect` (0 hits today, since redirects stay implicit; verified to fire on `c.redirect("/x", 301)` and `Response.redirect(url, 307)`).
+- Known gap: `switch (res.status) { case 404: }` is not covered. The lesson names it.
 
 #### 4. Lesson
 
 **File**: `context/foundation/lessons.md` (via `/10x-lesson`, append-only)
 
-**Intent**: Record that the constants rule now applies to all code (superseding "in new code"), together with the duplication boundary from this plan and the enforcement points (`HttpStatus`-typed `jsonError`, the ESLint rule). Also record that e2e and http oracles stay literal.
+**Intent**: Record that the constants rule now applies to all code (superseding "in new code"), together with the duplication boundary from this plan and the enforcement points (`HttpStatus`-typed `jsonError`, the ESLint rule) and the rule's known gap (a status in a `switch`/`case` is not caught, so review covers it). Also record that e2e and http oracles stay literal.
 
 **Contract**: a new entry with Context, Problem, Rule and Applies to (`plan`, `implement`, `impl-review`).
 
 #### 5. Reference docs and follow-up
 
-**File**: `docs/reference/contract-surfaces.md`, `README.md`, `context/changes/constants-sweep/follow-ups/deferred-image-defects.md` (new)
+**File**: `docs/reference/contract-surfaces.md`, `README.md`, `context/foundation/test-plan.md`, `context/changes/constants-sweep/follow-ups/deferred-image-defects.md` (new)
 
 **Intent**:
 - `contract-surfaces.md:78-80`: drop "existing routes still use literals", and add `HTTP_STATUS.FOUND`, `HttpStatus`, the narrowed `jsonError` and the ESLint rule.
 - `contract-surfaces.md`, new auth/middleware entry: `authFormSchema`, `authErrorMessage` / `isExistingAccountError`, the duplicate-signup success path, the `?error=` contract, and `isProtectedPath` exact-or-slash matching in `src/lib/protected-routes.ts`.
 - `README.md:161`: `PROTECTED_ROUTES` now lives in `src/lib/protected-routes.ts` and matches the exact path or path + `/`.
+- The same location and matching change in `contract-surfaces.md:167` (Routes: "Protected (`PROTECTED_ROUTES` in `src/middleware.ts`)") and in `test-plan.md:148` ("Register the prefix in `PROTECTED_ROUTES` (`src/middleware.ts`)").
 - The follow-up note records the two deferred image-path 500s with their test-plan §6.6 references.
+- `test-plan.md` §6.6: append an S-04 note (do not edit the earlier phase notes). It marks the four Phase 3 auth defects and the Phase 2 `HTTP_STATUS.FOUND` gap as resolved in S-04, and says the two image-path 500s are deferred, pointing to `follow-ups/deferred-image-defects.md` of change `constants-sweep` (the folder moves to `context/archive/` on archive, so name the change id, not only the current path).
 
 **Contract**: docs only.
 
@@ -512,11 +524,11 @@ VariableDeclarator[id.name=/[sS]tatus/] Literal[raw=/^[1-5][0-9]{2}$/]
 #### Automated Verification:
 
 - Lint passes with the new rule enabled: `npm run lint`
-- The rule fires on a probe: `printf 'export const r = new Response("", { status: 500 });\n' | npx eslint --stdin --stdin-filename src/probe.ts` exits non-zero with `no-restricted-syntax`
+- The rule fires on a probe: `printf 'export const r = new Response("", { status: 500 });\n' | npx eslint --stdin --stdin-filename src/lib/api.ts` exits non-zero and its output contains `no-restricted-syntax` (an existing path is required, because a non-existent one fails earlier with a project-service parse error; stdin replaces the file's contents and nothing is written)
 - Hook proof still passes: `npm run test:hooks`
 - Full suite passes: `npm test`, then `npm run build && npm run test:http && npm run test:e2e`
 - No literal 302 is left in tests/http assertions: `grep -rnE "toBe\(302\)|=== 200" tests/http` prints nothing
-- No SQLSTATE literal is left in the integration assertions: `grep -rnE '"(23505|23503|23514|42501|22023|P0002)"' tests/integration --include=*.ts` prints only test-name strings
+- No SQLSTATE literal is left in the integration assertions: `grep -rnE '"(23505|23503|23514|42501|22023|P0002)"' tests/integration --include=*.ts` prints nothing (all 19 hits today are assertions; test names mention codes unquoted, so the pattern never matches them)
 
 #### Manual Verification:
 
@@ -598,15 +610,16 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 - [ ] 2.1 Type check passes: `npx astro check`
 - [ ] 2.2 Lint passes: `npm run lint`
 - [ ] 2.3 Unit tests pass: `npm run test:unit`
-- [ ] 2.4 The e2e suite passes with no e2e file edited, on a fresh build: `npm run build && npm run test:e2e`
+- [ ] 2.4 The http matrices and the e2e suite pass with no test file edited, on a fresh build: `npm run build && npm run test:http && npm run test:e2e`
 - [ ] 2.5 No `.astro` page assigns a literal status (grep prints nothing)
 - [ ] 2.6 No repeated copy is left inline (grep prints nothing)
 - [ ] 2.7 No ASCII ellipsis is left in UI labels (grep prints nothing)
+- [ ] 2.8 No repeated label or client-validation text is left inline (grep prints nothing)
 
 #### Manual
 
-- [ ] 2.8 Click-through of all touched pages shows unchanged text except the two ellipsis labels
-- [ ] 2.9 Relation-change notice wording unchanged after edit and delete
+- [ ] 2.9 Click-through of all touched pages shows unchanged text except the two ellipsis labels
+- [ ] 2.10 Relation-change notice wording unchanged after edit and delete
 
 ### Phase 3: Auth defects and route matching
 
@@ -630,11 +643,11 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 #### Automated
 
 - [ ] 4.1 Lint passes with the new rule enabled: `npm run lint`
-- [ ] 4.2 The rule fires on a probe via `eslint --stdin`
+- [ ] 4.2 The rule fires on a probe via `eslint --stdin` (output contains `no-restricted-syntax`)
 - [ ] 4.3 Hook proof still passes: `npm run test:hooks`
 - [ ] 4.4 Full suite passes: `npm test`, then `npm run build && npm run test:http && npm run test:e2e`
 - [ ] 4.5 No literal 302 is left in tests/http assertions (grep prints nothing)
-- [ ] 4.6 No SQLSTATE literal is left in the integration assertions (grep prints only test names)
+- [ ] 4.6 No SQLSTATE literal is left in the integration assertions (grep prints nothing)
 
 #### Manual
 
