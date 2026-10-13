@@ -642,14 +642,14 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 
 #### Automated
 
-- [x] 4.1 Lint passes with the new rule enabled: `npm run lint`
-- [x] 4.2 The rule fires on a probe via `eslint --stdin` (output contains `no-restricted-syntax`)
-- [x] 4.3 Hook proof still passes: `npm run test:hooks`
-- [x] 4.4 Full suite passes: `npm test`, then `npm run build && npm run test:http && npm run test:e2e`
-- [x] 4.5 No literal 302 is left in tests/http assertions (grep prints nothing)
-- [x] 4.6 No SQLSTATE literal is left in the integration assertions (grep prints nothing)
+- [x] 4.1 Lint passes with the new rule enabled: `npm run lint` — f3122ce
+- [x] 4.2 The rule fires on a probe via `eslint --stdin` (output contains `no-restricted-syntax`) — f3122ce
+- [x] 4.3 Hook proof still passes: `npm run test:hooks` — f3122ce
+- [x] 4.4 Full suite passes: `npm test`, then `npm run build && npm run test:http && npm run test:e2e` — f3122ce
+- [x] 4.5 No literal 302 is left in tests/http assertions (grep prints nothing) — f3122ce
+- [x] 4.6 No SQLSTATE literal is left in the integration assertions (grep prints nothing) — f3122ce
 
 #### Manual
 
-- [x] 4.7 Per-edit lint hook reports a deliberately added literal status, then revert
-- [x] 4.8 New lesson and contract-surfaces entries read accurately against the final code
+- [x] 4.7 Per-edit lint hook reports a deliberately added literal status, then revert — f3122ce
+- [x] 4.8 New lesson and contract-surfaces entries read accurately against the final code — f3122ce
