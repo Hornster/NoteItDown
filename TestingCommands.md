@@ -1,4 +1,4 @@
 - lsof -i:<port>
     - lists anything listening on port <port>
-- kill $(lsof -t -i:8080)
+- kill $(lsof -t -i:<port>)
     - forces shutdown of anything that is listening on port <port>
