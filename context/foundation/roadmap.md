@@ -3,7 +3,7 @@ project: NoteItDown
 version: 2
 status: draft
 created: 2026-10-09
-updated: 2026-10-12
+updated: 2026-10-13
 prd_version: 2
 main_goal: quality
 top_blocker: time
@@ -45,7 +45,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | S-01 | auth-risk-tests             | developer can rely on named auth risk scenarios, each covered by a test that runs in CI               | F-01          | FR-007, FR-008, FR-010                 | done        |
 | S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | done |
 | S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | done        |
-| S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | proposed |
+| S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | planning |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | proposed |
 | S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | proposed |
 | S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | proposed |
@@ -142,7 +142,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - Which repeated strings in `.astro` / `.tsx` count as "duplicated user-facing messages" versus one-off copy? — Owner: `/10x-plan`. Block: no.
 - **Inherited from S-01:** four logged auth defects (`test-plan.md` §6.6: malformed-body 500, prefix over-match, raw Supabase message / enumeration, literal 401s), and `UI_BASELINE.signupDuplicateEmail` in `tests/e2e/auth-session.spec.ts` must change on purpose.
 - **Risk:** Touches auth routes and the relation-notice text, so it waits for S-01/S-02 to pin that behavior; it is its own change, landed before S-05 so refactor and theming diffs don't mix.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-05: D&D theme revamp
 
