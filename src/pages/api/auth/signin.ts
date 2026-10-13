@@ -1,19 +1,35 @@
 import type { APIRoute } from "astro";
+import { authErrorMessage } from "@/lib/auth-errors";
+import { MESSAGES } from "@/lib/constants/messages";
+import { authFormSchema } from "@/lib/schemas/auth";
 import { createClient } from "@/lib/supabase";
 
+export const prerender = false;
+
+function fail(context: Parameters<APIRoute>[0], message: string) {
+  return context.redirect(`/auth/signin?error=${encodeURIComponent(message)}`);
+}
+
 export const POST: APIRoute = async (context) => {
-  const form = await context.request.formData();
-  const email = form.get("email") as string;
-  const password = form.get("password") as string;
+  // An unparseable body counts as an empty form; the schema then supplies the message.
+  const form = await context.request.formData().catch(() => new FormData());
+  const parsed = authFormSchema.safeParse({
+    email: form.get("email") ?? undefined,
+    password: form.get("password") ?? undefined,
+  });
+  if (!parsed.success) {
+    return fail(context, parsed.error.issues[0]?.message ?? MESSAGES.AUTH_FAILED);
+  }
+  const { email, password } = parsed.data;
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
+    return fail(context, MESSAGES.SUPABASE_NOT_CONFIGURED);
   }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+    return fail(context, authErrorMessage(error.code));
   }
 
   return context.redirect("/dashboard");

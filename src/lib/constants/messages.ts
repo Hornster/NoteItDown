@@ -18,6 +18,13 @@ export const MESSAGES = {
   NOTE_DELETE_FAILED: "Something went wrong while deleting the note. Please try again.",
   NETWORK_ERROR: "Network error. Please check your connection and try again.",
 
+  // Auth errors
+  AUTH_INVALID_CREDENTIALS: "Invalid login credentials",
+  AUTH_WEAK_PASSWORD: "Password is too weak. Please choose a stronger one.",
+  AUTH_RATE_LIMITED: "Too many attempts. Please wait a moment and try again.",
+  AUTH_EMAIL_NOT_CONFIRMED: "Please confirm your email address before signing in.",
+  AUTH_FAILED: "Something went wrong. Please try again.",
+
   // Validation
   NAME_REQUIRED: "Name is required.",
   TYPE_NAME_REQUIRED: "Type name is required.",

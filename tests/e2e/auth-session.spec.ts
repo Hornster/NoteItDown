@@ -4,11 +4,11 @@ import { createTestUser } from "../support/test-user";
 import { waitForHydration } from "./support/hydration";
 
 // UI baseline approved by the user on 2026-10-11 (auth-risk-tests Progress 3.3, 3.4); changing it is a deliberate wording
-// decision (S-04). Deliberately literal — never import from `MESSAGES`; the oracle must not come from the code under test.
+// decision (S-04). On 2026-10-13, in S-04 `/10x-plan`, a duplicate signup was made indistinguishable from success
+// (no account enumeration), so it has no wording baseline any more. Deliberately literal — never import from
+// `MESSAGES`; the oracle must not come from the code under test.
 const UI_BASELINE = {
   signinInvalidCredentials: "Invalid login credentials",
-  // characterizes known S-04 defect (account enumeration via raw Supabase message); expected to change in S-04
-  signupDuplicateEmail: "User already registered",
 };
 
 const CAMPAIGN_URL = /\/campaigns\/[0-9a-f-]{36}$/;
@@ -69,7 +69,7 @@ test.describe("approved error wording", () => {
     await expect(page.getByText(UI_BASELINE.signinInvalidCredentials, { exact: true })).toBeVisible();
   });
 
-  test("signup with an existing email shows the approved message", async ({ page }) => {
+  test("signup with an existing email looks like a successful signup", async ({ page }) => {
     await page.goto("/auth/signup");
     await waitForHydration(page, "Create account");
     await page.getByLabel("Email").fill(seeded.email);
@@ -77,7 +77,6 @@ test.describe("approved error wording", () => {
     await page.getByLabel("Confirm password").fill(seeded.password);
     await page.getByRole("button", { name: "Create account" }).click();
 
-    await expect(page).toHaveURL(/\/auth\/signup\?error=/);
-    await expect(page.getByText(UI_BASELINE.signupDuplicateEmail, { exact: true })).toBeVisible();
+    await expect(page).toHaveURL("/auth/confirm-email");
   });
 });

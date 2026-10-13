@@ -607,36 +607,36 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 
 #### Automated
 
-- [x] 2.1 Type check passes: `npx astro check`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 Unit tests pass: `npm run test:unit`
-- [x] 2.4 The http matrices and the e2e suite pass with no test file edited, on a fresh build: `npm run build && npm run test:http && npm run test:e2e`
-- [x] 2.5 No `.astro` page assigns a literal status (grep prints nothing)
-- [x] 2.6 No repeated copy is left inline (grep prints nothing) (note: the only hits are the literal `Name is required.` oracles in `src/lib/schemas/{campaigns,notes}.test.ts`, kept literal by design per phase 1 §6; the grep with `*.test.ts` excluded prints nothing, decided in /10x-implement phase 2)
-- [x] 2.7 No ASCII ellipsis is left in UI labels (grep prints nothing)
-- [x] 2.8 No repeated label or client-validation text is left inline (grep prints nothing)
+- [x] 2.1 Type check passes: `npx astro check` — e81ec39
+- [x] 2.2 Lint passes: `npm run lint` — e81ec39
+- [x] 2.3 Unit tests pass: `npm run test:unit` — e81ec39
+- [x] 2.4 The http matrices and the e2e suite pass with no test file edited, on a fresh build: `npm run build && npm run test:http && npm run test:e2e` — e81ec39
+- [x] 2.5 No `.astro` page assigns a literal status (grep prints nothing) — e81ec39
+- [x] 2.6 No repeated copy is left inline (grep prints nothing) (note: the only hits are the literal `Name is required.` oracles in `src/lib/schemas/{campaigns,notes}.test.ts`, kept literal by design per phase 1 §6; the grep with `*.test.ts` excluded prints nothing, decided in /10x-implement phase 2) — e81ec39
+- [x] 2.7 No ASCII ellipsis is left in UI labels (grep prints nothing) — e81ec39
+- [x] 2.8 No repeated label or client-validation text is left inline (grep prints nothing) — e81ec39
 
 #### Manual
 
-- [x] 2.9 Click-through of all touched pages shows unchanged text except the two ellipsis labels
-- [x] 2.10 Relation-change notice wording unchanged after edit and delete
+- [x] 2.9 Click-through of all touched pages shows unchanged text except the two ellipsis labels — e81ec39
+- [x] 2.10 Relation-change notice wording unchanged after edit and delete — e81ec39
 
 ### Phase 3: Auth defects and route matching
 
 #### Automated
 
-- [ ] 3.1 Type check passes: `npx astro check`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 New unit tests pass (`auth.test.ts`, `auth-errors.test.ts`, `protected-routes.test.ts`): `npm run test:unit`
-- [ ] 3.4 HTTP suite passes, including new auth-route tests and the `/mapping` probe: `npm run build && npm run test:http`
-- [ ] 3.5 e2e passes with duplicate signup landing on confirm-email and wrong-password baseline unchanged: `npm run test:e2e`
-- [ ] 3.6 Smoke passes against the preview: `npm run smoke`
-- [ ] 3.7 No raw Supabase message is passed through (grep prints nothing)
+- [x] 3.1 Type check passes: `npx astro check`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 New unit tests pass (`auth.test.ts`, `auth-errors.test.ts`, `protected-routes.test.ts`): `npm run test:unit`
+- [x] 3.4 HTTP suite passes, including new auth-route tests and the `/mapping` probe: `npm run build && npm run test:http`
+- [x] 3.5 e2e passes with duplicate signup landing on confirm-email and wrong-password baseline unchanged: `npm run test:e2e`
+- [x] 3.6 Smoke passes against the preview: `npm run smoke`
+- [x] 3.7 No raw Supabase message is passed through (grep prints nothing)
 
 #### Manual
 
-- [ ] 3.8 Browser check: existing-email signup, wrong password, JS-disabled empty password
-- [ ] 3.9 curl JSON-body probe to signin returns 302 with `?error=Email%20is%20required`
+- [x] 3.8 Browser check: existing-email signup, wrong password, JS-disabled empty password
+- [x] 3.9 curl JSON-body probe to signin returns 302 with `?error=Email%20is%20required`
 
 ### Phase 4: Test literals, regression guard and docs
 

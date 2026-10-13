@@ -5,6 +5,7 @@ import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
 import { MESSAGES, passwordTooShort } from "@/lib/constants/messages";
+import { EMAIL_PATTERN } from "@/lib/schemas/auth";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -25,7 +26,7 @@ export default function SignUpForm({ serverError }: Props) {
 
     if (!email.trim()) {
       next.email = MESSAGES.EMAIL_REQUIRED;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!EMAIL_PATTERN.test(email)) {
       next.email = MESSAGES.EMAIL_INVALID;
     }
 

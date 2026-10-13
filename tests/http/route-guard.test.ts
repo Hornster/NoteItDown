@@ -61,6 +61,13 @@ describe("anonymous path variants are never served", () => {
   );
 });
 
+describe("routes that only share a prefix with a protected route", () => {
+  it("GET /mapping is 404, not a sign-in redirect", async () => {
+    const res = await send("/mapping");
+    expect(res.status).toBe(HTTP_STATUS.NOT_FOUND);
+  });
+});
+
 describe("anonymous access to protected API methods", () => {
   it.each(api.map((r) => [`${r.method} ${r.path}`, r] as const))(
     "%s is rejected with 401 JSON",
