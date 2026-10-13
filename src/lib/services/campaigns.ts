@@ -1,5 +1,6 @@
 import type { PostgrestMaybeSingleResponse, PostgrestResponse, SupabaseClient } from "@supabase/supabase-js";
 
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
 import { isUuid } from "@/lib/utils";
 import type { Campaign, CampaignSummary } from "@/types";
 
@@ -88,7 +89,7 @@ export async function createCampaign(
 
   if (error) {
     // campaigns_owner_name_key (duplicate campaign name, case-insensitive).
-    if (error.code === "23505") {
+    if (error.code === PG_ERROR.UNIQUE_VIOLATION) {
       return { success: false, reason: "duplicate_name" };
     }
     return { success: false, reason: "unexpected", error };
@@ -120,7 +121,7 @@ export async function renameCampaign(supabase: SupabaseClient, id: string, name:
 
   if (error) {
     // campaigns_owner_name_key (duplicate campaign name, case-insensitive).
-    if (error.code === "23505") {
+    if (error.code === PG_ERROR.UNIQUE_VIOLATION) {
       return { success: false, reason: "duplicate_name" };
     }
     return { success: false, reason: "unexpected", error };

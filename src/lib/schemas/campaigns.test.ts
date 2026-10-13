@@ -12,6 +12,7 @@ describe("campaignNameSchema", () => {
   it("rejects an empty name", () => {
     const result = campaignNameSchema.safeParse({ name: "" });
     expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0]?.message).toBe("Name is required.");
   });
 
   it("rejects a whitespace-only name", () => {
@@ -27,6 +28,7 @@ describe("campaignNameSchema", () => {
   it("rejects a name over 80 chars", () => {
     const result = campaignNameSchema.safeParse({ name: "a".repeat(81) });
     expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0]?.message).toBe("Name must be at most 80 characters.");
   });
 
   it("rejects an unknown top-level key (strict)", () => {

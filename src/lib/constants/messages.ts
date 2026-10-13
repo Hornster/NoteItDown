@@ -1,16 +1,37 @@
 import { ALT_TEXT_MAX_LENGTH, MAX_IMAGES_PER_NOTE } from "@/lib/images/limits";
 
-/** User-facing strings shared by API routes and the UI. New code uses these instead of literals. */
+/** User-facing strings shared by API routes and the UI. All code uses these instead of literals. */
 export const MESSAGES = {
+  // API errors
   SIGNED_IN_REQUIRED: "You must be signed in.",
   SUPABASE_NOT_CONFIGURED: "Supabase is not configured.",
   INVALID_JSON_BODY: "Request body must be valid JSON.",
   NOTE_NOT_FOUND: "This note doesn't exist or isn't yours.",
+  CAMPAIGN_NOT_FOUND: "This campaign doesn't exist or isn't yours.",
+  NO_CAMPAIGN_FOR_ACCOUNT: "No campaign found for this account.",
+  NOTE_TYPE_INVALID: "The selected type is not valid for this campaign.",
+  CAMPAIGN_CREATE_FAILED: "Something went wrong while creating the campaign. Please try again.",
+  CAMPAIGN_RENAME_FAILED: "Something went wrong while renaming the campaign. Please try again.",
+  CAMPAIGN_SAVE_FAILED: "Something went wrong while saving the campaign. Please try again.",
+  NOTE_CREATE_FAILED: "Something went wrong while creating the note. Please try again.",
+  NOTE_SAVE_FAILED: "Something went wrong while saving the note. Please try again.",
+  NOTE_DELETE_FAILED: "Something went wrong while deleting the note. Please try again.",
+  NETWORK_ERROR: "Network error. Please check your connection and try again.",
+
+  // Validation
+  NAME_REQUIRED: "Name is required.",
+  TYPE_NAME_REQUIRED: "Type name is required.",
+  TYPE_ID_INVALID: "Type id must be a valid uuid.",
+
+  // UI labels
+  NOTICE_DISMISS_LABEL: "Dismiss",
+  LICENSES_LABEL: "Third-party licences",
+
+  // Images
   IMAGE_LIMIT_REACHED: `A note can have at most ${String(MAX_IMAGES_PER_NOTE)} images.`,
   IMAGE_NOT_FOUND: "Image not found.",
   IMAGE_UPLOAD_INVALID: "The uploaded image is not valid. Please try another file.",
   GENERIC_IMAGE_ERROR: "Something went wrong while handling the image. Please try again.",
-  NETWORK_ERROR: "Network error. Please check your connection and try again.",
   IMAGE_UNSUPPORTED: "This file is unsupported or corrupt. Try a JPEG, PNG, WebP or GIF.",
   IMAGE_HEIC_DECODER_UNAVAILABLE:
     "Cannot retrieve HEIC conversion library. Make sure you are connected to the Internet.",
@@ -34,10 +55,39 @@ export const MESSAGES = {
   IMAGE_REMOVE_LABEL: "Remove image",
   IMAGE_ALT_TEXT_LABEL: "Alt text",
   IMAGE_ALT_TEXT_PLACEHOLDER: "Alt text (optional)",
-  NOTICE_DISMISS_LABEL: "Dismiss",
-  FOOTER_LICENSES_LINK: "Third-party licences",
   IMAGE_FAILURE_NOTICE_HEADING: "The note was saved, but some images were not.",
 } as const;
+
+// API error helpers
+
+/** Conflict message for a campaign name that already exists. */
+export function campaignNameTaken(name: string): string {
+  return `A campaign named "${name}" already exists.`;
+}
+
+/** Conflict message for a note name that already exists in the campaign. */
+export function noteNameTaken(name: string): string {
+  return `A note named "${name}" already exists in this campaign.`;
+}
+
+// Validation helpers
+
+/** Zod message for a name over the length limit. */
+export function nameTooLong(max: number): string {
+  return `Name must be at most ${String(max)} characters.`;
+}
+
+/** Zod message for note content over the length limit. */
+export function contentTooLong(max: number): string {
+  return `Content must be at most ${String(max)} characters.`;
+}
+
+/** Zod message for a new note type name over the length limit. */
+export function typeNameTooLong(max: number): string {
+  return `Type name must be at most ${String(max)} characters.`;
+}
+
+// Image helpers
 
 /** 1-based label for an image without a file name, e.g. in the image-failure notice. */
 export function imageLabel(n: number): string {

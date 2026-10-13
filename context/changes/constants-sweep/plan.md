@@ -590,18 +590,18 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 
 #### Automated
 
-- [ ] 1.1 Type check passes: `npx astro check`
-- [ ] 1.2 Lint passes: `npm run lint`
-- [ ] 1.3 Unit tests pass: `npm run test:unit`
-- [ ] 1.4 Integration tests pass against local Supabase: `npm run test:integration`
-- [ ] 1.5 Route-guard and forged-id matrices pass on a fresh build: `npm run build && npm run test:http`
-- [ ] 1.6 No SQLSTATE literal is left in `src/` code (grep prints nothing)
-- [ ] 1.7 No status literal is left in the converted routes and endpoints (grep prints nothing)
-- [ ] 1.8 No moved server message is left inline (grep prints nothing)
+- [x] 1.1 Type check passes: `npx astro check`
+- [x] 1.2 Lint passes: `npm run lint`
+- [x] 1.3 Unit tests pass: `npm run test:unit`
+- [x] 1.4 Integration tests pass against local Supabase: `npm run test:integration`
+- [x] 1.5 Route-guard and forged-id matrices pass on a fresh build: `npm run build && npm run test:http`
+- [x] 1.6 No SQLSTATE literal is left in `src/` code (grep prints nothing)
+- [x] 1.7 No status literal is left in the converted routes and endpoints (grep prints nothing)
+- [x] 1.8 No moved server message is left inline (grep prints nothing)
 
 #### Manual
 
-- [ ] 1.9 Spot-check foreign-campaign 404 and duplicate-name 409 JSON bodies match pre-change text
+- [x] 1.9 Spot-check foreign-campaign 404 and duplicate-name 409 JSON bodies match pre-change text
 
 ### Phase 2: UI sweep
 

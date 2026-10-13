@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MESSAGES, nameTooLong } from "@/lib/constants/messages";
 import type { SaveCampaignCommand } from "@/types";
 
 /**
@@ -19,8 +20,8 @@ export const campaignNameSchema = z
     name: z
       .string()
       .trim()
-      .min(1, "Name is required.")
-      .max(CAMPAIGN_NAME_MAX_LENGTH, `Name must be at most ${CAMPAIGN_NAME_MAX_LENGTH} characters.`),
+      .min(1, MESSAGES.NAME_REQUIRED)
+      .max(CAMPAIGN_NAME_MAX_LENGTH, nameTooLong(CAMPAIGN_NAME_MAX_LENGTH)),
   })
   .strict();
 

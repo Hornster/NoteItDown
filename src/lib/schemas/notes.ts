@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { contentTooLong, MESSAGES, nameTooLong, typeNameTooLong } from "@/lib/constants/messages";
 import type { CreateNoteCommand, UpdateNoteCommand } from "@/types";
 
 /**
@@ -22,21 +23,14 @@ export const NOTE_TYPE_NAME_MAX_LENGTH = 60;
  */
 export const createNoteSchema = z
   .object({
-    name: z
-      .string()
-      .trim()
-      .min(1, "Name is required.")
-      .max(NOTE_NAME_MAX_LENGTH, `Name must be at most ${NOTE_NAME_MAX_LENGTH} characters.`),
+    name: z.string().trim().min(1, MESSAGES.NAME_REQUIRED).max(NOTE_NAME_MAX_LENGTH, nameTooLong(NOTE_NAME_MAX_LENGTH)),
     // Not trimmed: the user's whitespace in the note body is kept as typed.
-    content: z
-      .string()
-      .max(NOTE_CONTENT_MAX_LENGTH, `Content must be at most ${NOTE_CONTENT_MAX_LENGTH} characters.`)
-      .default(""),
+    content: z.string().max(NOTE_CONTENT_MAX_LENGTH, contentTooLong(NOTE_CONTENT_MAX_LENGTH)).default(""),
     type: z.discriminatedUnion("kind", [
       z
         .object({
           kind: z.literal("existing"),
-          id: z.uuid("Type id must be a valid uuid."),
+          id: z.uuid(MESSAGES.TYPE_ID_INVALID),
         })
         .strict(),
       z
@@ -45,8 +39,8 @@ export const createNoteSchema = z
           name: z
             .string()
             .trim()
-            .min(1, "Type name is required.")
-            .max(NOTE_TYPE_NAME_MAX_LENGTH, `Type name must be at most ${NOTE_TYPE_NAME_MAX_LENGTH} characters.`),
+            .min(1, MESSAGES.TYPE_NAME_REQUIRED)
+            .max(NOTE_TYPE_NAME_MAX_LENGTH, typeNameTooLong(NOTE_TYPE_NAME_MAX_LENGTH)),
         })
         .strict(),
     ]),

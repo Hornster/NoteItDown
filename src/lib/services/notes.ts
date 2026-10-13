@@ -5,6 +5,7 @@ import type {
   SupabaseClient,
 } from "@supabase/supabase-js";
 
+import { PG_ERROR } from "@/lib/constants/db-error-codes";
 import type {
   CreateNoteCommand,
   DeleteNoteResponse,
@@ -143,12 +144,16 @@ export async function createNote(
   if (response.error) {
     const { error } = response;
     // notes_campaign_name_key (duplicate note name, case-insensitive).
-    if (error.code === "23505") {
+    if (error.code === PG_ERROR.UNIQUE_VIOLATION) {
       return { success: false, reason: "duplicate_name" };
     }
     // 23503: FK violation (type not in this campaign). 42501: RLS denial (foreign
     // campaign/type). 22023: neither/both type arguments provided.
-    if (error.code === "23503" || error.code === "42501" || error.code === "22023") {
+    if (
+      error.code === PG_ERROR.FOREIGN_KEY_VIOLATION ||
+      error.code === PG_ERROR.INSUFFICIENT_PRIVILEGE ||
+      error.code === PG_ERROR.INVALID_PARAMETER_VALUE
+    ) {
       return { success: false, reason: "invalid_type" };
     }
     return { success: false, reason: "unexpected", error };
@@ -178,13 +183,17 @@ export async function updateNote(
 
   if (response.error) {
     const { error } = response;
-    if (error.code === "P0002") {
+    if (error.code === PG_ERROR.NO_DATA_FOUND) {
       return { success: false, reason: "not_found" };
     }
-    if (error.code === "23505") {
+    if (error.code === PG_ERROR.UNIQUE_VIOLATION) {
       return { success: false, reason: "duplicate_name" };
     }
-    if (error.code === "23503" || error.code === "42501" || error.code === "22023") {
+    if (
+      error.code === PG_ERROR.FOREIGN_KEY_VIOLATION ||
+      error.code === PG_ERROR.INSUFFICIENT_PRIVILEGE ||
+      error.code === PG_ERROR.INVALID_PARAMETER_VALUE
+    ) {
       return { success: false, reason: "invalid_type" };
     }
     return { success: false, reason: "unexpected", error };
@@ -210,7 +219,7 @@ export async function deleteNote(
 
   if (response.error) {
     const { error } = response;
-    if (error.code === "P0002") {
+    if (error.code === PG_ERROR.NO_DATA_FOUND) {
       return { success: false, reason: "not_found" };
     }
     return { success: false, reason: "unexpected", error };

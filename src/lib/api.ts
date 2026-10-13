@@ -1,7 +1,8 @@
+import type { HttpStatus } from "@/lib/constants/http-status";
 import type { ApiError } from "@/types";
 
 /** JSON error response in the shared `ApiError` shape used by every API route. */
-export function jsonError(body: ApiError, status: number): Response {
+export function jsonError(body: ApiError, status: HttpStatus): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
 
