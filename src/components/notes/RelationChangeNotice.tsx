@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { MESSAGES, noteDeletedNotice, noteSavedNotice } from "@/lib/constants/messages";
 import { takeRelationNotice, type RelationNotice, type RelationNoticeTarget } from "@/lib/relation-notice";
 import type { RelationChange } from "@/types";
 
@@ -61,29 +62,37 @@ export default function RelationChangeNotice({ campaignId, target }: Props) {
       <div className="space-y-1">
         {notice.kind === "edit" ? (
           <>
-            <p>Saved &quot;{notice.noteName}&quot;.</p>
+            <p>{noteSavedNotice(notice.noteName)}</p>
             {notice.rechecked && hasAdded && (
-              <RelationLinks label="Relations added" changes={notice.added} campaignId={campaignId} />
+              <RelationLinks label={MESSAGES.RELATIONS_ADDED_LABEL} changes={notice.added} campaignId={campaignId} />
             )}
             {notice.rechecked && hasRemoved && (
-              <RelationLinks label="Relations removed" changes={notice.removed} campaignId={campaignId} />
+              <RelationLinks
+                label={MESSAGES.RELATIONS_REMOVED_LABEL}
+                changes={notice.removed}
+                campaignId={campaignId}
+              />
             )}
-            {notice.rechecked && !hasAdded && !hasRemoved && <p>Relations unchanged.</p>}
+            {notice.rechecked && !hasAdded && !hasRemoved && <p>{MESSAGES.RELATIONS_UNCHANGED}</p>}
           </>
         ) : (
           <>
-            <p>Deleted &quot;{notice.noteName}&quot;.</p>
+            <p>{noteDeletedNotice(notice.noteName)}</p>
             {hasRemoved ? (
-              <RelationLinks label="Relations removed" changes={notice.removed} campaignId={campaignId} />
+              <RelationLinks
+                label={MESSAGES.RELATIONS_REMOVED_LABEL}
+                changes={notice.removed}
+                campaignId={campaignId}
+              />
             ) : (
-              <p>No relations touched.</p>
+              <p>{MESSAGES.NO_RELATIONS_TOUCHED}</p>
             )}
           </>
         )}
       </div>
       <button
         type="button"
-        aria-label="Dismiss"
+        aria-label={MESSAGES.NOTICE_DISMISS_LABEL}
         onClick={() => {
           setNotice(null);
         }}

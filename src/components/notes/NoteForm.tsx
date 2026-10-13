@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NoteImagePicker from "@/components/notes/NoteImagePicker";
 import { useSaveNote } from "@/components/hooks/useSaveNote";
-import { imageLabel, MESSAGES } from "@/lib/constants/messages";
+import { contentTooLong, imageLabel, MESSAGES, nameTooLong, typeNameTooLong } from "@/lib/constants/messages";
 import { NOTE_CONTENT_MAX_LENGTH, NOTE_NAME_MAX_LENGTH, NOTE_TYPE_NAME_MAX_LENGTH } from "@/lib/schemas/notes";
 import type { HeldImageState, NoteImageView, NoteType } from "@/types";
 
@@ -64,24 +64,24 @@ export default function NoteForm(props: Props) {
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      next.name = "Name is required.";
+      next.name = MESSAGES.NAME_REQUIRED;
     } else if (trimmedName.length > NOTE_NAME_MAX_LENGTH) {
-      next.name = `Name must be at most ${NOTE_NAME_MAX_LENGTH} characters.`;
+      next.name = nameTooLong(NOTE_NAME_MAX_LENGTH);
     }
 
     if (content.length > NOTE_CONTENT_MAX_LENGTH) {
-      next.content = `Content must be at most ${NOTE_CONTENT_MAX_LENGTH} characters.`;
+      next.content = contentTooLong(NOTE_CONTENT_MAX_LENGTH);
     }
 
     if (isNewType) {
       const trimmedTypeName = newTypeName.trim();
       if (!trimmedTypeName) {
-        next.type = "Type name is required.";
+        next.type = MESSAGES.TYPE_NAME_REQUIRED;
       } else if (trimmedTypeName.length > NOTE_TYPE_NAME_MAX_LENGTH) {
-        next.type = `Type name must be at most ${NOTE_TYPE_NAME_MAX_LENGTH} characters.`;
+        next.type = typeNameTooLong(NOTE_TYPE_NAME_MAX_LENGTH);
       }
     } else if (!typeChoice) {
-      next.type = "Choose a type.";
+      next.type = MESSAGES.TYPE_REQUIRED;
     }
 
     return next;
@@ -120,7 +120,7 @@ export default function NoteForm(props: Props) {
     <form className="space-y-4" onSubmit={handleSubmit} noValidate>
       <FormField
         id="name"
-        label="Name"
+        label={MESSAGES.NAME_LABEL}
         value={name}
         onChange={(v) => {
           setName(v);
@@ -224,7 +224,7 @@ export default function NoteForm(props: Props) {
         {pending ? (
           <span className="flex items-center gap-2">
             <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            {mode === "edit" ? "Saving…" : "Creating…"}
+            {mode === "edit" ? MESSAGES.SAVING : MESSAGES.CREATING}
           </span>
         ) : (
           <span className="flex items-center gap-2">

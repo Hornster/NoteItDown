@@ -1,4 +1,6 @@
 ---
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
@@ -18,7 +20,7 @@ const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId
 
 let notes: NoteListItem[] = [];
 if (!campaign) {
-  Astro.response.status = 404;
+  Astro.response.status = HTTP_STATUS.NOT_FOUND;
 } else {
   rememberCampaign(Astro.cookies, campaign.id);
   if (supabase) {
@@ -27,7 +29,7 @@ if (!campaign) {
 }
 ---
 
-<Layout title={campaign ? campaign.name : "Campaign not found"}>
+<Layout title={campaign ? campaign.name : MESSAGES.CAMPAIGN_NOT_FOUND_TITLE}>
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
       <Topbar campaignId={campaignId} view="notes" />
@@ -51,13 +53,13 @@ if (!campaign) {
                   href={`/campaigns/${campaign.id}/map`}
                   class="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
                 >
-                  Memory map
+                  {MESSAGES.MEMORY_MAP_LABEL}
                 </a>
                 <a
                   href={`/campaigns/${campaign.id}/notes/new`}
                   class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
                 >
-                  New note
+                  {MESSAGES.NEW_NOTE_LABEL}
                 </a>
               </div>
             </div>
@@ -70,12 +72,12 @@ if (!campaign) {
 
             {notes.length === 0 ? (
               <div class="rounded-xl border border-dashed border-white/20 bg-white/5 p-8 text-center">
-                <p class="text-blue-100/70">No notes yet.</p>
+                <p class="text-blue-100/70">{MESSAGES.NOTES_EMPTY}</p>
                 <a
                   href={`/campaigns/${campaign.id}/notes/new`}
                   class="mt-3 inline-block rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
                 >
-                  Create your first note
+                  {MESSAGES.NOTES_EMPTY_CTA}
                 </a>
               </div>
             ) : (
@@ -97,7 +99,7 @@ if (!campaign) {
             )}
           </>
         ) : (
-          <p class="text-blue-100/70">This campaign doesn't exist or isn't yours.</p>
+          <p class="text-blue-100/70">{MESSAGES.CAMPAIGN_NOT_FOUND}</p>
         )}
       </div>
     </div>

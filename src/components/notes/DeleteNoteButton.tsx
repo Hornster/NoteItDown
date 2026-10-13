@@ -10,6 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useDeleteNote } from "@/components/hooks/useDeleteNote";
+import { MESSAGES } from "@/lib/constants/messages";
 
 interface DeleteNoteButtonProps {
   campaignId: string;
@@ -31,7 +32,7 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button type="button" className="text-sm text-red-300 transition-colors hover:text-red-200 hover:underline">
-          Delete
+          {MESSAGES.DELETE_LABEL}
         </button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -47,7 +48,7 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
           </p>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{MESSAGES.CANCEL_LABEL}</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             disabled={pending}
@@ -57,7 +58,7 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
               void remove();
             }}
           >
-            {pending ? "Deleting…" : "Delete"}
+            {pending ? "Deleting…" : MESSAGES.DELETE_LABEL}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

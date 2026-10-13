@@ -1,4 +1,5 @@
 ---
+import { MESSAGES } from "@/lib/constants/messages";
 import { createClient } from "@/lib/supabase";
 import { listCampaigns } from "@/lib/services/campaigns";
 import CampaignSwitcher from "@/components/campaigns/CampaignSwitcher";
@@ -38,7 +39,7 @@ if (user) {
       <div class="flex flex-wrap items-center gap-3">
         <CampaignSwitcher client:load campaigns={campaigns} campaignId={campaignId} view={view} />
         <a href="/campaigns/new" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-          New campaign
+          {MESSAGES.NEW_CAMPAIGN_LABEL}
         </a>
         <a href={dashboardHref} class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
           Dashboard
@@ -58,10 +59,10 @@ if (user) {
       <span class="text-blue-100/70">Not signed in</span>
       <div class="flex gap-3">
         <a href="/auth/signin" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-          Sign in
+          {MESSAGES.SIGN_IN_LABEL}
         </a>
         <a href="/auth/signup" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-          Sign up
+          {MESSAGES.SIGN_UP_LABEL}
         </a>
       </div>
     </>

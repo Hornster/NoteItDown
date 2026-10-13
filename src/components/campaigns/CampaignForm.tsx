@@ -4,6 +4,7 @@ import { FormField } from "@/components/auth/FormField";
 import { ServerError } from "@/components/auth/ServerError";
 import { Button } from "@/components/ui/button";
 import { useSaveCampaign } from "@/components/hooks/useSaveCampaign";
+import { MESSAGES, nameTooLong } from "@/lib/constants/messages";
 import { CAMPAIGN_NAME_MAX_LENGTH } from "@/lib/schemas/campaigns";
 
 type Props = { mode: "create" } | { mode: "rename"; campaignId: string; initialName: string };
@@ -30,10 +31,10 @@ export default function CampaignForm(props: Props) {
   function validate(): string | undefined {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      return "Name is required.";
+      return MESSAGES.NAME_REQUIRED;
     }
     if (trimmedName.length > CAMPAIGN_NAME_MAX_LENGTH) {
-      return `Name must be at most ${CAMPAIGN_NAME_MAX_LENGTH} characters.`;
+      return nameTooLong(CAMPAIGN_NAME_MAX_LENGTH);
     }
     return undefined;
   }
@@ -56,7 +57,7 @@ export default function CampaignForm(props: Props) {
     <form className="space-y-4" onSubmit={handleSubmit} noValidate>
       <FormField
         id="name"
-        label="Name"
+        label={MESSAGES.NAME_LABEL}
         value={name}
         onChange={(v) => {
           setName(v);
@@ -77,7 +78,7 @@ export default function CampaignForm(props: Props) {
         {pending ? (
           <span className="flex items-center gap-2">
             <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            {props.mode === "create" ? "Creating…" : "Saving…"}
+            {props.mode === "create" ? MESSAGES.CREATING : MESSAGES.SAVING}
           </span>
         ) : props.mode === "create" ? (
           <span className="flex items-center gap-2">

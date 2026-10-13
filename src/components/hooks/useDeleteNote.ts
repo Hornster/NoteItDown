@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { MESSAGES } from "@/lib/constants/messages";
 import { writeRelationNotice } from "@/lib/relation-notice";
 import type { ApiError, DeleteNoteResponse } from "@/types";
 
-const GENERIC_ERROR: ApiError = { error: "Something went wrong while deleting the note. Please try again." };
-const NETWORK_ERROR: ApiError = { error: "Network error. Please check your connection and try again." };
-const NOT_FOUND_ERROR: ApiError = { error: "This note doesn't exist or isn't yours." };
+const GENERIC_ERROR: ApiError = { error: MESSAGES.NOTE_DELETE_FAILED };
+const NETWORK_ERROR: ApiError = { error: MESSAGES.NETWORK_ERROR };
+const NOT_FOUND_ERROR: ApiError = { error: MESSAGES.NOTE_NOT_FOUND };
 
 interface UseDeleteNoteResult {
   remove: () => Promise<void>;
@@ -29,7 +31,7 @@ export function useDeleteNote(campaignId: string, noteId: string): UseDeleteNote
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/notes/${noteId}`, { method: "DELETE" });
 
-      if (response.status === 200) {
+      if (response.status === HTTP_STATUS.OK) {
         const body = (await response.json()) as DeleteNoteResponse;
         writeRelationNotice(window.sessionStorage, {
           kind: "delete",
@@ -41,7 +43,7 @@ export function useDeleteNote(campaignId: string, noteId: string): UseDeleteNote
         return;
       }
 
-      if (response.status === 404) {
+      if (response.status === HTTP_STATUS.NOT_FOUND) {
         setError(NOT_FOUND_ERROR);
         setPending(false);
         return;

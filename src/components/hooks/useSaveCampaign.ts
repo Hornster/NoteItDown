@@ -1,8 +1,10 @@
 import { useCallback, useState } from "react";
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { MESSAGES } from "@/lib/constants/messages";
 import type { ApiError, SaveCampaignCommand } from "@/types";
 
-const GENERIC_ERROR: ApiError = { error: "Something went wrong while saving the campaign. Please try again." };
-const NETWORK_ERROR: ApiError = { error: "Network error. Please check your connection and try again." };
+const GENERIC_ERROR: ApiError = { error: MESSAGES.CAMPAIGN_SAVE_FAILED };
+const NETWORK_ERROR: ApiError = { error: MESSAGES.NETWORK_ERROR };
 
 interface UseSaveCampaignResult {
   submit: (command: SaveCampaignCommand) => Promise<void>;
@@ -27,7 +29,7 @@ export function useSaveCampaign(mode: "create" | "rename", campaignId?: string):
 
       const url = mode === "create" ? "/api/campaigns" : `/api/campaigns/${campaignId ?? ""}`;
       const method = mode === "create" ? "POST" : "PATCH";
-      const successStatus = mode === "create" ? 201 : 200;
+      const successStatus = mode === "create" ? HTTP_STATUS.CREATED : HTTP_STATUS.OK;
 
       try {
         const response = await fetch(url, {

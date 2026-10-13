@@ -1,4 +1,6 @@
 ---
+import { HTTP_STATUS } from "@/lib/constants/http-status";
+import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import NoteForm from "@/components/notes/NoteForm";
@@ -24,7 +26,7 @@ let noteTypes: NoteType[] = [];
 let images: NoteImageView[] = [];
 let imagesUnavailable = false;
 if (!campaign) {
-  Astro.response.status = 404;
+  Astro.response.status = HTTP_STATUS.NOT_FOUND;
 } else {
   rememberCampaign(Astro.cookies, campaign.id);
 
@@ -34,7 +36,7 @@ if (!campaign) {
   note = found?.campaign_id === campaign.id ? found : null;
 
   if (!note) {
-    Astro.response.status = 404;
+    Astro.response.status = HTTP_STATUS.NOT_FOUND;
   } else if (supabase) {
     noteTypes = await listNoteTypes(supabase, campaign.id);
     try {
@@ -49,7 +51,7 @@ if (!campaign) {
 }
 ---
 
-<Layout title={note ? `Edit ${note.name}` : "Note not found"}>
+<Layout title={note ? `Edit ${note.name}` : MESSAGES.NOTE_NOT_FOUND_TITLE}>
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-lg">
       <Topbar campaignId={campaignId} view="note" />
@@ -72,11 +74,11 @@ if (!campaign) {
               href={`/campaigns/${campaign.id}/notes/${note.id}`}
               class="mt-4 inline-block text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
             >
-              Cancel
+              {MESSAGES.CANCEL_LABEL}
             </a>
           </>
         ) : (
-          <p class="text-blue-100/70">This note doesn't exist or isn't yours.</p>
+          <p class="text-blue-100/70">{MESSAGES.NOTE_NOT_FOUND}</p>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 ---
+import { HTTP_STATUS } from "@/lib/constants/http-status";
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
@@ -27,7 +28,7 @@ let relationCount = 0;
 let images: NoteImageView[] = [];
 let imagesUnavailable = false;
 if (!campaign) {
-  Astro.response.status = 404;
+  Astro.response.status = HTTP_STATUS.NOT_FOUND;
 } else {
   rememberCampaign(Astro.cookies, campaign.id);
 
@@ -37,7 +38,7 @@ if (!campaign) {
   note = found?.campaign_id === campaign.id ? found : null;
 
   if (!note) {
-    Astro.response.status = 404;
+    Astro.response.status = HTTP_STATUS.NOT_FOUND;
   } else if (supabase) {
     relationCount = await countNoteRelations(supabase, note.id);
     try {
@@ -52,7 +53,7 @@ if (!campaign) {
 }
 ---
 
-<Layout title={note ? note.name : "Note not found"}>
+<Layout title={note ? note.name : MESSAGES.NOTE_NOT_FOUND_TITLE}>
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
       <Topbar campaignId={campaignId} view="note" />
@@ -112,7 +113,7 @@ if (!campaign) {
             {imagesUnavailable && <p class="mt-6 text-sm text-amber-200">{MESSAGES.NOTE_IMAGES_LOAD_FAILED}</p>}
           </>
         ) : (
-          <p class="mt-4 text-blue-100/70">This note doesn't exist or isn't yours.</p>
+          <p class="mt-4 text-blue-100/70">{MESSAGES.NOTE_NOT_FOUND}</p>
         )}
       </div>
     </div>

@@ -6,7 +6,7 @@ import { MESSAGES } from "@/lib/constants/messages";
 import { writeRelationNotice } from "@/lib/relation-notice";
 import type { ApiError, CreateNoteCommand, ImageChanges, UpdateNoteResponse } from "@/types";
 
-const GENERIC_ERROR: ApiError = { error: "Something went wrong while saving the note. Please try again." };
+const GENERIC_ERROR: ApiError = { error: MESSAGES.NOTE_SAVE_FAILED };
 const NETWORK_ERROR: ApiError = { error: MESSAGES.NETWORK_ERROR };
 
 const NO_IMAGE_CHANGES: ImageChanges = { removedIds: [], altEdits: {}, added: [] };

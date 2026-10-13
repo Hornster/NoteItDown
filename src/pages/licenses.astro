@@ -1,4 +1,5 @@
 ---
+import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
 import lgplText from "@/assets/licenses/lgpl-3.0.txt?raw";
 import gplText from "@/assets/licenses/gpl-3.0.txt?raw";
@@ -30,11 +31,11 @@ const notices = [
 ];
 ---
 
-<Layout title="Third-party licences">
+<Layout title={MESSAGES.LICENSES_LABEL}>
   <div class="bg-cosmic min-h-screen p-4 text-white">
     <div class="mx-auto max-w-3xl py-8">
       <h1 class="mb-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
-        Third-party licences
+        {MESSAGES.LICENSES_LABEL}
       </h1>
       <p class="mb-6 text-sm text-blue-100/70">
         HEIC photos are converted in your browser with the libraries below, loaded only when you pick a HEIC file. They

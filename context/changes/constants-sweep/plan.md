@@ -590,36 +590,36 @@ There is no schema or data change. Rolling back is a git revert. The one user-vi
 
 #### Automated
 
-- [x] 1.1 Type check passes: `npx astro check`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Unit tests pass: `npm run test:unit`
-- [x] 1.4 Integration tests pass against local Supabase: `npm run test:integration`
-- [x] 1.5 Route-guard and forged-id matrices pass on a fresh build: `npm run build && npm run test:http`
-- [x] 1.6 No SQLSTATE literal is left in `src/` code (grep prints nothing)
-- [x] 1.7 No status literal is left in the converted routes and endpoints (grep prints nothing)
-- [x] 1.8 No moved server message is left inline (grep prints nothing)
+- [x] 1.1 Type check passes: `npx astro check` — e7c0bb3
+- [x] 1.2 Lint passes: `npm run lint` — e7c0bb3
+- [x] 1.3 Unit tests pass: `npm run test:unit` — e7c0bb3
+- [x] 1.4 Integration tests pass against local Supabase: `npm run test:integration` — e7c0bb3
+- [x] 1.5 Route-guard and forged-id matrices pass on a fresh build: `npm run build && npm run test:http` — e7c0bb3
+- [x] 1.6 No SQLSTATE literal is left in `src/` code (grep prints nothing) — e7c0bb3
+- [x] 1.7 No status literal is left in the converted routes and endpoints (grep prints nothing) — e7c0bb3
+- [x] 1.8 No moved server message is left inline (grep prints nothing) — e7c0bb3
 
 #### Manual
 
-- [x] 1.9 Spot-check foreign-campaign 404 and duplicate-name 409 JSON bodies match pre-change text
+- [x] 1.9 Spot-check foreign-campaign 404 and duplicate-name 409 JSON bodies match pre-change text — e7c0bb3
 
 ### Phase 2: UI sweep
 
 #### Automated
 
-- [ ] 2.1 Type check passes: `npx astro check`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Unit tests pass: `npm run test:unit`
-- [ ] 2.4 The http matrices and the e2e suite pass with no test file edited, on a fresh build: `npm run build && npm run test:http && npm run test:e2e`
-- [ ] 2.5 No `.astro` page assigns a literal status (grep prints nothing)
-- [ ] 2.6 No repeated copy is left inline (grep prints nothing)
-- [ ] 2.7 No ASCII ellipsis is left in UI labels (grep prints nothing)
-- [ ] 2.8 No repeated label or client-validation text is left inline (grep prints nothing)
+- [x] 2.1 Type check passes: `npx astro check`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Unit tests pass: `npm run test:unit`
+- [x] 2.4 The http matrices and the e2e suite pass with no test file edited, on a fresh build: `npm run build && npm run test:http && npm run test:e2e`
+- [x] 2.5 No `.astro` page assigns a literal status (grep prints nothing)
+- [x] 2.6 No repeated copy is left inline (grep prints nothing) (note: the only hits are the literal `Name is required.` oracles in `src/lib/schemas/{campaigns,notes}.test.ts`, kept literal by design per phase 1 §6; the grep with `*.test.ts` excluded prints nothing, decided in /10x-implement phase 2)
+- [x] 2.7 No ASCII ellipsis is left in UI labels (grep prints nothing)
+- [x] 2.8 No repeated label or client-validation text is left inline (grep prints nothing)
 
 #### Manual
 
-- [ ] 2.9 Click-through of all touched pages shows unchanged text except the two ellipsis labels
-- [ ] 2.10 Relation-change notice wording unchanged after edit and delete
+- [x] 2.9 Click-through of all touched pages shows unchanged text except the two ellipsis labels
+- [x] 2.10 Relation-change notice wording unchanged after edit and delete
 
 ### Phase 3: Auth defects and route matching
 

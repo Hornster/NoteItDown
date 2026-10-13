@@ -4,6 +4,7 @@ import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
+import { MESSAGES, passwordTooShort } from "@/lib/constants/messages";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -23,21 +24,21 @@ export default function SignUpForm({ serverError }: Props) {
     const next: typeof errors = {};
 
     if (!email.trim()) {
-      next.email = "Email is required";
+      next.email = MESSAGES.EMAIL_REQUIRED;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = "Enter a valid email address";
+      next.email = MESSAGES.EMAIL_INVALID;
     }
 
     if (!password) {
-      next.password = "Password is required";
+      next.password = MESSAGES.PASSWORD_REQUIRED;
     } else if (password.length < MIN_PASSWORD_LENGTH) {
-      next.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
+      next.password = passwordTooShort(MIN_PASSWORD_LENGTH);
     }
 
     if (!confirmPassword) {
-      next.confirmPassword = "Please confirm your password";
+      next.confirmPassword = MESSAGES.CONFIRM_PASSWORD_REQUIRED;
     } else if (password !== confirmPassword) {
-      next.confirmPassword = "Passwords do not match";
+      next.confirmPassword = MESSAGES.PASSWORDS_DO_NOT_MATCH;
     }
 
     setErrors(next);
@@ -67,20 +68,20 @@ export default function SignUpForm({ serverError }: Props) {
       <FormField
         id="email"
         type="email"
-        label="Email"
+        label={MESSAGES.EMAIL_LABEL}
         value={email}
         onChange={(v) => {
           setEmail(v);
           clearError("email");
         }}
-        placeholder="you@example.com"
+        placeholder={MESSAGES.EMAIL_PLACEHOLDER}
         error={errors.email}
         icon={<Mail className="size-4" />}
       />
 
       <FormField
         id="password"
-        label="Password"
+        label={MESSAGES.PASSWORD_LABEL}
         type={showPassword ? "text" : "password"}
         value={password}
         onChange={(v) => {
@@ -126,7 +127,7 @@ export default function SignUpForm({ serverError }: Props) {
 
       <ServerError message={serverError} />
 
-      <SubmitButton pendingText="Creating account..." icon={<UserPlus className="size-4" />}>
+      <SubmitButton pendingText="Creating account…" icon={<UserPlus className="size-4" />}>
         Create account
       </SubmitButton>
     </form>

@@ -23,9 +23,46 @@ export const MESSAGES = {
   TYPE_NAME_REQUIRED: "Type name is required.",
   TYPE_ID_INVALID: "Type id must be a valid uuid.",
 
+  // Client validation
+  EMAIL_REQUIRED: "Email is required",
+  EMAIL_INVALID: "Enter a valid email address",
+  PASSWORD_REQUIRED: "Password is required",
+  CONFIRM_PASSWORD_REQUIRED: "Please confirm your password",
+  PASSWORDS_DO_NOT_MATCH: "Passwords do not match",
+  TYPE_REQUIRED: "Choose a type.",
+
   // UI labels
   NOTICE_DISMISS_LABEL: "Dismiss",
   LICENSES_LABEL: "Third-party licences",
+  SIGN_IN_LABEL: "Sign in",
+  SIGN_UP_LABEL: "Sign up",
+  NEW_CAMPAIGN_LABEL: "New campaign",
+  NEW_NOTE_LABEL: "New note",
+  MEMORY_MAP_LABEL: "Memory map",
+  CANCEL_LABEL: "Cancel",
+  DELETE_LABEL: "Delete",
+  EMAIL_LABEL: "Email",
+  PASSWORD_LABEL: "Password",
+  NAME_LABEL: "Name",
+  EMAIL_PLACEHOLDER: "you@example.com",
+
+  // Pending states
+  CREATING: "Creating…",
+  SAVING: "Saving…",
+
+  // Empty state
+  NOTES_EMPTY: "No notes yet.",
+  NOTES_EMPTY_CTA: "Create your first note",
+
+  // Title fallbacks
+  CAMPAIGN_NOT_FOUND_TITLE: "Campaign not found",
+  NOTE_NOT_FOUND_TITLE: "Note not found",
+
+  // Relation notice
+  RELATIONS_ADDED_LABEL: "Relations added",
+  RELATIONS_REMOVED_LABEL: "Relations removed",
+  RELATIONS_UNCHANGED: "Relations unchanged.",
+  NO_RELATIONS_TOUCHED: "No relations touched.",
 
   // Images
   IMAGE_LIMIT_REACHED: `A note can have at most ${String(MAX_IMAGES_PER_NOTE)} images.`,
@@ -85,6 +122,28 @@ export function contentTooLong(max: number): string {
 /** Zod message for a new note type name over the length limit. */
 export function typeNameTooLong(max: number): string {
   return `Type name must be at most ${String(max)} characters.`;
+}
+
+/** Client message for a password under the minimum length. */
+export function passwordTooShort(min: number): string {
+  return `Password must be at least ${String(min)} characters`;
+}
+
+// UI helpers
+
+/** Page title and heading of the rename-campaign page. */
+export function renameCampaignTitle(name: string): string {
+  return `Rename ${name}`;
+}
+
+/** Relation-change notice line after a note save. */
+export function noteSavedNotice(name: string): string {
+  return `Saved "${name}".`;
+}
+
+/** Relation-change notice line after a note delete. */
+export function noteDeletedNotice(name: string): string {
+  return `Deleted "${name}".`;
 }
 
 // Image helpers
