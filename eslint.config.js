@@ -70,6 +70,7 @@ const astroConfig = defineConfig({
   },
 });
 
+// This block owns no-restricted-syntax for src/: flat config replaces rule options, so a later block setting it would drop these selectors.
 const httpStatusLiteralConfig = defineConfig({
   files: ["src/**/*.{ts,tsx,astro}"],
   ignores: ["src/**/*.test.ts"],
@@ -78,6 +79,7 @@ const httpStatusLiteralConfig = defineConfig({
       "error",
       ...[
         "Property[key.name='status'] > Literal[raw=/^[1-5][0-9]{2}$/]",
+        "Property[key.value='status'] > Literal[raw=/^[1-5][0-9]{2}$/]",
         "Property[key.name='status'] > ConditionalExpression > Literal[raw=/^[1-5][0-9]{2}$/]",
         "AssignmentExpression[left.type='MemberExpression'][left.property.name='status'] > Literal.right[raw=/^[1-5][0-9]{2}$/]",
         "CallExpression[callee.name='jsonError'] > Literal.arguments:nth-child(2)[raw=/^[1-5][0-9]{2}$/]",

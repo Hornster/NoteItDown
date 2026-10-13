@@ -5,6 +5,7 @@ import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
 import { MESSAGES } from "@/lib/constants/messages";
+import { EMAIL_PATTERN } from "@/lib/schemas/auth";
 
 interface Props {
   serverError?: string | null;
@@ -20,7 +21,7 @@ export default function SignInForm({ serverError }: Props) {
     const next: typeof errors = {};
     if (!email.trim()) {
       next.email = MESSAGES.EMAIL_REQUIRED;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!EMAIL_PATTERN.test(email)) {
       next.email = MESSAGES.EMAIL_INVALID;
     }
     if (!password) {

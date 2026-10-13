@@ -1,7 +1,7 @@
 ---
 change_id: constants-sweep
 title: Apply the constants rule across src/ (status codes, Postgres codes, messages)
-status: implemented
+status: impl_reviewed
 created: 2026-10-13
 updated: 2026-10-13
 archived_at: null
