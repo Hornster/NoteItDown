@@ -3,7 +3,7 @@ project: NoteItDown
 version: 2
 status: draft
 created: 2026-10-09
-updated: 2026-10-13
+updated: 2026-10-14
 prd_version: 2
 main_goal: quality
 top_blocker: time
@@ -46,7 +46,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | S-02 | notes-relations-risk-tests  | developer can rely on named risk scenarios for notes CRUD, relations and data isolation               | F-01          | FR-008, FR-011, FR-012, FR-013         | done |
 | S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | done        |
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | done |
-| S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | proposed |
+| S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | planning |
 | S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | proposed |
 | S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | proposed |
 
@@ -155,7 +155,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Does `context/foundation/materials/dnd-color-palette.md` define a value for every theme token in use, and do map node/edge colors meet WCAG AA on the dark background? — Owner: `/10x-plan`. Block: no.
 - **Risk:** Largest blast radius per the PRD (layout/UI regressions are noticed first); applied through shared palette tokens so a later mobile milestone changes layout only; before/after screenshots of header/footer and edit/new note layouts must be taken before editing.
-- **Status:** proposed
+- **Status:** planning
 
 ### S-06: Dashboard grouping & search
 
