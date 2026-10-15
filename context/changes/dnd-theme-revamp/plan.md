@@ -509,32 +509,32 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 e2e suite passes including the new Cancel-focus assertion: `npm run test:e2e`
-- [x] 1.3 `npm run test:e2e` does not run the screenshot project (`--list` shows no `[screenshots]` tests)
-- [x] 1.4 Screenshot run produces all 17 "before" PNGs
+- [x] 1.1 Lint passes: `npm run lint` — bb1c1ab
+- [x] 1.2 e2e suite passes including the new Cancel-focus assertion: `npm run test:e2e` — bb1c1ab
+- [x] 1.3 `npm run test:e2e` does not run the screenshot project (`--list` shows no `[screenshots]` tests) — bb1c1ab
+- [x] 1.4 Screenshot run produces all 17 "before" PNGs — bb1c1ab
 
 #### Manual
 
-- [x] 1.5 The "before" PNGs show the current UI with data present
-- [x] 1.6 No `src/` file changed in this phase
+- [x] 1.5 The "before" PNGs show the current UI with data present — bb1c1ab
+- [x] 1.6 No `src/` file changed in this phase — bb1c1ab
 
 ### Phase 2: Token contract and primitives
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Unit tests pass, including the new contrast test: `npm run test:unit`
-- [ ] 2.3 Type check passes: `npx astro check`
-- [ ] 2.4 Build succeeds: `npm run build`
-- [ ] 2.5 e2e passes (dialogs restyled, names and focus unchanged): `npm run test:e2e`
-- [ ] 2.6 No `.dark` selector in `global.css` and no `dark:` class anywhere in `src/`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Unit tests pass, including the new contrast test: `npm run test:unit`
+- [x] 2.3 Type check passes: `npx astro check`
+- [x] 2.4 Build succeeds: `npm run build`
+- [x] 2.5 e2e passes (dialogs restyled, names and focus unchanged): `npm run test:e2e`
+- [x] 2.6 No `.dark` selector in `global.css` and no `dark:` class anywhere in `src/`
 
 #### Manual
 
-- [ ] 2.7 Delete dialog is dark with filled red Delete, neutral outlined Cancel focused on open (gold ring visible when opened via keyboard)
-- [ ] 2.8 Image popup close button clearly visible over light and dark images (Chromium and Firefox)
-- [ ] 2.9 Map shows brown background, muted-brown edges and themed controls
+- [x] 2.7 Delete dialog is dark with filled red Delete, neutral outlined Cancel focused on open (gold ring visible when opened via keyboard)
+- [x] 2.8 Image popup close button clearly visible over light and dark images (Chromium and Firefox)
+- [x] 2.9 Map shows brown background, muted-brown edges and themed controls
 
 ### Phase 3: Shared components
 
