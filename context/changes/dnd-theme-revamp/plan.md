@@ -559,35 +559,35 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 
 #### Automated
 
-- [x] 4.1 Lint passes: `npm run lint`
-- [x] 4.2 Unit tests pass, including the new guard: `npm run test:unit`
-- [x] 4.3 Type check passes: `npx astro check`
-- [x] 4.4 Build succeeds: `npm run build`
-- [x] 4.5 e2e passes: `npm run test:e2e`
-- [x] 4.6 No `bg-cosmic`, `backdrop-blur` or `bg-clip-text` left in `src`
+- [x] 4.1 Lint passes: `npm run lint` — 935ab1f
+- [x] 4.2 Unit tests pass, including the new guard: `npm run test:unit` — 935ab1f
+- [x] 4.3 Type check passes: `npx astro check` — 935ab1f
+- [x] 4.4 Build succeeds: `npm run build` — 935ab1f
+- [x] 4.5 e2e passes: `npm run test:e2e` — 935ab1f
+- [x] 4.6 No `bg-cosmic`, `backdrop-blur` or `bg-clip-text` left in `src` — 935ab1f
 
 #### Manual
 
-- [x] 4.7 Guard fails on an injected `text-purple-300` naming file:line, then reverted
-- [x] 4.8 Every page shows only palette colors
-- [x] 4.9 New-note and edit-note pages match the structure of their "before" screenshots (`SHOT_LABEL=phase4` run)
-- [x] 4.10 Long note text is comfortable to read
+- [x] 4.7 Guard fails on an injected `text-purple-300` naming file:line, then reverted — 935ab1f
+- [x] 4.8 Every page shows only palette colors — 935ab1f
+- [x] 4.9 New-note and edit-note pages match the structure of their "before" screenshots (`SHOT_LABEL=phase4` run) — 935ab1f
+- [x] 4.10 Long note text is comfortable to read — 935ab1f
 
 ### Phase 5: Fonts and final evidence
 
 #### Automated
 
-- [ ] 5.1 Lint passes: `npm run lint`
-- [ ] 5.2 Unit tests pass: `npm run test:unit`
-- [ ] 5.3 Type check passes: `npx astro check`
-- [ ] 5.4 Build succeeds on the Cloudflare adapter and emits font files
-- [ ] 5.5 e2e passes: `npm run test:e2e`
-- [ ] 5.6 After-screenshot run produces all 17 PNGs
+- [x] 5.1 Lint passes: `npm run lint`
+- [x] 5.2 Unit tests pass: `npm run test:unit`
+- [x] 5.3 Type check passes: `npx astro check`
+- [x] 5.4 Build succeeds on the Cloudflare adapter and emits font files
+- [x] 5.5 e2e passes: `npm run test:e2e`
+- [x] 5.6 After-screenshot run produces all 17 PNGs
 
 #### Manual
 
-- [ ] 5.7 Preview serves Lora on body and Cinzel on headings from the app origin
-- [ ] 5.8 Polish diacritics render in the web fonts
-- [ ] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement
-- [ ] 5.10 FR-015 image attach and popup checked in Chromium and Firefox
-- [ ] 5.11 Licenses page lists Cinzel and Lora with the OFL text
+- [x] 5.7 Preview serves Lora on body and Cinzel on headings from the app origin
+- [x] 5.8 Polish diacritics render in the web fonts
+- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement
+- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox
+- [x] 5.11 Licenses page lists Cinzel and Lora with the OFL text

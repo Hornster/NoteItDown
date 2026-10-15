@@ -5,6 +5,7 @@ import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
 import lgplText from "@/assets/licenses/lgpl-3.0.txt?raw";
 import gplText from "@/assets/licenses/gpl-3.0.txt?raw";
+import oflText from "@/assets/licenses/ofl-1.1.txt?raw";
 
 export const prerender = false;
 
@@ -29,6 +30,21 @@ const notices = [
     license: "LGPL-3.0",
     copyright: "© struktur AG, Dirk Farin",
     source: "https://github.com/strukturag/libde265",
+  },
+];
+
+const fontNotices = [
+  {
+    name: "Cinzel",
+    license: "OFL-1.1",
+    copyright: "© 2020 The Cinzel Project Authors",
+    source: "https://github.com/NDISCOVER/Cinzel",
+  },
+  {
+    name: "Lora",
+    license: "OFL-1.1",
+    copyright: "© 2011 The Lora Project Authors",
+    source: "https://github.com/cyrealtype/Lora-Cyrillic",
   },
 ];
 ---
@@ -59,6 +75,24 @@ const notices = [
         ))}
       </ul>
 
+      <h2 class="mb-2 text-lg font-semibold">Fonts</h2>
+      <p class="mb-4 text-sm text-muted-foreground">
+        The Cinzel and Lora typefaces are self-hosted and distributed under the SIL Open Font License 1.1.
+      </p>
+      <ul class="mb-8 space-y-3">
+        {fontNotices.map((n) => (
+          <li class:list={cn(cardVariants(), "rounded-2xl p-4")}>
+            <p class="font-semibold">{n.name}</p>
+            <p class="text-sm text-foreground">
+              {n.license} &middot; {n.copyright}
+            </p>
+            <a href={n.source} target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">
+              {n.source}
+            </a>
+          </li>
+        ))}
+      </ul>
+
       <h2 class="mb-2 text-lg font-semibold">GNU Lesser General Public License v3.0</h2>
       <pre
         class:list={cn(
@@ -71,6 +105,11 @@ const notices = [
       <pre
         class:list={cn(cardVariants(), "overflow-x-auto rounded-2xl p-4 text-xs whitespace-pre-wrap text-foreground")}
       >{gplText}</pre>
+
+      <h2 class="mt-8 mb-2 text-lg font-semibold">SIL Open Font License 1.1</h2>
+      <pre
+        class:list={cn(cardVariants(), "overflow-x-auto rounded-2xl p-4 text-xs whitespace-pre-wrap text-foreground")}
+      >{oflText}</pre>
     </div>
   </div>
 </Layout>

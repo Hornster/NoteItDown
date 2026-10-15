@@ -48,6 +48,8 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-lora);
+  --font-heading: var(--font-cinzel);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -107,5 +109,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  [data-slot="dialog-title"],
+  [data-slot="alert-dialog-title"] {
+    font-family: var(--font-heading);
   }
 }
