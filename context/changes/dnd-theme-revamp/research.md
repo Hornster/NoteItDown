@@ -9,7 +9,7 @@ tags: [research, styles, tailwind, shadcn, theme, dnd-theme-revamp]
 status: complete
 last_updated: 2026-10-14
 last_updated_by: Claude (Opus 5.5)
-last_updated_note: "Follow-up: reference materials (index-example.css, layout-example.tsx) checked against Open Questions 1-3"
+last_updated_note: "Follow-up: reference materials (index-example.css, layout-example.tsx.txt) checked against Open Questions 1-3"
 ---
 
 # Research: Current styles config for the D&D theme revamp
@@ -220,7 +220,7 @@ None under `context/changes/**/research.md` covers styling.
 
 ## Follow-up 2026-10-14: reference materials vs Open Questions 1-3
 
-**Question**: can `context/foundation/materials/index-example.css` (a shadcn theme file, 181 lines) and `context/foundation/materials/layout-example.tsx` (a Next.js root layout, 39 lines) be translated, mapped or applied directly to answer Open Questions 1 (token mapping), 2 (palette coverage) and 3 (map contrast)?
+**Question**: can `context/foundation/materials/index-example.css` (a shadcn theme file, 181 lines) and `context/foundation/materials/layout-example.tsx.txt` (a Next.js root layout, 39 lines) be translated, mapped or applied directly to answer Open Questions 1 (token mapping), 2 (palette coverage) and 3 (map contrast)?
 
 **Method**: each oklch value in the example was converted to sRGB hex, and each palette hex to oklch, with the standard OKLab matrices. WCAG 2.x contrast ratios were computed from relative luminance. Scripts are not committed. React Flow's variables were read from `node_modules/@xyflow/react/dist/style.css` (installed `^12.12.0`, `package.json:35`). Font subsets were read from the Google Fonts `css2` endpoint. The Astro Fonts API was checked through Context7 (`/withastro/docs`).
 
@@ -230,7 +230,7 @@ None under `context/changes/**/research.md` covers styling.
 - **Q2, coverage: mostly answered. Two tokens need corrected values and one is still missing.** The example fills every shadcn token, including `--destructive-foreground`, chart and sidebar. But its dark `--muted-foreground` fails AA and its dark `--input` makes form-field borders invisible. There is no `--success`.
 - **Q3, map contrast: not answered by the example.** It has nothing for React Flow. The measured pairs below show that React Flow's dark defaults fail on `#1B1814`, and they show which example values pass.
 - **The file cannot be pasted over `global.css` as is.** The example omits `@import "tw-animate-css"` and the `@xyflow/react` stylesheet import (`global.css:2,4-6`). Both are in use. The example also activates its dark values only under `.dark`, and no element in `src/` has that class (see section 1).
-- **`layout-example.tsx` cannot be applied.** It uses `next/font/google` and Next's `Metadata`, which do not exist in Astro. Its intent translates to Astro's stable Fonts API (details at the end).
+- **`layout-example.tsx.txt` cannot be applied.** It uses `next/font/google` and Next's `Metadata`, which do not exist in Astro. Its intent translates to Astro's stable Fonts API (details at the end).
 
 ### Q1: example values vs palette
 
@@ -325,9 +325,9 @@ The example has no React Flow values. React Flow 12 styles read `var(--xy-<name>
 
 Whether a note node counts as a "graphical object" under 1.4.11 depends on reading the guideline. The node's name text identifies it on its own. Edges carry the relation, so their 3:1 matters most. Final choices belong to `/10x-plan`. The table gives measured candidates from values already in the example.
 
-### `layout-example.tsx`: fonts in Astro
+### `layout-example.tsx.txt`: fonts in Astro
 
-- `next/font/google` and `Metadata` (`layout-example.tsx:3-4,22`) are Next.js only. The Astro equivalent is the stable Fonts API: a top-level `fonts` array in `astro.config.mjs` with `fontProviders.google()`, `name` and `cssVariable`, plus `<Font cssVariable="…" />` from `astro:assets` in the `<head>` of `Layout.astro`. Astro's docs say to register Tailwind 4 fonts through `@theme inline { --font-sans: var(--font-xyz); }`. The installed Astro is `^7.3.2` (`package.json:36`). This research did not build with the Fonts API on the Cloudflare adapter, so that combination is unverified.
+- `next/font/google` and `Metadata` (`layout-example.tsx.txt:3-4,22`) are Next.js only. The Astro equivalent is the stable Fonts API: a top-level `fonts` array in `astro.config.mjs` with `fontProviders.google()`, `name` and `cssVariable`, plus `<Font cssVariable="…" />` from `astro:assets` in the `<head>` of `Layout.astro`. Astro's docs say to register Tailwind 4 fonts through `@theme inline { --font-sans: var(--font-xyz); }`. The installed Astro is `^7.3.2` (`package.json:36`). This research did not build with the Fonts API on the Cloudflare adapter, so that combination is unverified.
 - The example puts `--font-sans: Cinzel, serif` straight into `:root` (line 93), and `@theme inline` re-exports it. In Astro, use a separate Fonts-API variable (for example `--font-cinzel`) and map `--font-sans` to it in `@theme inline`. That avoids two declarations of the same name.
 - **Subsets**: the example requests only `subsets: ["latin"]`. The app has Polish text with diacritics (`src/lib/config-status.ts` matched `[ąęłśżźćń…]`). Google Fonts serves `latin-ext` for all three families: Cinzel (latin, latin-ext), Lora (also cyrillic and vietnamese), Courier Prime (latin, latin-ext). `latin-ext` must be included.
 - **Cinzel as `--font-sans`**: Tailwind's preflight uses `--font-sans` as the default font, so every piece of body text, including long notes, would render in Cinzel. Cinzel is an inscription-style font with capitals only, so lowercase letters render as small caps. This is a known design property of the family. It was not rendered in this session. Choice for `/10x-plan`: Cinzel for headings only (for example a `--font-heading` token), with Lora for body text.

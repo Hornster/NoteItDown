@@ -5,6 +5,7 @@ import { expect, test as base, type Browser, type BrowserContext, type Page } fr
 
 import { createTestUser } from "../../support/test-user";
 import { waitForHydration } from "../support/hydration";
+import { createNoteViaUi, signInViaUi } from "../support/ui-flows";
 
 // On-demand screenshot capture for the theme revamp (`npm run test:screenshots`), not part of the e2e suite.
 // Output: .screenshots/theme/<SHOT_LABEL or "adhoc">/<key>.png, with stable keys so before/after pairs line up.
@@ -15,7 +16,6 @@ const OUT_DIR = path.join(process.cwd(), ".screenshots", "theme", LABEL);
 
 const KEEP_NAME = "Ironvale Keep";
 const MENTIONER_NAME = "Captain Mirelle";
-const NOTE_URL = /\/campaigns\/[0-9a-f-]{36}\/notes\/([0-9a-f-]{36})$/;
 
 interface Seed {
   campaignId: string;
@@ -87,40 +87,6 @@ function makePng(): Buffer {
   ]);
 }
 
-async function signInViaUi(page: Page, user: { email: string; password: string; campaignId: string }) {
-  await page.goto("/auth/signin");
-  await waitForHydration(page, "Sign in");
-  await page.getByLabel("Email").fill(user.email);
-  await page.getByLabel("Password", { exact: true }).fill(user.password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(`/campaigns/${user.campaignId}`);
-  await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
-}
-
-/** Creates a note through the form (optionally with an image) and returns its id from the landing URL. */
-async function createNoteViaUi(
-  page: Page,
-  campaignId: string,
-  name: string,
-  content: string,
-  image?: { name: string; mimeType: string; buffer: Buffer },
-): Promise<string> {
-  await page.goto(`/campaigns/${campaignId}/notes/new`);
-  await waitForHydration(page, "Create note");
-  await page.getByLabel("Name", { exact: true }).fill(name);
-  await page.getByLabel("Content").fill(content);
-  if (image) {
-    await page.locator("#images").setInputFiles(image);
-    // The picker processes the file client-side; the blob preview appears once it is ready to upload.
-    await expect(page.locator('form img[src^="blob:"]')).toBeVisible();
-  }
-  await page.getByRole("button", { name: "Create note" }).click();
-  await expect(page).toHaveURL(NOTE_URL);
-  const id = NOTE_URL.exec(page.url())?.[1];
-  if (!id) throw new Error(`could not read the id of "${name}" from ${page.url()}`);
-  return id;
-}
-
 async function seedCampaign(browser: Browser, baseURL: string | undefined): Promise<Seed> {
   const user = await createTestUser();
   const context = await browser.newContext({ baseURL });
@@ -149,11 +115,6 @@ async function shoot(page: Page, key: string, options: { fullPage?: boolean } = 
     caret: "hide",
   });
 }
-
-test.beforeAll(async ({ browser }) => {
-  test.setTimeout(120_000);
-  seed = await seedCampaign(browser, test.info().project.use.baseURL);
-});
 
 test.describe("signed out", () => {
   test("home", async ({ page }) => {
@@ -185,6 +146,12 @@ test.describe("signed out", () => {
 });
 
 test.describe("signed in", () => {
+  // Scoped here so a seeding failure cannot take the signed-out shots down with it.
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(120_000);
+    seed = await seedCampaign(browser, test.info().project.use.baseURL);
+  });
+
   test("dashboard", async ({ signedInPage: page }) => {
     await page.goto("/dashboard");
     await expect(page).toHaveURL(`/campaigns/${requireSeed().campaignId}`);

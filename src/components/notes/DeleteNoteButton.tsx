@@ -33,7 +33,7 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive-text" size="sm" className="h-auto p-0">
+        <Button type="button" variant="destructive-text" size="sm" className="h-auto p-0 has-[>svg]:px-0">
           <Trash2 aria-hidden="true" />
           {MESSAGES.DELETE_LABEL}
         </Button>

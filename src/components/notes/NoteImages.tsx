@@ -32,7 +32,7 @@ export default function NoteImages({ campaignId, noteId, noteName, images }: Pro
               key={image.id}
               type="button"
               onClick={() => void openImage(image.id)}
-              className="border-input bg-background focus:ring-ring overflow-hidden rounded-xl border focus:ring-2 focus:outline-none"
+              className="border-input bg-background focus-visible:ring-ring overflow-hidden rounded-xl border focus:outline-none focus-visible:ring-2"
             >
               <img
                 ref={(element) => {

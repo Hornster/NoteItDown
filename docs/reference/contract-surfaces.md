@@ -198,7 +198,7 @@ Semantic color tokens in `src/styles/global.css` (`:root`). Components use them 
 - `--destructive` / `--destructive-text` — destructive actions (fill) and error text/borders (light red, readable on card surfaces). The `destructive-text` button variant (`buttonVariants({ variant: "destructive-text" })`) is the text-only destructive action.
 - `--success` — success notices only.
 - `--accent` — neutral hover surface (ghost/outline hover, list-row hover).
-- `--reading` — long-text reading surface (note content box), slightly lighter than `--background` to soften contrast.
+- `--reading` — long-text reading surface (note content box), lighter than `--background` to soften contrast; close to the `--card` tone and separated from it by `border-input`.
 
 ## Migration file
 

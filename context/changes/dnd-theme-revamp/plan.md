@@ -148,6 +148,7 @@ Replace the token layer with the D&D mapping, add the derived tokens the palette
 | `--destructive`, `--chart-2` | `#A8322D` | palette red (fills only) |
 | `--destructive-text` | `#E57368` | **new**: red for text/icons/borders on dark surfaces (5.88:1 bg, 4.80:1 card) |
 | `--success` | `#5E8C5A` | **new**: palette's optional green (icon/border 4.53:1 bg, 3.69:1 card) |
+| `--reading` | `#322F2B` | **new (Phase 4, readability, 4.10)**: note-body surface on `[noteId].astro` instead of the nested-panel `bg-background`; close to the `--card` tone, separated by `border-input` (parchment 9.79:1, input 3.14:1); added after planning, recorded by impl-review phase 4 F2 |
 | `--chart-3` | `#5D513F` | decorative only (map dots) |
 | `--chart-4` | `#8D7856` | |
 | `--chart-5` | `#DCCFAD` | |
@@ -587,7 +588,7 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 #### Manual
 
 - [x] 5.7 Preview serves Lora on body and Cinzel on headings from the app origin — e319a8a
-- [x] 5.8 Polish diacritics render in the web fonts — e319a8a
-- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement — e319a8a
-- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox — e319a8a
+- [x] 5.8 Polish diacritics render in the web fonts — e319a8a (verified manually 2026-10-15: diacritics render in Lora/Cinzel)
+- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement — e319a8a (verified 2026-10-15: no font-caused spacing shift)
+- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox — e319a8a (verified 2026-10-15: Chromium and Firefox OK)
 - [x] 5.11 Licenses page lists Cinzel and Lora with the OFL text — e319a8a

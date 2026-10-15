@@ -25,7 +25,7 @@ const content = isAutoConfirmed
     <div class:list={cn(cardVariants(), "w-full max-w-sm rounded-2xl p-8 text-center")}>
       <div class="mb-4 text-5xl">{content.emoji}</div>
       <h1 class="mb-3 text-foreground text-2xl font-bold">{content.heading}</h1>
-      <p class="mb-6 text-foreground">{content.description}</p>
+      <p class="mb-6 text-muted-foreground">{content.description}</p>
       <a href="/auth/signin" class="text-sm text-primary hover:underline">
         {content.linkText}
       </a>

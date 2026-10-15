@@ -1,7 +1,7 @@
 ---
 change_id: dnd-theme-revamp
 title: D&D palette theme on every page with meaning-colored buttons
-status: implemented
+status: impl_reviewed
 created: 2026-10-14
 updated: 2026-10-15
 archived_at: null

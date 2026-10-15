@@ -33,6 +33,7 @@ const PAIRS: [string, string, number][] = [
   ["foreground", "background", 4.5],
   ["foreground", "card", 4.5],
   ["primary", "background", 4.5],
+  ["primary", "card", 4.5],
   ["primary-foreground", "primary", 4.5],
   ["muted-foreground", "background", 4.5],
   ["muted-foreground", "card", 4.5],

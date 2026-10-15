@@ -5,6 +5,7 @@ import { HTTP_STATUS } from "@/lib/constants/http-status";
 
 import { createTestUser } from "../support/test-user";
 import { waitForHydration } from "./support/hydration";
+import { createNoteViaUi, signInViaUi } from "./support/ui-flows";
 
 // Auth calls: 5 (CRUD test: 1 signUp via createTestUser + 1 UI signin; forged-URL test: 2 signUps + 1 UI signin).
 // Relation-change notice wording approved by the user on 2026-10-11 in `/10x-plan` (notes-relations-risk-tests);
@@ -18,34 +19,6 @@ const UI_BASELINE = {
   deleted: (name: string) => `Deleted "${name}".`,
   noRelationsTouched: "No relations touched.",
 };
-
-const NOTE_URL = /\/campaigns\/[0-9a-f-]{36}\/notes\/([0-9a-f-]{36})$/;
-
-type Seeded = Awaited<ReturnType<typeof createTestUser>>;
-
-async function signInViaUi(page: Page, user: Seeded) {
-  await page.goto("/auth/signin");
-  await waitForHydration(page, "Sign in");
-  await page.getByLabel("Email").fill(user.email);
-  await page.getByLabel("Password", { exact: true }).fill(user.password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(`/campaigns/${user.campaignId}`);
-  await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
-}
-
-/** Creates a note through the UI form and returns its id (taken from the URL it lands on). */
-async function createNoteViaUi(page: Page, campaignId: string, name: string, content: string): Promise<string> {
-  await page.goto(`/campaigns/${campaignId}/notes/new`);
-  await waitForHydration(page, "Create note");
-  await page.getByLabel("Name", { exact: true }).fill(name);
-  await page.getByLabel("Content").fill(content);
-  await page.getByRole("button", { name: "Create note" }).click();
-  await expect(page).toHaveURL(NOTE_URL);
-  const id = NOTE_URL.exec(page.url())?.[1];
-  if (!id) throw new Error(`could not read the id of "${name}" from ${page.url()}`);
-  await expect(page.getByRole("heading", { name })).toBeVisible();
-  return id;
-}
 
 /** Opens the edit form of a note, applies the given changes, saves and waits for the note page. */
 async function editNoteViaUi(

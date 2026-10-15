@@ -43,7 +43,7 @@ const fontNotices = [
   {
     name: "Lora",
     license: "OFL-1.1",
-    copyright: "© 2011 The Lora Project Authors",
+    copyright: '© 2011 The Lora Project Authors, with Reserved Font Name "Lora"',
     source: "https://github.com/cyrealtype/Lora-Cyrillic",
   },
 ];
@@ -65,7 +65,7 @@ const fontNotices = [
             <p class="font-semibold">
               {n.name} <span class="text-muted-foreground">{n.version}</span>
             </p>
-            <p class="text-sm text-foreground">
+            <p class="text-sm text-muted-foreground">
               {n.license} &middot; {n.copyright}
             </p>
             <a href={n.source} target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">
@@ -83,7 +83,7 @@ const fontNotices = [
         {fontNotices.map((n) => (
           <li class:list={cn(cardVariants(), "rounded-2xl p-4")}>
             <p class="font-semibold">{n.name}</p>
-            <p class="text-sm text-foreground">
+            <p class="text-sm text-muted-foreground">
               {n.license} &middot; {n.copyright}
             </p>
             <a href={n.source} target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">
