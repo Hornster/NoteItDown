@@ -1,3 +1,5 @@
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,9 +33,10 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button type="button" className="text-sm text-red-300 transition-colors hover:text-red-200 hover:underline">
+        <Button type="button" variant="destructive-text" size="sm" className="h-auto p-0">
+          <Trash2 aria-hidden="true" />
           {MESSAGES.DELETE_LABEL}
-        </button>
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -43,7 +46,7 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
           </AlertDialogDescription>
         </AlertDialogHeader>
         {error && (
-          <p role="alert" className="text-destructive text-sm">
+          <p role="alert" className="text-destructive-text text-sm">
             {error.error}
           </p>
         )}
@@ -58,6 +61,7 @@ export default function DeleteNoteButton({ campaignId, noteId, noteName, relatio
               void remove();
             }}
           >
+            <Trash2 aria-hidden="true" />
             {pending ? "Deleting…" : MESSAGES.DELETE_LABEL}
           </AlertDialogAction>
         </AlertDialogFooter>

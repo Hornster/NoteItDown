@@ -523,37 +523,37 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Unit tests pass, including the new contrast test: `npm run test:unit`
-- [x] 2.3 Type check passes: `npx astro check`
-- [x] 2.4 Build succeeds: `npm run build`
-- [x] 2.5 e2e passes (dialogs restyled, names and focus unchanged): `npm run test:e2e`
-- [x] 2.6 No `.dark` selector in `global.css` and no `dark:` class anywhere in `src/`
+- [x] 2.1 Lint passes: `npm run lint` — e23af22
+- [x] 2.2 Unit tests pass, including the new contrast test: `npm run test:unit` — e23af22
+- [x] 2.3 Type check passes: `npx astro check` — e23af22
+- [x] 2.4 Build succeeds: `npm run build` — e23af22
+- [x] 2.5 e2e passes (dialogs restyled, names and focus unchanged): `npm run test:e2e` — e23af22
+- [x] 2.6 No `.dark` selector in `global.css` and no `dark:` class anywhere in `src/` — e23af22
 
 #### Manual
 
-- [x] 2.7 Delete dialog is dark with filled red Delete, neutral outlined Cancel focused on open (gold ring visible when opened via keyboard)
-- [x] 2.8 Image popup close button clearly visible over light and dark images (Chromium and Firefox)
-- [x] 2.9 Map shows brown background, muted-brown edges and themed controls
+- [x] 2.7 Delete dialog is dark with filled red Delete, neutral outlined Cancel focused on open (gold ring visible when opened via keyboard) — e23af22
+- [x] 2.8 Image popup close button clearly visible over light and dark images (Chromium and Firefox) — e23af22
+- [x] 2.9 Map shows brown background, muted-brown edges and themed controls — e23af22
 
 ### Phase 3: Shared components
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Unit tests pass: `npm run test:unit`
-- [ ] 3.3 Type check passes: `npx astro check`
-- [ ] 3.4 Build succeeds: `npm run build`
-- [ ] 3.5 e2e passes (notice structure, Delete/Cancel names, form labels unchanged): `npm run test:e2e`
-- [ ] 3.6 No hard-coded palette class or hex literal remains in `src/components/` and `src/layouts/` (Welcome.astro excluded)
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Unit tests pass: `npm run test:unit`
+- [x] 3.3 Type check passes: `npx astro check`
+- [x] 3.4 Build succeeds: `npm run build`
+- [x] 3.5 e2e passes (notice structure, Delete/Cancel names, form labels unchanged): `npm run test:e2e`
+- [x] 3.6 No hard-coded palette class or hex literal remains in `src/components/` and `src/layouts/` (Welcome.astro excluded)
 
 #### Manual
 
-- [ ] 3.7 Header and footer links in the same places as the "before" screenshot
-- [ ] 3.8 Light-red Delete trigger with trash icon; filled red confirm with icon; neutral Cancel
-- [ ] 3.9 Green-bordered success notice with readable gold relation links; dismiss works
-- [ ] 3.10 Wrong-password error is light red with icon; form fields have visible borders; invalid field has a light-red border
-- [ ] 3.11 Map nodes, outline badges and edges legible; node click navigates
+- [x] 3.7 Header and footer links in the same places as the "before" screenshot
+- [x] 3.8 Light-red Delete trigger with trash icon; filled red confirm with icon; neutral Cancel
+- [x] 3.9 Green-bordered success notice with readable gold relation links; dismiss works
+- [x] 3.10 Wrong-password error is light red with icon; form fields have visible borders; invalid field has a light-red border
+- [x] 3.11 Map nodes, outline badges and edges legible; node click navigates
 
 ### Phase 4: Pages and guard
 

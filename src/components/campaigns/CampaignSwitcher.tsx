@@ -1,3 +1,4 @@
+import { Select } from "@/components/ui/select";
 import { campaignSwitchPath, type CampaignView } from "@/lib/campaign-paths";
 import type { CampaignSummary } from "@/types";
 
@@ -17,7 +18,7 @@ export default function CampaignSwitcher({ campaigns, campaignId, view }: Props)
   const selected = campaigns.some((campaign) => campaign.id === campaignId) ? (campaignId ?? "") : "";
 
   return (
-    <select
+    <Select
       aria-label="Switch campaign"
       value={selected}
       onChange={(e) => {
@@ -26,18 +27,18 @@ export default function CampaignSwitcher({ campaigns, campaignId, view }: Props)
           window.location.assign(campaignSwitchPath(view, targetId));
         }
       }}
-      className="max-w-[10rem] truncate rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-xs text-white focus:ring-2 focus:ring-purple-400 focus:outline-none sm:max-w-[14rem] sm:text-sm"
+      className="max-w-[10rem] truncate rounded-lg px-2 py-1 text-xs sm:max-w-[14rem] sm:text-sm"
     >
       {selected === "" && (
-        <option value="" disabled className="bg-slate-800 text-white">
+        <option value="" disabled>
           Select a campaign…
         </option>
       )}
       {campaigns.map((campaign) => (
-        <option key={campaign.id} value={campaign.id} className="bg-slate-800 text-white">
+        <option key={campaign.id} value={campaign.id}>
           {campaign.name}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

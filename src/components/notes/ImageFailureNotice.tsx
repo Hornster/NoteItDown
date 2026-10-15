@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { CircleAlert, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { takeImageFailureNotice, type ImageFailureNotice as Notice } from "@/lib/image-failure-notice";
 import { MESSAGES } from "@/lib/constants/messages";
 
@@ -22,11 +23,9 @@ export default function ImageFailureNotice({ noteId }: Props) {
   if (!notice) return null;
 
   return (
-    <div
-      role="alert"
-      className="mb-6 flex items-start justify-between gap-3 rounded-xl border border-red-300/30 bg-red-500/10 p-4 text-sm text-red-100 backdrop-blur-xl"
-    >
-      <div className="space-y-1">
+    <Alert variant="destructive" role="alert" className="mb-6 justify-between rounded-xl p-4">
+      <CircleAlert aria-hidden="true" />
+      <AlertDescription className="space-y-1">
         <p>{MESSAGES.IMAGE_FAILURE_NOTICE_HEADING}</p>
         <ul className="list-disc pl-5">
           {notice.failures.map((f, i) => (
@@ -35,17 +34,17 @@ export default function ImageFailureNotice({ noteId }: Props) {
             </li>
           ))}
         </ul>
-      </div>
+      </AlertDescription>
       <button
         type="button"
         aria-label={MESSAGES.NOTICE_DISMISS_LABEL}
         onClick={() => {
           setNotice(null);
         }}
-        className="shrink-0 text-white/60 transition-colors hover:text-white"
+        className="text-muted-foreground hover:text-foreground shrink-0 transition-colors"
       >
-        <X className="size-4" />
+        <X className="size-4" aria-hidden="true" />
       </button>
-    </div>
+    </Alert>
   );
 }

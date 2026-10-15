@@ -1,4 +1,5 @@
 import { ImagePlus, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useImagePicks } from "@/components/hooks/useImagePicks";
 import { useThumbFallback } from "@/components/hooks/useThumbFallback";
@@ -14,8 +15,7 @@ interface Props {
   onChange: (update: (prev: HeldImageState) => HeldImageState) => void;
 }
 
-const altInputClass =
-  "mt-2 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-purple-400 focus:outline-none";
+const altInputClass = "mt-2 rounded-lg px-3 py-1.5 text-sm";
 
 export default function NoteImagePicker({ existing, held, onChange }: Props) {
   const { full, hasAnimated, ignoredCount, addFiles, removePending, setPendingAlt, removeKept, editKeptAlt } =
@@ -38,7 +38,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
         const original = originals.get(image.id) ?? image;
         const altValue = image.id in held.altEdits ? (held.altEdits[image.id] ?? "") : (original.alt_text ?? "");
         return (
-          <div key={image.id} className="mt-2 rounded-lg border border-white/10 bg-white/5 p-3">
+          <div key={image.id} className="border-input bg-background mt-2 rounded-lg border p-3">
             <div className="flex items-start gap-3">
               {image.thumb_url && !isFailed(image.id) ? (
                 <img
@@ -55,7 +55,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
                   className="h-20 w-auto rounded"
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded bg-white/10 text-xs text-white/60">
+                <div className="border-input bg-background text-muted-foreground flex h-20 w-20 items-center justify-center rounded border text-xs">
                   {MESSAGES.IMAGE_UNAVAILABLE}
                 </div>
               )}
@@ -65,12 +65,12 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
                 onClick={() => {
                   removeKept(image);
                 }}
-                className="ml-auto shrink-0 text-white/60 transition-colors hover:text-white"
+                className="text-muted-foreground hover:text-foreground ml-auto shrink-0 transition-colors"
               >
-                <X className="size-4" />
+                <X className="size-4" aria-hidden="true" />
               </button>
             </div>
-            <input
+            <Input
               type="text"
               aria-label={MESSAGES.IMAGE_ALT_TEXT_LABEL}
               placeholder={MESSAGES.IMAGE_ALT_TEXT_PLACEHOLDER}
@@ -86,7 +86,7 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
       })}
 
       {held.added.map((pending) => (
-        <div key={pending.key} className="mt-2 rounded-lg border border-white/10 bg-white/5 p-3">
+        <div key={pending.key} className="border-input bg-background mt-2 rounded-lg border p-3">
           <div className="flex items-start gap-3">
             {pending.status === "ready" && pending.previewUrl && (
               <img
@@ -98,10 +98,10 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
               />
             )}
             <div className="min-w-0 text-sm">
-              <p className="truncate text-blue-100/90">{pending.fileName}</p>
-              {pending.status === "processing" && <p className="text-blue-100/70">{MESSAGES.IMAGE_PROCESSING}</p>}
+              <p className="text-foreground truncate">{pending.fileName}</p>
+              {pending.status === "processing" && <p className="text-muted-foreground">{MESSAGES.IMAGE_PROCESSING}</p>}
               {pending.status === "error" && (
-                <p role="alert" className="text-xs text-red-300">
+                <p role="alert" className="text-destructive-text text-xs">
                   {pending.error}
                 </p>
               )}
@@ -112,13 +112,13 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
               onClick={() => {
                 removePending(pending);
               }}
-              className="ml-auto shrink-0 text-white/60 transition-colors hover:text-white"
+              className="text-muted-foreground hover:text-foreground ml-auto shrink-0 transition-colors"
             >
-              <X className="size-4" />
+              <X className="size-4" aria-hidden="true" />
             </button>
           </div>
           {pending.status === "ready" && (
-            <input
+            <Input
               type="text"
               aria-label={MESSAGES.IMAGE_ALT_TEXT_LABEL}
               placeholder={MESSAGES.IMAGE_ALT_TEXT_PLACEHOLDER}
@@ -136,8 +136,8 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
       <label
         htmlFor="images"
         className={cn(
-          "mt-2 inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm text-white",
-          full ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-white/10",
+          "border-input text-foreground mt-2 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm",
+          full ? "cursor-not-allowed opacity-50" : "hover:bg-accent cursor-pointer",
         )}
       >
         <ImagePlus className="size-4" />
@@ -153,9 +153,9 @@ export default function NoteImagePicker({ existing, held, onChange }: Props) {
         className="sr-only"
       />
 
-      {ignoredCount > 0 && <p className="mt-1 text-xs text-amber-200">{imagesIgnoredNotice(ignoredCount)}</p>}
-      <p className="mt-1 text-xs text-blue-100/60">{MESSAGES.IMAGE_COMPRESSED_HINT}</p>
-      {hasAnimated && <p className="mt-1 text-xs text-blue-100/60">{MESSAGES.IMAGE_ANIMATED_NOTICE}</p>}
+      {ignoredCount > 0 && <p className="text-primary mt-1 text-xs">{imagesIgnoredNotice(ignoredCount)}</p>}
+      <p className="text-muted-foreground mt-1 text-xs">{MESSAGES.IMAGE_COMPRESSED_HINT}</p>
+      {hasAnimated && <p className="text-muted-foreground mt-1 text-xs">{MESSAGES.IMAGE_ANIMATED_NOTICE}</p>}
     </div>
   );
 }

@@ -32,7 +32,7 @@ export default function NoteImages({ campaignId, noteId, noteName, images }: Pro
               key={image.id}
               type="button"
               onClick={() => void openImage(image.id)}
-              className="overflow-hidden rounded-xl border border-white/10 bg-white/5 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="border-input bg-background focus:ring-ring overflow-hidden rounded-xl border focus:ring-2 focus:outline-none"
             >
               <img
                 ref={(element) => {
@@ -50,7 +50,7 @@ export default function NoteImages({ campaignId, noteId, noteName, images }: Pro
           ) : (
             <div
               key={image.id}
-              className="flex aspect-square items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm text-blue-100/70"
+              className="border-input bg-background text-muted-foreground flex aspect-square items-center justify-center rounded-xl border text-sm"
             >
               {MESSAGES.IMAGE_UNAVAILABLE}
             </div>
@@ -64,16 +64,13 @@ export default function NoteImages({ campaignId, noteId, noteName, images }: Pro
           if (!open) closeImage();
         }}
       >
-        <DialogContent
-          aria-describedby={undefined}
-          className="w-auto max-w-[95vw] border-white/10 bg-black/80 p-2 sm:max-w-[95vw]"
-        >
+        <DialogContent aria-describedby={undefined} className="w-auto max-w-[95vw] p-2 sm:max-w-[95vw]">
           <DialogTitle className="sr-only">{openAlt}</DialogTitle>
           {(full.status === "loading" || (full.status === "ready" && !full.loaded)) && (
-            <p className="p-8 text-center text-blue-100/80">{MESSAGES.IMAGE_FULL_LOADING}</p>
+            <p className="text-muted-foreground p-8 text-center">{MESSAGES.IMAGE_FULL_LOADING}</p>
           )}
           {full.status === "error" && (
-            <p role="alert" className="p-8 text-center text-red-300">
+            <p role="alert" className="text-destructive-text p-8 text-center">
               {MESSAGES.IMAGE_FULL_LOAD_FAILED}
             </p>
           )}

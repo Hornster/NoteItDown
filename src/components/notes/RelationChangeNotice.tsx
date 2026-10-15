@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { CircleCheck, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MESSAGES, noteDeletedNotice, noteSavedNotice } from "@/lib/constants/messages";
 import { takeRelationNotice, type RelationNotice, type RelationNoticeTarget } from "@/lib/relation-notice";
 import type { RelationChange } from "@/types";
@@ -26,7 +27,7 @@ function RelationLinks({
           {i > 0 && ", "}
           <a
             href={`/campaigns/${campaignId}/notes/${c.note_id}`}
-            className="text-purple-300 underline transition-colors hover:text-purple-100"
+            className="text-primary hover:text-primary/80 underline transition-colors"
           >
             {c.name}
           </a>
@@ -55,11 +56,9 @@ export default function RelationChangeNotice({ campaignId, target }: Props) {
   const hasRemoved = notice.removed.length > 0;
 
   return (
-    <div
-      role="status"
-      className="mb-6 flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-blue-100/90 backdrop-blur-xl"
-    >
-      <div className="space-y-1">
+    <Alert variant="success" role="status" className="mb-6 justify-between rounded-xl p-4">
+      <CircleCheck aria-hidden="true" />
+      <AlertDescription className="space-y-1">
         {notice.kind === "edit" ? (
           <>
             <p>{noteSavedNotice(notice.noteName)}</p>
@@ -89,17 +88,17 @@ export default function RelationChangeNotice({ campaignId, target }: Props) {
             )}
           </>
         )}
-      </div>
+      </AlertDescription>
       <button
         type="button"
         aria-label={MESSAGES.NOTICE_DISMISS_LABEL}
         onClick={() => {
           setNotice(null);
         }}
-        className="shrink-0 text-white/60 transition-colors hover:text-white"
+        className="text-muted-foreground hover:text-foreground shrink-0 transition-colors"
       >
-        <X className="size-4" />
+        <X className="size-4" aria-hidden="true" />
       </button>
-    </div>
+    </Alert>
   );
 }

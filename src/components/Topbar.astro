@@ -2,6 +2,8 @@
 import { MESSAGES } from "@/lib/constants/messages";
 import { createClient } from "@/lib/supabase";
 import { listCampaigns } from "@/lib/services/campaigns";
+import { cardVariants } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import CampaignSwitcher from "@/components/campaigns/CampaignSwitcher";
 import type { CampaignView } from "@/lib/campaign-paths";
 import type { CampaignSummary } from "@/types";
@@ -32,23 +34,28 @@ if (user) {
 }
 ---
 
-<div class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+<div
+  class:list={cn(
+    cardVariants(),
+    "mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl px-4 py-2 text-sm text-foreground",
+  )}
+>
   {user ? (
     <>
-      <span class="truncate text-blue-100/70">{user.email}</span>
+      <span class="truncate text-muted-foreground">{user.email}</span>
       <div class="flex flex-wrap items-center gap-3">
         <CampaignSwitcher client:load campaigns={campaigns} campaignId={campaignId} view={view} />
-        <a href="/campaigns/new" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href="/campaigns/new" class="text-primary transition-colors hover:text-primary/80 hover:underline">
           {MESSAGES.NEW_CAMPAIGN_LABEL}
         </a>
-        <a href={dashboardHref} class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href={dashboardHref} class="text-primary transition-colors hover:text-primary/80 hover:underline">
           Dashboard
         </a>
-        <a href={mapHref} class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href={mapHref} class="text-primary transition-colors hover:text-primary/80 hover:underline">
           Map
         </a>
         <form method="POST" action="/api/auth/signout">
-          <button type="submit" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+          <button type="submit" class="text-primary transition-colors hover:text-primary/80 hover:underline">
             Sign out
           </button>
         </form>
@@ -56,12 +63,12 @@ if (user) {
     </>
   ) : (
     <>
-      <span class="text-blue-100/70">Not signed in</span>
+      <span class="text-muted-foreground">Not signed in</span>
       <div class="flex gap-3">
-        <a href="/auth/signin" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href="/auth/signin" class="text-primary transition-colors hover:text-primary/80 hover:underline">
           {MESSAGES.SIGN_IN_LABEL}
         </a>
-        <a href="/auth/signup" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+        <a href="/auth/signup" class="text-primary transition-colors hover:text-primary/80 hover:underline">
           {MESSAGES.SIGN_UP_LABEL}
         </a>
       </div>
