@@ -577,17 +577,17 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 
 #### Automated
 
-- [x] 5.1 Lint passes: `npm run lint`
-- [x] 5.2 Unit tests pass: `npm run test:unit`
-- [x] 5.3 Type check passes: `npx astro check`
-- [x] 5.4 Build succeeds on the Cloudflare adapter and emits font files
-- [x] 5.5 e2e passes: `npm run test:e2e`
-- [x] 5.6 After-screenshot run produces all 17 PNGs
+- [x] 5.1 Lint passes: `npm run lint` — e319a8a
+- [x] 5.2 Unit tests pass: `npm run test:unit` — e319a8a
+- [x] 5.3 Type check passes: `npx astro check` — e319a8a
+- [x] 5.4 Build succeeds on the Cloudflare adapter and emits font files — e319a8a
+- [x] 5.5 e2e passes: `npm run test:e2e` — e319a8a
+- [x] 5.6 After-screenshot run produces all 17 PNGs — e319a8a
 
 #### Manual
 
-- [x] 5.7 Preview serves Lora on body and Cinzel on headings from the app origin
-- [x] 5.8 Polish diacritics render in the web fonts
-- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement
-- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox
-- [x] 5.11 Licenses page lists Cinzel and Lora with the OFL text
+- [x] 5.7 Preview serves Lora on body and Cinzel on headings from the app origin — e319a8a
+- [x] 5.8 Polish diacritics render in the web fonts — e319a8a
+- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement — e319a8a
+- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox — e319a8a
+- [x] 5.11 Licenses page lists Cinzel and Lora with the OFL text — e319a8a
