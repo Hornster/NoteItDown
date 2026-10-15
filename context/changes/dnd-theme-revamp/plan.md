@@ -588,7 +588,10 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 #### Manual
 
 - [x] 5.7 Preview serves Lora on body and Cinzel on headings from the app origin — e319a8a
-- [x] 5.8 Polish diacritics render in the web fonts — e319a8a (verified manually 2026-10-15: diacritics render in Lora/Cinzel)
-- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement — e319a8a (verified 2026-10-15: no font-caused spacing shift)
-- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox — e319a8a (verified 2026-10-15: Chromium and Firefox OK)
+- [x] 5.8 Polish diacritics render in the web fonts — e319a8a
+  - verified manually 2026-10-15: diacritics render in Lora/Cinzel
+- [x] 5.9 FR-014 before/after comparison done; layouts unchanged in structure and placement — e319a8a
+  - verified 2026-10-15: no font-caused spacing shift
+- [x] 5.10 FR-015 image attach and popup checked in Chromium and Firefox — e319a8a
+  - verified 2026-10-15: Chromium and Firefox OK
 - [x] 5.11 Licenses page lists Cinzel and Lora with the OFL text — e319a8a
