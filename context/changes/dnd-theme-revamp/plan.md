@@ -509,15 +509,15 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 
 #### Automated
 
-- [ ] 1.1 Lint passes: `npm run lint`
-- [ ] 1.2 e2e suite passes including the new Cancel-focus assertion: `npm run test:e2e`
-- [ ] 1.3 `npm run test:e2e` does not run the screenshot project (`--list` shows no `[screenshots]` tests)
-- [ ] 1.4 Screenshot run produces all 17 "before" PNGs
+- [x] 1.1 Lint passes: `npm run lint`
+- [x] 1.2 e2e suite passes including the new Cancel-focus assertion: `npm run test:e2e`
+- [x] 1.3 `npm run test:e2e` does not run the screenshot project (`--list` shows no `[screenshots]` tests)
+- [x] 1.4 Screenshot run produces all 17 "before" PNGs
 
 #### Manual
 
-- [ ] 1.5 The "before" PNGs show the current UI with data present
-- [ ] 1.6 No `src/` file changed in this phase
+- [x] 1.5 The "before" PNGs show the current UI with data present
+- [x] 1.6 No `src/` file changed in this phase
 
 ### Phase 2: Token contract and primitives
 

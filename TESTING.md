@@ -26,6 +26,7 @@
 
 - `npx playwright install chromium` downloads the Chromium browser Playwright drives (once per machine or Playwright upgrade).
 - `npm run test:e2e` runs the browser scenarios in `tests/e2e/` against the production preview on port 4322, which Playwright starts itself. Scenarios: sign-in and auth session chain, note create/edit/delete with the pinned relation-change notice wording, memory-map node click, and a forged note URL (`notes-relations.spec.ts`).
+- `npm run test:screenshots` runs the on-demand `screenshots` Playwright project (`tests/e2e/screenshots/*.shot.ts`; `npm run test:e2e` pins `--project=chromium` and never runs it) against the same preview server and preflight. Needs local Supabase and a fresh `npm run build`. Writes full-page PNGs to `.screenshots/theme/<SHOT_LABEL>/` (git-ignored; `SHOT_LABEL` env, default `adhoc`), e.g. `SHOT_LABEL=before npm run test:screenshots`. Uses 2 auth calls per run.
 - `npx playwright show-trace <zip>` opens a `trace.zip` downloaded from a failed CI run's `playwright-report` artifact.
 
 ## Smoke and infrastructure

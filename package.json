@@ -16,7 +16,8 @@
     "test:integration": "vitest run --project integration",
     "test:http": "vitest run --project http",
     "test": "vitest run --project unit --project hooks --project integration",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --project=chromium",
+    "test:screenshots": "playwright test --project=screenshots"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

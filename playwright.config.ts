@@ -17,7 +17,11 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    // On demand only (`npm run test:screenshots`); `test:e2e` pins --project=chromium so CI never runs it.
+    { name: "screenshots", testMatch: "screenshots/**/*.shot.ts", use: { ...devices["Desktop Chrome"] } },
+  ],
   webServer: {
     // --ignore-lock: astro allows one tracked preview per project; don't collide with a preview on 4321.
     command: "npm run preview -- --port 4322 --ignore-lock",

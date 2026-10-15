@@ -66,6 +66,8 @@ async function deleteNoteViaUi(page: Page, campaignId: string, noteId: string) {
   await page.goto(`/campaigns/${campaignId}/notes/${noteId}`);
   await waitForHydration(page, "Delete");
   await page.getByRole("button", { name: "Delete" }).click();
+  // Cancel is the default-focused button, so a stray Enter cannot confirm the deletion.
+  await expect(page.getByRole("alertdialog").getByRole("button", { name: "Cancel" })).toBeFocused();
   // The dialog has its own "Delete" confirm button; scope the click to it.
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete" }).click();
   await expect(page).toHaveURL(`/campaigns/${campaignId}`);
