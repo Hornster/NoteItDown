@@ -79,6 +79,7 @@ Integrations: `@astrojs/react`, `@astrojs/cloudflare`, `@astrojs/sitemap`.
 - **API routes**: use uppercase `GET`, `POST` exports; validate input with zod.
 - **Supabase migrations**: `supabase/migrations/` using naming format `YYYYMMDDHHmmss_short_description.sql`. Always enable RLS on new tables with granular per-operation, per-role policies.
 - **React**: no Next.js directives ("use client" etc.). Extract hooks to `src/components/hooks/`.
+- **Colors**: only through semantic tokens and the primitives in `src/components/ui/` (`buttonVariants`, `cardVariants`, `badgeVariants`, `alertVariants`); no Tailwind palette classes or hex/rgb literals. Token values live only in `src/styles/global.css`. Guard: `src/styles/theme-guard.test.ts` (unit project).
 - **Services/helpers** go in `src/lib/` (or `src/lib/services/` for extracted business logic).
 - **Shared types** (entities, DTOs) go in `src/types.ts`.
 

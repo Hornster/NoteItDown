@@ -1,4 +1,6 @@
 ---
+import { cardVariants } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
@@ -30,17 +32,15 @@ if (!campaign) {
 ---
 
 <Layout title={MESSAGES.NEW_NOTE_LABEL}>
-  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+  <div class="min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-lg">
       <Topbar campaignId={campaignId} view="new-note" />
-      <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
-        <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
-          {MESSAGES.NEW_NOTE_LABEL}
-        </h1>
+      <div class:list={cn(cardVariants(), "rounded-2xl p-8")}>
+        <h1 class="mb-6 text-foreground text-2xl font-bold">{MESSAGES.NEW_NOTE_LABEL}</h1>
         {campaign ? (
           <NoteForm mode="create" campaignId={campaign.id} noteTypes={noteTypes} client:load />
         ) : (
-          <p class="text-blue-100/70">{MESSAGES.CAMPAIGN_NOT_FOUND}</p>
+          <p class="text-muted-foreground">{MESSAGES.CAMPAIGN_NOT_FOUND}</p>
         )}
       </div>
     </div>

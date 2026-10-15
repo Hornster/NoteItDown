@@ -1,4 +1,6 @@
 ---
+import { cardVariants } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
 import SignUpForm from "@/components/auth/SignUpForm";
@@ -7,15 +9,13 @@ const error = Astro.url.searchParams.get("error");
 ---
 
 <Layout title={MESSAGES.SIGN_UP_LABEL}>
-  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
-    <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
-      <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
-        {MESSAGES.SIGN_UP_LABEL}
-      </h1>
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class:list={cn(cardVariants(), "w-full max-w-sm rounded-2xl p-8")}>
+      <h1 class="mb-6 text-foreground text-center text-2xl font-bold">{MESSAGES.SIGN_UP_LABEL}</h1>
       <SignUpForm serverError={error} client:load />
-      <p class="mt-4 text-center text-sm text-blue-100/60">
+      <p class="mt-4 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <a href="/auth/signin" class="text-purple-300 hover:underline">
+        <a href="/auth/signin" class="text-primary hover:underline">
           {MESSAGES.SIGN_IN_LABEL}
         </a>
       </p>

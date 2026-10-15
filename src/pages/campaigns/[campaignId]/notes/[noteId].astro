@@ -1,4 +1,7 @@
 ---
+import { cardVariants } from "@/components/ui/card";
+import { badgeVariants } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
@@ -54,14 +57,14 @@ if (!campaign) {
 ---
 
 <Layout title={note ? note.name : MESSAGES.NOTE_NOT_FOUND_TITLE}>
-  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+  <div class="min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
       <Topbar campaignId={campaignId} view="note" />
-      <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+      <div class:list={cn(cardVariants(), "rounded-2xl p-8")}>
         {campaign && (
           <a
             href={`/campaigns/${campaign.id}`}
-            class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+            class="text-sm text-primary transition-colors hover:text-primary/80 hover:underline"
           >
             &larr; Back to {campaign.name}
           </a>
@@ -70,13 +73,11 @@ if (!campaign) {
         {note ? (
           <>
             <div class="mt-4 mb-6 flex flex-wrap items-center justify-between gap-3">
-              <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-                {note.name}
-              </h1>
+              <h1 class="text-foreground text-3xl font-bold">{note.name}</h1>
               <div class="flex shrink-0 items-center gap-3">
                 <a
                   href={`/campaigns/${note.campaign_id}/notes/${note.id}/edit`}
-                  class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+                  class="text-sm text-primary transition-colors hover:text-primary/80 hover:underline"
                 >
                   Edit
                 </a>
@@ -87,7 +88,7 @@ if (!campaign) {
                   noteName={note.name}
                   relationCount={relationCount}
                 />
-                <span class="rounded-full bg-purple-500/30 px-2.5 py-1 text-xs text-purple-200">{note.type_name}</span>
+                <span class:list={badgeVariants({ variant: "outline" })}>{note.type_name}</span>
               </div>
             </div>
 
@@ -97,7 +98,7 @@ if (!campaign) {
               target={{ kind: "edit", noteId: note.id }}
             />
 
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4 whitespace-pre-wrap text-blue-100/90">
+            <div class="rounded-xl border border-input bg-reading p-4 whitespace-pre-wrap text-foreground">
               {note.content}
             </div>
 
@@ -110,10 +111,10 @@ if (!campaign) {
                 images={images}
               />
             )}
-            {imagesUnavailable && <p class="mt-6 text-sm text-amber-200">{MESSAGES.NOTE_IMAGES_LOAD_FAILED}</p>}
+            {imagesUnavailable && <p class="mt-6 text-sm text-destructive-text">{MESSAGES.NOTE_IMAGES_LOAD_FAILED}</p>}
           </>
         ) : (
-          <p class="mt-4 text-blue-100/70">{MESSAGES.NOTE_NOT_FOUND}</p>
+          <p class="mt-4 text-muted-foreground">{MESSAGES.NOTE_NOT_FOUND}</p>
         )}
       </div>
     </div>

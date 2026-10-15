@@ -540,38 +540,38 @@ None: styling only, no data, routes or stored state change. Rollback = revert th
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Unit tests pass: `npm run test:unit`
-- [x] 3.3 Type check passes: `npx astro check`
-- [x] 3.4 Build succeeds: `npm run build`
-- [x] 3.5 e2e passes (notice structure, Delete/Cancel names, form labels unchanged): `npm run test:e2e`
-- [x] 3.6 No hard-coded palette class or hex literal remains in `src/components/` and `src/layouts/` (Welcome.astro excluded)
+- [x] 3.1 Lint passes: `npm run lint` — e8602b0
+- [x] 3.2 Unit tests pass: `npm run test:unit` — e8602b0
+- [x] 3.3 Type check passes: `npx astro check` — e8602b0
+- [x] 3.4 Build succeeds: `npm run build` — e8602b0
+- [x] 3.5 e2e passes (notice structure, Delete/Cancel names, form labels unchanged): `npm run test:e2e` — e8602b0
+- [x] 3.6 No hard-coded palette class or hex literal remains in `src/components/` and `src/layouts/` (Welcome.astro excluded) — e8602b0
 
 #### Manual
 
-- [x] 3.7 Header and footer links in the same places as the "before" screenshot
-- [x] 3.8 Light-red Delete trigger with trash icon; filled red confirm with icon; neutral Cancel
-- [x] 3.9 Green-bordered success notice with readable gold relation links; dismiss works
-- [x] 3.10 Wrong-password error is light red with icon; form fields have visible borders; invalid field has a light-red border
-- [x] 3.11 Map nodes, outline badges and edges legible; node click navigates
+- [x] 3.7 Header and footer links in the same places as the "before" screenshot — e8602b0
+- [x] 3.8 Light-red Delete trigger with trash icon; filled red confirm with icon; neutral Cancel — e8602b0
+- [x] 3.9 Green-bordered success notice with readable gold relation links; dismiss works — e8602b0
+- [x] 3.10 Wrong-password error is light red with icon; form fields have visible borders; invalid field has a light-red border — e8602b0
+- [x] 3.11 Map nodes, outline badges and edges legible; node click navigates — e8602b0
 
 ### Phase 4: Pages and guard
 
 #### Automated
 
-- [ ] 4.1 Lint passes: `npm run lint`
-- [ ] 4.2 Unit tests pass, including the new guard: `npm run test:unit`
-- [ ] 4.3 Type check passes: `npx astro check`
-- [ ] 4.4 Build succeeds: `npm run build`
-- [ ] 4.5 e2e passes: `npm run test:e2e`
-- [ ] 4.6 No `bg-cosmic`, `backdrop-blur` or `bg-clip-text` left in `src`
+- [x] 4.1 Lint passes: `npm run lint`
+- [x] 4.2 Unit tests pass, including the new guard: `npm run test:unit`
+- [x] 4.3 Type check passes: `npx astro check`
+- [x] 4.4 Build succeeds: `npm run build`
+- [x] 4.5 e2e passes: `npm run test:e2e`
+- [x] 4.6 No `bg-cosmic`, `backdrop-blur` or `bg-clip-text` left in `src`
 
 #### Manual
 
-- [ ] 4.7 Guard fails on an injected `text-purple-300` naming file:line, then reverted
-- [ ] 4.8 Every page shows only palette colors
-- [ ] 4.9 New-note and edit-note pages match the structure of their "before" screenshots (`SHOT_LABEL=phase4` run)
-- [ ] 4.10 Long note text is comfortable to read
+- [x] 4.7 Guard fails on an injected `text-purple-300` naming file:line, then reverted
+- [x] 4.8 Every page shows only palette colors
+- [x] 4.9 New-note and edit-note pages match the structure of their "before" screenshots (`SHOT_LABEL=phase4` run)
+- [x] 4.10 Long note text is comfortable to read
 
 ### Phase 5: Fonts and final evidence
 

@@ -1,4 +1,8 @@
 ---
+import { cardVariants } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { badgeVariants } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 import { MESSAGES } from "@/lib/constants/messages";
 import Layout from "@/layouts/Layout.astro";
@@ -30,20 +34,18 @@ if (!campaign) {
 ---
 
 <Layout title={campaign ? campaign.name : MESSAGES.CAMPAIGN_NOT_FOUND_TITLE}>
-  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+  <div class="min-h-screen p-4 sm:p-8">
     <div class="mx-auto max-w-2xl">
       <Topbar campaignId={campaignId} view="notes" />
-      <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+      <div class:list={cn(cardVariants(), "rounded-2xl p-8")}>
         {campaign ? (
           <>
             <div class="mb-6 flex items-center justify-between gap-4">
               <div class="flex min-w-0 flex-wrap items-baseline gap-2">
-                <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-                  {campaign.name}
-                </h1>
+                <h1 class="text-foreground text-3xl font-bold">{campaign.name}</h1>
                 <a
                   href={`/campaigns/${campaign.id}/edit`}
-                  class="text-sm text-purple-300 transition-colors hover:text-purple-100 hover:underline"
+                  class="text-sm text-primary transition-colors hover:text-primary/80 hover:underline"
                 >
                   Rename
                 </a>
@@ -51,13 +53,13 @@ if (!campaign) {
               <div class="flex shrink-0 items-center gap-2">
                 <a
                   href={`/campaigns/${campaign.id}/map`}
-                  class="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+                  class:list={cn(buttonVariants({ variant: "outline" }), "rounded-lg px-4 py-2 text-sm")}
                 >
                   {MESSAGES.MEMORY_MAP_LABEL}
                 </a>
                 <a
                   href={`/campaigns/${campaign.id}/notes/new`}
-                  class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+                  class:list={cn(buttonVariants(), "rounded-lg px-4 py-2 text-sm")}
                 >
                   {MESSAGES.NEW_NOTE_LABEL}
                 </a>
@@ -71,11 +73,11 @@ if (!campaign) {
             />
 
             {notes.length === 0 ? (
-              <div class="rounded-xl border border-dashed border-white/20 bg-white/5 p-8 text-center">
-                <p class="text-blue-100/70">{MESSAGES.NOTES_EMPTY}</p>
+              <div class="rounded-xl border border-dashed border-input bg-background p-8 text-center">
+                <p class="text-muted-foreground">{MESSAGES.NOTES_EMPTY}</p>
                 <a
                   href={`/campaigns/${campaign.id}/notes/new`}
-                  class="mt-3 inline-block rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+                  class:list={cn(buttonVariants(), "mt-3 inline-block rounded-lg px-4 py-2 text-sm")}
                 >
                   {MESSAGES.NOTES_EMPTY_CTA}
                 </a>
@@ -86,12 +88,10 @@ if (!campaign) {
                   <li>
                     <a
                       href={`/campaigns/${campaign.id}/notes/${note.id}`}
-                      class="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 transition-colors hover:bg-white/10"
+                      class="flex items-center justify-between gap-4 rounded-xl border border-input bg-background px-4 py-3 transition-colors hover:bg-accent"
                     >
-                      <span class="truncate font-medium text-white">{note.name}</span>
-                      <span class="shrink-0 rounded-full bg-purple-500/30 px-2.5 py-1 text-xs text-purple-200">
-                        {note.type_name}
-                      </span>
+                      <span class="truncate font-medium text-foreground">{note.name}</span>
+                      <span class:list={cn(badgeVariants({ variant: "outline" }), "shrink-0")}>{note.type_name}</span>
                     </a>
                   </li>
                 ))}
@@ -99,7 +99,7 @@ if (!campaign) {
             )}
           </>
         ) : (
-          <p class="text-blue-100/70">{MESSAGES.CAMPAIGN_NOT_FOUND}</p>
+          <p class="text-muted-foreground">{MESSAGES.CAMPAIGN_NOT_FOUND}</p>
         )}
       </div>
     </div>

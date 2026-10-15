@@ -47,6 +47,8 @@ const PAIRS: [string, string, number][] = [
   ["success", "card", 3],
   ["ring", "background", 3],
   ["ring", "card", 3],
+  ["foreground", "reading", 4.5],
+  ["input", "reading", 3],
 ];
 
 describe("theme token contrast", () => {

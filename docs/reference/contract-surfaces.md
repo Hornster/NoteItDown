@@ -190,6 +190,16 @@ Relations are the automatic, atomic output of every note write (FR-007, FR-011).
 
 - `noteitdown:image-failure` (`sessionStorage`, `src/lib/image-failure-notice.ts`, `IMAGE_FAILURE_NOTICE_KEY`) — one-shot flash written by `useSaveNote` when any image step (delete, alt-text PATCH, upload) fails after the note itself was saved, and consumed by the `ImageFailureNotice` island on the edit page. Payload (JSON): `{ noteId; failures: { label; reason }[] }` (`label` is the file name for new picks, `image N` for existing ones). `takeImageFailureNotice(storage, noteId)` always removes the key and returns the payload only when it parses, has the expected shape and `noteId` matches. All storage access is try/catch'd.
 
+## Theme tokens
+
+Semantic color tokens in `src/styles/global.css` (`:root`). Components use them via Tailwind (`bg-primary`, `text-destructive-text`, ...) and the `src/components/ui/` primitives; hard-coded colors are rejected by `src/styles/theme-guard.test.ts`.
+
+- `--primary` (gold) — primary buttons, links, and the S-07 relation marking.
+- `--destructive` / `--destructive-text` — destructive actions (fill) and error text/borders (light red, readable on card surfaces). The `destructive-text` button variant (`buttonVariants({ variant: "destructive-text" })`) is the text-only destructive action.
+- `--success` — success notices only.
+- `--accent` — neutral hover surface (ghost/outline hover, list-row hover).
+- `--reading` — long-text reading surface (note content box), slightly lighter than `--background` to soften contrast.
+
 ## Migration file
 
 - `supabase/migrations/20260922120000_campaign_notes_schema.sql` — first schema migration in the project. Includes an idempotent backfill (`insert ... where not exists`) that provisions a default campaign for any pre-existing `auth.users` row. Applied to production manually (`npx supabase db push`) — CI does not run migrations.
