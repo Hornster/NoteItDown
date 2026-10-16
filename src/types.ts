@@ -95,6 +95,12 @@ export interface NoteListItem {
   created_at: string;
 }
 
+/** Dashboard notes of one type, as produced by `groupNotesByType` in `@/lib/note-search`. */
+export interface NoteGroup {
+  typeName: string;
+  notes: NoteListItem[];
+}
+
 export interface NoteDetail extends Note {
   type_name: string;
 }

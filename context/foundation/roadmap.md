@@ -47,7 +47,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | S-03 | per-file-check-hook         | developer gets lint + related unit tests run automatically for a modified file                        | —             | FR-006                                 | done        |
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | done |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | done |
-| S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | planning |
+| S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | in-progress |
 | S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | proposed |
 
 ## Streams
@@ -168,7 +168,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - What is a "typical campaign size" for the ~300 ms search-responsiveness target? — Owner: user. Block: no.
 - **Risk:** Replaces the current note list, so every existing entry point (open/create/edit/delete note, campaign switching) must stay reachable; search matching stays separate from relation detection.
-- **Status:** planning
+- **Status:** in-progress
 
 ### S-07: Memory-map search
 

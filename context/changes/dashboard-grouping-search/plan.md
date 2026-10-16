@@ -277,13 +277,13 @@ None — no schema, API or stored-data change. Old bookmarks of `/dashboard` and
 
 #### Automated
 
-- [ ] 1.1 Unit tests pass: `npm run test:unit`
-- [ ] 1.2 Lint passes: `npm run lint`
-- [ ] 1.3 Type check passes: `npx astro check`
+- [x] 1.1 Unit tests pass: `npm run test:unit`
+- [x] 1.2 Lint passes: `npm run lint`
+- [x] 1.3 Type check passes: `npx astro check`
 
 #### Manual
 
-- [ ] 1.4 `note-search.ts` is independent of relation detection (SQL in `supabase/migrations/20260926120000_relation_detection.sql`) and of `src/lib/relation-notice.ts`: no shared matcher, no imports either way
+- [x] 1.4 `note-search.ts` is independent of relation detection (SQL in `supabase/migrations/20260926120000_relation_detection.sql`) and of `src/lib/relation-notice.ts`: no shared matcher, no imports either way
 
 ### Phase 2: Grouped dashboard island
 
