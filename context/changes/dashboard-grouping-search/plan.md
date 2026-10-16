@@ -309,11 +309,11 @@ None — no schema, API or stored-data change. Old bookmarks of `/dashboard` and
 
 #### Automated
 
-- [x] 3.1 New e2e scenario passes with the existing ones: `npm run test:e2e`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 Full default suite passes: `npm test`
+- [x] 3.1 New e2e scenario passes with the existing ones: `npm run test:e2e` — c6d8149
+- [x] 3.2 Lint passes: `npm run lint` — c6d8149
+- [x] 3.3 Full default suite passes: `npm test` — c6d8149
 
 #### Manual
 
-- [x] 3.4 With a campaign of ~500 notes, results update within ~300 ms after the search triggers (Enter) and expanding a group feels instant
-- [x] 3.5 Optional: `SHOT_LABEL=s06 npm run test:screenshots` dashboard shot looks right against the D&D theme
+- [x] 3.4 With a campaign of ~500 notes, results update within ~300 ms after the search triggers (Enter) and expanding a group feels instant — c6d8149
+- [x] 3.5 Optional: `SHOT_LABEL=s06 npm run test:screenshots` dashboard shot looks right against the D&D theme — c6d8149
