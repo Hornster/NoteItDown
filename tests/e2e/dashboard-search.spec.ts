@@ -29,6 +29,13 @@ function group(page: Page, typeName: string) {
   return page.getByRole("button", { name: typeName });
 }
 
+/** The notes panel a group header controls (via its aria-controls id; React ids contain colons, hence [id=]). */
+async function groupPanel(page: Page, typeName: string) {
+  const panelId = await group(page, typeName).getAttribute("aria-controls");
+  if (!panelId) throw new Error(`group "${typeName}" has no aria-controls`);
+  return page.locator(`[id="${panelId}"]`);
+}
+
 function noteLink(page: Page, name: string) {
   return page.getByRole("link", { name });
 }
@@ -67,7 +74,7 @@ test("dashboard groups notes by type and searches by name with restorable state"
     await expect(group(page, "NPC")).toHaveAttribute("aria-expanded", "true");
     await expect(noteLink(page, "Aldric Vane")).toBeVisible();
     await expect(noteLink(page, "Bram Hollowell")).toBeVisible();
-    await expect(page.locator("li > ul").first().getByRole("link")).toHaveText(["Aldric Vane", "Bram Hollowell"]);
+    await expect((await groupPanel(page, "NPC")).getByRole("link")).toHaveText(["Aldric Vane", "Bram Hollowell"]);
   });
 
   await test.step("a partial lower-case query plus Enter narrows to matching groups, expanded, and sets ?q=", async () => {
