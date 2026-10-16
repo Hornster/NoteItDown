@@ -60,6 +60,8 @@ export const MESSAGES = {
   // Empty state
   NOTES_EMPTY: "No notes yet.",
   NOTES_EMPTY_CTA: "Create your first note",
+  NO_NOTES_FOUND: "No notes found.",
+  NOTES_SEARCH_LABEL: "Search notes by name",
 
   // Title fallbacks
   CAMPAIGN_NOT_FOUND_TITLE: "Campaign not found",

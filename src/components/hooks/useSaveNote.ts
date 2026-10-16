@@ -3,6 +3,7 @@ import { writeImageFailureNotice } from "@/lib/image-failure-notice";
 import { applyImageChanges, createImageApi } from "@/lib/images/upload";
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 import { MESSAGES } from "@/lib/constants/messages";
+import { sessionStorageOrNull } from "@/lib/browser-storage";
 import { writeRelationNotice } from "@/lib/relation-notice";
 import type { ApiError, CreateNoteCommand, ImageChanges, UpdateNoteResponse } from "@/types";
 
@@ -10,15 +11,6 @@ const GENERIC_ERROR: ApiError = { error: MESSAGES.NOTE_SAVE_FAILED };
 const NETWORK_ERROR: ApiError = { error: MESSAGES.NETWORK_ERROR };
 
 const NO_IMAGE_CHANGES: ImageChanges = { removedIds: [], altEdits: {}, added: [] };
-
-/** `window.sessionStorage` itself throws when site data is blocked; the notice writers only guard setItem. */
-function sessionStorageOrNull(): Storage | null {
-  try {
-    return window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
 
 interface UseSaveNoteResult {
   submit: (command: CreateNoteCommand, imageChanges?: ImageChanges) => Promise<void>;

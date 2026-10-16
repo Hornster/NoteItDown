@@ -277,33 +277,33 @@ None — no schema, API or stored-data change. Old bookmarks of `/dashboard` and
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm run test:unit`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Type check passes: `npx astro check`
+- [x] 1.1 Unit tests pass: `npm run test:unit` — d2037b4
+- [x] 1.2 Lint passes: `npm run lint` — d2037b4
+- [x] 1.3 Type check passes: `npx astro check` — d2037b4
 
 #### Manual
 
-- [x] 1.4 `note-search.ts` is independent of relation detection (SQL in `supabase/migrations/20260926120000_relation_detection.sql`) and of `src/lib/relation-notice.ts`: no shared matcher, no imports either way
+- [x] 1.4 `note-search.ts` is independent of relation detection (SQL in `supabase/migrations/20260926120000_relation_detection.sql`) and of `src/lib/relation-notice.ts`: no shared matcher, no imports either way — d2037b4
 
 ### Phase 2: Grouped dashboard island
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass (incl. theme guard): `npm run test:unit`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Type check passes: `npx astro check`
-- [ ] 2.4 Production build succeeds: `npm run build`
-- [ ] 2.5 Existing e2e scenarios still pass: `npm run test:e2e`
-- [ ] 2.6 Route-guard and forged-id matrix still pass: `npm run test:http`
+- [x] 2.1 Unit tests pass (incl. theme guard): `npm run test:unit`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Type check passes: `npx astro check`
+- [x] 2.4 Production build succeeds: `npm run build`
+- [x] 2.5 Existing e2e scenarios still pass: `npm run test:e2e`
+- [x] 2.6 Route-guard and forged-id matrix still pass: `npm run test:http`
 
 #### Manual
 
-- [ ] 2.7 Dashboard shows groups A–Z, all collapsed, each with type name and count; clicking expands to notes A–Z, clicking again collapses
-- [ ] 2.8 Pause, Enter and blur-after-change each run the search; blur without a change (e.g. clicking a note) does not re-run it; no match shows the neutral "No notes found." text
-- [ ] 2.9 Search → open a note → Back restores the query, its results and the groups opened by hand before the search; reload does the same
-- [ ] 2.10 Clearing the search restores the pre-search browse expansion; toggles made during the search are forgotten
-- [ ] 2.11 Open, create, edit, delete note, rename campaign, memory map and campaign switching all still reachable; delete notice still shows on the dashboard
-- [ ] 2.12 No hydration warning in the browser console on load with and without `?q=`
+- [x] 2.7 Dashboard shows groups A–Z, all collapsed, each with type name and count; clicking expands to notes A–Z, clicking again collapses
+- [x] 2.8 Pause, Enter and blur-after-change each run the search; blur without a change (e.g. clicking a note) does not re-run it; no match shows the neutral "No notes found." text
+- [x] 2.9 Search → open a note → Back restores the query, its results and the groups opened by hand before the search; reload does the same
+- [x] 2.10 Clearing the search restores the pre-search browse expansion; toggles made during the search are forgotten
+- [x] 2.11 Open, create, edit, delete note, rename campaign, memory map and campaign switching all still reachable; delete notice still shows on the dashboard
+- [x] 2.12 No hydration warning in the browser console on load with and without `?q=`
 
 ### Phase 3: e2e scenario & docs
 

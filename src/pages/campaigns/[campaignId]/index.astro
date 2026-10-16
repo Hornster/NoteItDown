@@ -1,7 +1,6 @@
 ---
 import { cardVariants } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { badgeVariants } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { HTTP_STATUS } from "@/lib/constants/http-status";
 import { MESSAGES } from "@/lib/constants/messages";
@@ -10,6 +9,8 @@ import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
 import { getCampaign } from "@/lib/services/campaigns";
 import { listNotes } from "@/lib/services/notes";
+import NotesBrowser from "@/components/notes/NotesBrowser";
+import { NOTE_SEARCH_PARAM, normalizeQuery } from "@/lib/note-search";
 import RelationChangeNotice from "@/components/notes/RelationChangeNotice";
 import { rememberCampaign } from "@/lib/campaign-cookie";
 import type { NoteListItem } from "@/types";
@@ -21,6 +22,8 @@ const { campaignId } = Astro.params;
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId) : null;
+
+const initialQuery = normalizeQuery(Astro.url.searchParams.get(NOTE_SEARCH_PARAM));
 
 let notes: NoteListItem[] = [];
 if (!campaign) {
@@ -83,19 +86,7 @@ if (!campaign) {
                 </a>
               </div>
             ) : (
-              <ul class="space-y-2">
-                {notes.map((note) => (
-                  <li>
-                    <a
-                      href={`/campaigns/${campaign.id}/notes/${note.id}`}
-                      class="flex items-center justify-between gap-4 rounded-xl border border-input bg-background px-4 py-3 transition-colors hover:bg-accent"
-                    >
-                      <span class="truncate font-medium text-foreground">{note.name}</span>
-                      <span class:list={cn(badgeVariants({ variant: "outline" }), "shrink-0")}>{note.type_name}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <NotesBrowser client:load campaignId={campaign.id} notes={notes} initialQuery={initialQuery} />
             )}
           </>
         ) : (
