@@ -289,31 +289,31 @@ None — no schema, API or stored-data change. Old bookmarks of `/dashboard` and
 
 #### Automated
 
-- [x] 2.1 Unit tests pass (incl. theme guard): `npm run test:unit`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 Type check passes: `npx astro check`
-- [x] 2.4 Production build succeeds: `npm run build`
-- [x] 2.5 Existing e2e scenarios still pass: `npm run test:e2e`
-- [x] 2.6 Route-guard and forged-id matrix still pass: `npm run test:http`
+- [x] 2.1 Unit tests pass (incl. theme guard): `npm run test:unit` — cf02fe1
+- [x] 2.2 Lint passes: `npm run lint` — cf02fe1
+- [x] 2.3 Type check passes: `npx astro check` — cf02fe1
+- [x] 2.4 Production build succeeds: `npm run build` — cf02fe1
+- [x] 2.5 Existing e2e scenarios still pass: `npm run test:e2e` — cf02fe1
+- [x] 2.6 Route-guard and forged-id matrix still pass: `npm run test:http` — cf02fe1
 
 #### Manual
 
-- [x] 2.7 Dashboard shows groups A–Z, all collapsed, each with type name and count; clicking expands to notes A–Z, clicking again collapses
-- [x] 2.8 Pause, Enter and blur-after-change each run the search; blur without a change (e.g. clicking a note) does not re-run it; no match shows the neutral "No notes found." text
-- [x] 2.9 Search → open a note → Back restores the query, its results and the groups opened by hand before the search; reload does the same
-- [x] 2.10 Clearing the search restores the pre-search browse expansion; toggles made during the search are forgotten
-- [x] 2.11 Open, create, edit, delete note, rename campaign, memory map and campaign switching all still reachable; delete notice still shows on the dashboard
-- [x] 2.12 No hydration warning in the browser console on load with and without `?q=`
+- [x] 2.7 Dashboard shows groups A–Z, all collapsed, each with type name and count; clicking expands to notes A–Z, clicking again collapses — cf02fe1
+- [x] 2.8 Pause, Enter and blur-after-change each run the search; blur without a change (e.g. clicking a note) does not re-run it; no match shows the neutral "No notes found." text — cf02fe1
+- [x] 2.9 Search → open a note → Back restores the query, its results and the groups opened by hand before the search; reload does the same — cf02fe1
+- [x] 2.10 Clearing the search restores the pre-search browse expansion; toggles made during the search are forgotten — cf02fe1
+- [x] 2.11 Open, create, edit, delete note, rename campaign, memory map and campaign switching all still reachable; delete notice still shows on the dashboard — cf02fe1
+- [x] 2.12 No hydration warning in the browser console on load with and without `?q=` — cf02fe1
 
 ### Phase 3: e2e scenario & docs
 
 #### Automated
 
-- [ ] 3.1 New e2e scenario passes with the existing ones: `npm run test:e2e`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 Full default suite passes: `npm test`
+- [x] 3.1 New e2e scenario passes with the existing ones: `npm run test:e2e`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 Full default suite passes: `npm test`
 
 #### Manual
 
-- [ ] 3.4 With a campaign of ~500 notes, results update within ~300 ms after the search triggers (Enter) and expanding a group feels instant
-- [ ] 3.5 Optional: `SHOT_LABEL=s06 npm run test:screenshots` dashboard shot looks right against the D&D theme
+- [x] 3.4 With a campaign of ~500 notes, results update within ~300 ms after the search triggers (Enter) and expanding a group feels instant
+- [x] 3.5 Optional: `SHOT_LABEL=s06 npm run test:screenshots` dashboard shot looks right against the D&D theme

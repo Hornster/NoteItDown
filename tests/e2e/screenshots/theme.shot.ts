@@ -156,6 +156,11 @@ test.describe("signed in", () => {
     await page.goto("/dashboard");
     await expect(page).toHaveURL(`/campaigns/${requireSeed().campaignId}`);
     await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+    // Expand one group so the shot shows note rows (S-06).
+    await page.locator("astro-island:not([ssr])", { has: page.locator("button[aria-expanded]") }).waitFor();
+    const firstGroup = page.locator("button[aria-expanded]").first();
+    await firstGroup.click();
+    await expect(firstGroup).toHaveAttribute("aria-expanded", "true");
     await shoot(page, "dashboard");
   });
 
