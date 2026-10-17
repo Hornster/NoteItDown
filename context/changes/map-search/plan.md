@@ -271,27 +271,27 @@ None. No schema, data or URL change; `?q=` on the map is additive.
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test:unit`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 Type check passes: `npx astro check`
-- [x] 2.4 Production build succeeds: `npm run build`
-- [x] 2.5 Existing e2e suite still passes, including the map node click step: `npm run test:e2e`
+- [x] 2.1 Unit tests pass: `npm run test:unit` — cd5567c
+- [x] 2.2 Lint passes: `npm run lint` — cd5567c
+- [x] 2.3 Type check passes: `npx astro check` — cd5567c
+- [x] 2.4 Production build succeeds: `npm run build` — cd5567c
+- [x] 2.5 Existing e2e suite still passes, including the map node click step: `npm run test:e2e` — cd5567c
 
 #### Manual
 
-- [x] 2.6 On the production preview, a single-match search centers the node (zooming in to 1 when zoomed out, not zooming out when zoomed in) and marks it in gold
-- [x] 2.7 A multi-match search marks every match and fits them in view; a no-match search shows "No notes found." in muted text and the viewport stays
-- [x] 2.8 Drag a node, pan away, press Enter on a search for it: the viewport re-centers on its new position
-- [x] 2.9 A found node is clearly readable in normal and hover state (name stays parchment) and the gold ring is visible when zoomed out
-- [x] 2.10 Clicking a found and a non-found node both open the note; Back returns with the search text, marks and framing restored
+- [x] 2.6 On the production preview, a single-match search centers the node (zooming in to 1 when zoomed out, not zooming out when zoomed in) and marks it in gold — cd5567c
+- [x] 2.7 A multi-match search marks every match and fits them in view; a no-match search shows "No notes found." in muted text and the viewport stays — cd5567c
+- [x] 2.8 Drag a node, pan away, press Enter on a search for it: the viewport re-centers on its new position — cd5567c
+- [x] 2.9 A found node is clearly readable in normal and hover state (name stays parchment) and the gold ring is visible when zoomed out — cd5567c
+- [x] 2.10 Clicking a found and a non-found node both open the note; Back returns with the search text, marks and framing restored — cd5567c
 
 ### Phase 3: e2e scenario & docs
 
 #### Automated
 
-- [ ] 3.1 New scenario passes: `npm run test:e2e` (after `npm run build`, with local Supabase)
-- [ ] 3.2 Lint passes: `npm run lint`
+- [x] 3.1 New scenario passes: `npm run test:e2e` (after `npm run build`, with local Supabase)
+- [x] 3.2 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 3.3 Docs read correctly and name the right files and auth-call count
+- [x] 3.3 Docs read correctly and name the right files and auth-call count
