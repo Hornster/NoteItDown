@@ -31,7 +31,7 @@ Automated checks re-run during review: `npm run test:unit` (176 passed), `npm ru
 - **Location**: src/components/memory-map/MemoryMap.tsx:58-61
 - **Detail**: `displayNodes` maps every state node to a new object with a new `data` object whenever `nodes` changes. During a drag, `useNodesState` replaces only the dragged node, but this memo creates new objects for all nodes. React Flow's `adoptUserNodes` (`@xyflow/system`, `userNode === internalNode.internals.userNode` check) then rebuilds every internal node and re-renders every `NoteNode` on each drag frame. Before this change only the dragged node was rebuilt. With the PRD's ~500-note campaigns this makes dragging slower for no visible gain. The plan prescribed the derivation but did not require new objects for non-found nodes.
 - **Fix**: Return the state node unchanged when it is not found (`found.has(node.id) ? { ...node, data: { ...node.data, found: true } } : node`), so only found nodes get new objects. `NoteNode` already treats a missing `found` as false.
-- **Decision**: FIXED
+- **Decision**: FIXED — b5c7442
 
 ### F2 — Hydration still shifts layout by the search field's height
 
