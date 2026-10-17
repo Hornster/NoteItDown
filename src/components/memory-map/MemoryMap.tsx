@@ -59,9 +59,10 @@ function MemoryMapCanvas(props: Props) {
   useMapSearchFocus(outcome, searchRun, props.initialQuery !== "");
 
   // Found marking is derived on top of the state nodes, which are never rewritten (dragging keeps working).
+  // Non-found nodes keep their identity so React Flow only re-renders the nodes that changed.
   const displayNodes = useMemo(() => {
     const found = new Set(matchingIds);
-    return nodes.map((node) => ({ ...node, data: { ...node.data, found: found.has(node.id) } }));
+    return nodes.map((node) => (found.has(node.id) ? { ...node, data: { ...node.data, found: true } } : node));
   }, [nodes, matchingIds]);
 
   return (
