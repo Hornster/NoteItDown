@@ -48,7 +48,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | done |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | done |
 | S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | done |
-| S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | in-progress |
+| S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | done |
 
 ## Streams
 
@@ -181,7 +181,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Does the found-node marking stay legible against the themed nodes/edges (WCAG AA) without a separate highlight token? — Owner: `/10x-plan`. Block: no.
 - **Risk:** Reuses the search input and trigger behavior from S-06; marking and centering must not change click-to-navigate on nodes or connections.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -228,3 +228,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-04: developer finds no hardcoded HTTP status codes, Postgres error codes or duplicated user-facing messages left in `src/` (comments and `.md` excluded), with identical runtime behavior and the rule recorded in `lessons.md`.** — Archived 2026-10-13 → `context/archive/2026-10-13-constants-sweep/`. Lesson: —.
 - **S-05: user sees the D&D palette on every page (dark background, parchment text, grey ornaments), with buttons colored by meaning — gold primary, red only for destructive actions with icon and label, a neutral Cancel that has default focus, green only for success — including the fixed alert-dialog and image-popup close button.** — Archived 2026-10-15 → `context/archive/2026-10-14-dnd-theme-revamp/`. Lesson: —.
 - **S-06: user can find a note on the dashboard — notes grouped by type (groups A–Z, collapsed, expanding to notes A–Z), with a case-insensitive name search that triggers on pause, Enter, or blur-if-changed, filtering groups in place.** — Archived 2026-10-16 → `context/archive/2026-10-16-dashboard-grouping-search/`. Lesson: —.
+- **S-07: user can search memory-map nodes by name with the same triggers as the dashboard — one match centers the viewport, several matches are all marked in gold, no match shows a neutral "no notes found" message.** — Archived 2026-10-17 → `context/archive/2026-10-17-map-search/`. Lesson: —.
