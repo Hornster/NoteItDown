@@ -8,6 +8,8 @@ import { MAP_NODE_HEIGHT, MAP_NODE_WIDTH } from "@/lib/memory-map-layout";
 export interface NoteNodeData {
   name: string;
   typeName: string;
+  /** True when the node matches the active map search. */
+  found?: boolean;
   [key: string]: unknown;
 }
 
@@ -21,9 +23,11 @@ export type NoteFlowNode = Node<NoteNodeData, "note">;
 export function NoteNode({ data }: NodeProps<NoteFlowNode>) {
   return (
     <div
+      data-found={data.found ? "true" : undefined}
       style={{ width: MAP_NODE_WIDTH, height: MAP_NODE_HEIGHT }}
       className={cn(
         "border-input bg-card text-card-foreground hover:bg-accent flex cursor-pointer flex-col justify-between gap-1 overflow-hidden rounded-xl border px-4 py-3 transition-colors",
+        data.found && "border-primary ring-primary ring-2",
       )}
     >
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} isConnectable={false} />

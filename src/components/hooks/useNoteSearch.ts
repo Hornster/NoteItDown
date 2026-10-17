@@ -5,6 +5,8 @@ import { NOTE_SEARCH_DEBOUNCE_MS, NOTE_SEARCH_PARAM, normalizeQuery, shouldSearc
 interface UseNoteSearchResult {
   input: string;
   appliedQuery: string;
+  /** Counts search runs: every Enter, plus any debounce/blur apply that changed the query. Starts at 0. */
+  searchRun: number;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   onBlur: () => void;
@@ -26,6 +28,8 @@ function syncQueryToUrl(query: string): void {
 export function useNoteSearch(initialQuery: string): UseNoteSearchResult {
   const [input, setInput] = useState(initialQuery);
   const [appliedQuery, setAppliedQuery] = useState(initialQuery);
+  const [searchRun, setSearchRun] = useState(0);
+  const appliedRef = useRef(initialQuery);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -36,6 +40,14 @@ export function useNoteSearch(initialQuery: string): UseNoteSearchResult {
   }, []);
 
   useEffect(() => clearTimer, [clearTimer]);
+
+  // Applies a query; counts a run when forced (Enter) or when it differs from the current applied query.
+  const applyQuery = useCallback((next: string, force: boolean) => {
+    const changed = next !== appliedRef.current;
+    appliedRef.current = next;
+    setAppliedQuery(next);
+    if (force || changed) setSearchRun((run) => run + 1);
+  }, []);
 
   useEffect(() => {
     syncQueryToUrl(appliedQuery);
@@ -48,10 +60,10 @@ export function useNoteSearch(initialQuery: string): UseNoteSearchResult {
       clearTimer();
       timer.current = setTimeout(() => {
         timer.current = null;
-        setAppliedQuery(normalizeQuery(value));
+        applyQuery(normalizeQuery(value), false);
       }, NOTE_SEARCH_DEBOUNCE_MS);
     },
-    [clearTimer],
+    [clearTimer, applyQuery],
   );
 
   const onKeyDown = useCallback(
@@ -59,15 +71,15 @@ export function useNoteSearch(initialQuery: string): UseNoteSearchResult {
       if (event.key !== "Enter") return;
       event.preventDefault();
       clearTimer();
-      setAppliedQuery(normalizeQuery(event.currentTarget.value));
+      applyQuery(normalizeQuery(event.currentTarget.value), true);
     },
-    [clearTimer],
+    [clearTimer, applyQuery],
   );
 
   const onBlur = useCallback(() => {
     clearTimer();
-    if (shouldSearchOnBlur(input, appliedQuery)) setAppliedQuery(normalizeQuery(input));
-  }, [clearTimer, input, appliedQuery]);
+    if (shouldSearchOnBlur(input, appliedQuery)) applyQuery(normalizeQuery(input), false);
+  }, [clearTimer, applyQuery, input, appliedQuery]);
 
-  return { input, appliedQuery, onInputChange, onKeyDown, onBlur };
+  return { input, appliedQuery, searchRun, onInputChange, onKeyDown, onBlur };
 }

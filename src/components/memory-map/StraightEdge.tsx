@@ -1,21 +1,6 @@
-import {
-  BaseEdge,
-  getStraightPath,
-  useInternalNode,
-  type EdgeProps,
-  type InternalNode,
-  type Node,
-} from "@xyflow/react";
+import { BaseEdge, getStraightPath, useInternalNode, type EdgeProps } from "@xyflow/react";
 
-import { MAP_NODE_HEIGHT, MAP_NODE_WIDTH } from "@/lib/memory-map-layout";
-
-/** Centre of a node's box in flow coordinates, from its measured (or fixed-fallback) size. */
-function nodeCenter(node: InternalNode<Node>): { x: number; y: number } {
-  const { x, y } = node.internals.positionAbsolute;
-  const width = node.measured.width ?? MAP_NODE_WIDTH;
-  const height = node.measured.height ?? MAP_NODE_HEIGHT;
-  return { x: x + width / 2, y: y + height / 2 };
-}
+import { nodeCenter } from "@/lib/memory-map-layout";
 
 /**
  * Undirected straight line between two nodes' centres (React Flow's "simple floating

@@ -12,6 +12,7 @@ import { getCampaign } from "@/lib/services/campaigns";
 import { listNotes } from "@/lib/services/notes";
 import { listRelations } from "@/lib/services/relations";
 import { rememberCampaign } from "@/lib/campaign-cookie";
+import { NOTE_SEARCH_PARAM, normalizeQuery } from "@/lib/note-search";
 import type { MemoryMapRelation, NoteListItem } from "@/types";
 
 // A top-level `return` in Astro frontmatter crashes this project's ESLint
@@ -21,6 +22,8 @@ const { campaignId } = Astro.params;
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 const campaign = campaignId && supabase ? await getCampaign(supabase, campaignId) : null;
+
+const initialQuery = normalizeQuery(Astro.url.searchParams.get(NOTE_SEARCH_PARAM));
 
 let notes: NoteListItem[] = [];
 let relations: MemoryMapRelation[] = [];
@@ -66,13 +69,20 @@ if (!campaign) {
                     No connections yet. A connection appears once a note's text mentions another note's exact name.
                   </p>
                 )}
-                <div class="h-[70vh] overflow-hidden rounded-xl border border-input bg-background">
-                  <MemoryMap client:only="react" campaignId={campaign.id} notes={notes} relations={relations}>
-                    <div slot="fallback" class="flex h-full items-center justify-center text-muted-foreground">
-                      Loading map&hellip;
-                    </div>
-                  </MemoryMap>
-                </div>
+                <MemoryMap
+                  client:only="react"
+                  campaignId={campaign.id}
+                  notes={notes}
+                  relations={relations}
+                  initialQuery={initialQuery}
+                >
+                  <div
+                    slot="fallback"
+                    class="flex h-[70vh] items-center justify-center overflow-hidden rounded-xl border border-input bg-background text-muted-foreground"
+                  >
+                    Loading map&hellip;
+                  </div>
+                </MemoryMap>
               </>
             )}
           </>

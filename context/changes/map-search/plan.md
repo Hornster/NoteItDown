@@ -263,27 +263,27 @@ None. No schema, data or URL change; `?q=` on the map is additive.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm run test:unit`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Type check passes: `npx astro check`
+- [x] 1.1 Unit tests pass: `npm run test:unit` — 42f6c93
+- [x] 1.2 Lint passes: `npm run lint` — 42f6c93
+- [x] 1.3 Type check passes: `npx astro check` — 42f6c93
 
 ### Phase 2: Search on the map
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test:unit`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Type check passes: `npx astro check`
-- [ ] 2.4 Production build succeeds: `npm run build`
-- [ ] 2.5 Existing e2e suite still passes, including the map node click step: `npm run test:e2e`
+- [x] 2.1 Unit tests pass: `npm run test:unit`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Type check passes: `npx astro check`
+- [x] 2.4 Production build succeeds: `npm run build`
+- [x] 2.5 Existing e2e suite still passes, including the map node click step: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 2.6 On the production preview, a single-match search centers the node (zooming in to 1 when zoomed out, not zooming out when zoomed in) and marks it in gold
-- [ ] 2.7 A multi-match search marks every match and fits them in view; a no-match search shows "No notes found." in muted text and the viewport stays
-- [ ] 2.8 Drag a node, pan away, press Enter on a search for it: the viewport re-centers on its new position
-- [ ] 2.9 A found node is clearly readable in normal and hover state (name stays parchment) and the gold ring is visible when zoomed out
-- [ ] 2.10 Clicking a found and a non-found node both open the note; Back returns with the search text, marks and framing restored
+- [x] 2.6 On the production preview, a single-match search centers the node (zooming in to 1 when zoomed out, not zooming out when zoomed in) and marks it in gold
+- [x] 2.7 A multi-match search marks every match and fits them in view; a no-match search shows "No notes found." in muted text and the viewport stays
+- [x] 2.8 Drag a node, pan away, press Enter on a search for it: the viewport re-centers on its new position
+- [x] 2.9 A found node is clearly readable in normal and hover state (name stays parchment) and the gold ring is visible when zoomed out
+- [x] 2.10 Clicking a found and a non-found node both open the note; Back returns with the search text, marks and framing restored
 
 ### Phase 3: e2e scenario & docs
 

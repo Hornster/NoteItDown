@@ -1,9 +1,18 @@
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from "d3-force";
+import type { InternalNode, Node } from "@xyflow/react";
 import type { SimulationLinkDatum, SimulationNodeDatum } from "d3-force";
 
 /** Fixed node box shared with the map's node component. */
 export const MAP_NODE_WIDTH = 160;
 export const MAP_NODE_HEIGHT = 80;
+
+/** Centre of a node's box in flow coordinates, from its measured (or fixed-fallback) size. */
+export function nodeCenter(node: InternalNode<Node>): { x: number; y: number } {
+  const { x, y } = node.internals.positionAbsolute;
+  const width = node.measured.width ?? MAP_NODE_WIDTH;
+  const height = node.measured.height ?? MAP_NODE_HEIGHT;
+  return { x: x + width / 2, y: y + height / 2 };
+}
 
 /** Enough ticks for the simulation to settle from alpha=1 without relying on the auto-stop timer. */
 const SIMULATION_TICKS = 300;
