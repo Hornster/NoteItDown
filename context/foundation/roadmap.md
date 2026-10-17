@@ -3,7 +3,7 @@ project: NoteItDown
 version: 2
 status: draft
 created: 2026-10-09
-updated: 2026-10-16
+updated: 2026-10-17
 prd_version: 2
 main_goal: quality
 top_blocker: time
@@ -48,7 +48,7 @@ The MVP is shipped and working; this milestone polishes it and firms up its base
 | S-04 | constants-sweep             | developer finds no hardcoded status codes, Postgres error codes or duplicated messages in `src/`      | S-01, S-02    | FR-009, FR-010, FR-011, FR-012         | done |
 | S-05 | dnd-theme-revamp            | user sees the D&D palette on every page, with buttons colored by meaning                              | S-04          | FR-001, FR-002, FR-014, FR-015         | done |
 | S-06 | dashboard-grouping-search   | user can find a note on the dashboard — grouped by type, with a name search                           | S-05          | US-01, FR-003, FR-004, FR-011          | done |
-| S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | proposed |
+| S-07 | map-search                  | user can search the memory map and have the match centered or all matches marked                      | S-06          | US-01, FR-005, FR-013                  | planning |
 
 ## Streams
 
@@ -181,7 +181,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Does the found-node marking stay legible against the themed nodes/edges (WCAG AA) without a separate highlight token? — Owner: `/10x-plan`. Block: no.
 - **Risk:** Reuses the search input and trigger behavior from S-06; marking and centering must not change click-to-navigate on nodes or connections.
-- **Status:** proposed
+- **Status:** planning
 
 ## Backlog Handoff
 
