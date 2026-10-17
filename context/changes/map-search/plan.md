@@ -289,9 +289,9 @@ None. No schema, data or URL change; `?q=` on the map is additive.
 
 #### Automated
 
-- [x] 3.1 New scenario passes: `npm run test:e2e` (after `npm run build`, with local Supabase)
-- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.1 New scenario passes: `npm run test:e2e` (after `npm run build`, with local Supabase) — 4b5ed36
+- [x] 3.2 Lint passes: `npm run lint` — 4b5ed36
 
 #### Manual
 
-- [x] 3.3 Docs read correctly and name the right files and auth-call count
+- [x] 3.3 Docs read correctly and name the right files and auth-call count — 4b5ed36

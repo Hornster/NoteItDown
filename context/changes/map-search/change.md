@@ -1,7 +1,7 @@
 ---
 change_id: map-search
 title: Memory-map search that centers a single match or marks all matches
-status: implementing
+status: implemented
 created: 2026-10-17
 updated: 2026-10-17
 archived_at: null
