@@ -82,29 +82,16 @@ Integrations: `@astrojs/react`, `@astrojs/cloudflare`, `@astrojs/sitemap`.
 - **Colors**: only through semantic tokens and the primitives in `src/components/ui/` (`buttonVariants`, `cardVariants`, `badgeVariants`, `alertVariants`); no Tailwind palette classes or hex/rgb literals. Token values live only in `src/styles/global.css`. Guard: `src/styles/theme-guard.test.ts` (unit project).
 - **Services/helpers** go in `src/lib/` (or `src/lib/services/` for extracted business logic).
 - **Shared types** (entities, DTOs) go in `src/types.ts`.
-
-### Versions & legacy idioms (training-data drift)
-
-Pinned majors: Astro 7, React 19, Tailwind 4, TypeScript 6, ESLint 10 (flat config), Vitest 5, zod 4, @astrojs/cloudflare 14. Before using a framework API you have not seen in this repo, look it up via Context7 — do not rely on memory.
-
+- Pinned majors: Astro 7, React 19, Tailwind 4, TypeScript 6, ESLint 10 (flat config), Vitest 5, zod 4, @astrojs/cloudflare 14. Before using a framework API you have not seen in this repo, look it up via Context7 — do not rely on memory.
 - Astro: secrets only via `astro:env/server` (declared in `astro.config.mjs` `env.schema`); build mode via `import.meta.env.DEV` / `PROD` / `SSR`. Do not use `Astro.locals.runtime.env` or `import.meta.env.SUPABASE_*`. Fonts use the stable top-level `fonts` config — no `experimental` flags.
 - Tailwind 4: there is no `tailwind.config.*`. Tokens live in `src/styles/global.css` under `@theme inline`. Do not add `@tailwind base/components/utilities`, `theme.extend`, or a JS config file.
 - zod 4: use `z.email()`, `z.url()` top-level formats and `error` (not `message`/`errorMap`) for custom messages; check Context7 before using v3-era APIs.
 - ESLint 10: flat config only (`eslint.config.js`); never add `.eslintrc*`.
-
-### Supabase data boundary (untyped client)
-
-The Supabase client has no generated `Database` types. Every service function in `src/lib/services/` that reads rows must map the result into an explicit type from `src/types.ts` before returning — never return raw `data` or `any`. For new aggregates (counts, sums such as per-user image usage) parse with zod (`z.object({ ... })`) so a renamed column or null aggregate fails loudly instead of returning 0.
-Scope every query by RLS **and** by the explicit owner/campaign filter the existing services use; any new per-user query gets a case in `tests/http/forged-id.test.ts`.
-
-### Cloudflare Workers runtime
-
-Server code runs in workerd, not Node: no filesystem, no native addons, no long-lived in-memory state between requests. Before adding an npm dependency used on the server, confirm it is pure JS/WASM and Workers-compatible, then verify with `npm run build && npm run preview` (not only `npm run dev`).
-Postgres extensions (e.g. `pg_trgm` for fuzzy matching) are enabled in a migration with `create extension if not exists <name> with schema extensions;` — never by hand in the dashboard.
-
-### Error handling & logging
-
-Server-side `console.error` output is captured by Cloudflare Workers Logs (`observability.enabled` in `wrangler.jsonc`) — that is the operator-only channel for production failure detail. Route all DB-failure handling through one shared helper in `src/lib/` (do not add new ad-hoc `console.error` + `eslint-disable` pairs); the helper logs the detail, returns the accurate status code with the generic user message, and includes extra detail in the response body only when `import.meta.env.DEV` is true. Production responses never contain stack traces, SQL, table or column names.
+- The Supabase client has no generated `Database` types. Every service function in `src/lib/services/` that reads rows must map the result into an explicit type from `src/types.ts` before returning — never return raw `data` or `any`. For new aggregates (counts, sums such as per-user image usage) parse with zod (`z.object({ ... })`) so a renamed column or null aggregate fails loudly instead of returning 0.
+- Scope every query by RLS **and** by the explicit owner/campaign filter the existing services use; any new per-user query gets a case in `tests/http/forged-id.test.ts`.
+- Server code runs in workerd, not Node: no filesystem, no native addons, no long-lived in-memory state between requests. Before adding an npm dependency used on the server, confirm it is pure JS/WASM and Workers-compatible, then verify with `npm run build && npm run preview` (not only `npm run dev`).
+- Postgres extensions (e.g. `pg_trgm` for fuzzy matching) are enabled in a migration with `create extension if not exists <name> with schema extensions;` — never by hand in the dashboard.
+- Server-side `console.error` output is captured by Cloudflare Workers Logs (`observability.enabled` in `wrangler.jsonc`) — that is the operator-only channel for production failure detail. Route all DB-failure handling through one shared helper in `src/lib/` (do not add new ad-hoc `console.error` + `eslint-disable` pairs); the helper logs the detail, returns the accurate status code with the generic user message, and includes extra detail in the response body only when `import.meta.env.DEV` is true. Production responses never contain stack traces, SQL, table or column names.
 
 ### Environment
 
