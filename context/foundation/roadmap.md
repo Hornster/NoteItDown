@@ -3,13 +3,13 @@ project: NoteItDown
 version: 2
 status: draft
 created: 2026-10-09
-updated: 2026-10-17
+updated: 2026-10-19
 prd_version: 2
 main_goal: quality
 top_blocker: time
 milestone_id: polish-and-hardening
 milestone_seq: 2
-milestone_status: open
+milestone_status: done
 ---
 
 # Roadmap: NoteItDown
@@ -20,7 +20,7 @@ milestone_status: open
 
 ## Milestone
 
-**M-2: Polish & Hardening — D&D theme, findable notes, risk-first tests** — Status: open
+**M-2: Polish & Hardening — D&D theme, findable notes, risk-first tests** — Status: done
 
 - **Intent:** Turn the working MVP into a polished, safer base: every page wears the D&D palette, notes are findable on the dashboard and the memory map, the riskiest flows are pinned by automated tests, and the constants rule applies across the whole repo — without changing any preserved behavior.
 - **Source materials:** `context/foundation/prd-v2.md` (v2)
@@ -217,6 +217,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Milestone History
 
 - **M-1: MVP — Notes with Auto-Detected Relations & Memory Map** (`mvp-memory-map`) — closed 2026-10-08. All six items done (F-01, S-01–S-05): full PRD v1 scope (FR-001–FR-011, US-01) shipped — notes with exact-name auto-relations on a memory map, multi-campaign support, edit/delete with relation-change notice, and up to 2 images per note.
+- **M-2: Polish & Hardening — D&D theme, findable notes, risk-first tests** (`polish-and-hardening`) — closed 2026-10-19. All eight items done (F-01, S-01–S-07): full PRD v2 scope (FR-001–FR-015, US-01) shipped — Playwright e2e in CI, risk-first auth/notes/relations/isolation tests, per-file agent check hook, constants sweep across `src/`, D&D theme with meaning-colored buttons, dashboard grouped by type with name search, and memory-map search with centering/marking.
 
 ## Done
 
