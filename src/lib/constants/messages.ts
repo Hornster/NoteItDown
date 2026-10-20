@@ -39,6 +39,7 @@ export const MESSAGES = {
   TYPE_REQUIRED: "Choose a type.",
 
   // UI labels
+  APP_TITLE: "NoteItDown",
   NOTICE_DISMISS_LABEL: "Dismiss",
   LICENSES_LABEL: "Third-party licences",
   SIGN_IN_LABEL: "Sign in",

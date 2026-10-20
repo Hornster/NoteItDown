@@ -3,6 +3,7 @@ import { cardVariants } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Topbar from "@/components/Topbar.astro";
+import { MESSAGES } from "@/lib/constants/messages";
 ---
 
 <div class="relative min-h-screen w-full overflow-hidden">
@@ -11,9 +12,11 @@ import Topbar from "@/components/Topbar.astro";
 
     <!-- Hero section -->
     <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32 lg:py-40">
-      <h1 class="mb-6 text-foreground text-5xl leading-tight font-bold sm:text-6xl lg:text-7xl">10x Astro Starter</h1>
+      <h1 class="mb-6 text-foreground text-5xl leading-tight font-bold sm:text-6xl lg:text-7xl">
+        {MESSAGES.APP_TITLE}
+      </h1>
       <p class="mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-        A production-ready starter with authentication, modern tooling, and a cosmic developer experience.
+        A TTRPG notepad that makes relations managing and data recall easy.
       </p>
       <div class="flex flex-col gap-4 sm:flex-row">
         <a href="/auth/signin" class:list={cn(buttonVariants(), "h-auto rounded-lg px-6 py-3 text-base")}>
@@ -42,13 +45,14 @@ import Topbar from "@/components/Topbar.astro";
           stroke-linecap="round"
           stroke-linejoin="round"
           class="mb-4 text-primary"
+          aria-hidden="true"
         >
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
+          <path d="m15 5 4 4"></path>
         </svg>
-        <h3 class="mb-2 text-lg font-semibold text-foreground">Authentication Ready</h3>
+        <h3 class="mb-2 text-lg font-semibold text-foreground">Make notes</h3>
         <p class="text-sm leading-relaxed text-muted-foreground">
-          Built-in Supabase auth with sign in, sign up, and protected routes out of the box.
+          Note the NPC, note their quest and reference the NPC in the description.
         </p>
       </div>
 
@@ -64,14 +68,16 @@ import Topbar from "@/components/Topbar.astro";
           stroke-linecap="round"
           stroke-linejoin="round"
           class="mb-4 text-primary"
+          aria-hidden="true"
         >
-          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-          <polyline points="2 17 12 22 22 17"></polyline>
-          <polyline points="2 12 12 17 22 12"></polyline>
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+          <path d="M21 3v5h-5"></path>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+          <path d="M8 16H3v5"></path>
         </svg>
-        <h3 class="mb-2 text-lg font-semibold text-foreground">Modern Stack</h3>
+        <h3 class="mb-2 text-lg font-semibold text-foreground">Keep noting</h3>
         <p class="text-sm leading-relaxed text-muted-foreground">
-          Astro 7, React 19, Tailwind 4, and TypeScript — the latest tools, ready to go.
+          The references are updated automatically whenever you update, add or delete a note. Immediately.
         </p>
       </div>
 
@@ -87,13 +93,15 @@ import Topbar from "@/components/Topbar.astro";
           stroke-linecap="round"
           stroke-linejoin="round"
           class="mb-4 text-primary"
+          aria-hidden="true"
         >
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
+          <path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path>
+          <path d="M15 5.764v15"></path>
+          <path d="M9 3.236v15"></path>
         </svg>
-        <h3 class="mb-2 text-lg font-semibold text-foreground">Developer Experience</h3>
+        <h3 class="mb-2 text-lg font-semibold text-foreground">Recall</h3>
         <p class="text-sm leading-relaxed text-muted-foreground">
-          ESLint, Prettier, and pre-commit hooks keep your codebase clean from day one.
+          Find where Boblin the Goblin lived through the interactive memory map with search capability.
         </p>
       </div>
     </div>
