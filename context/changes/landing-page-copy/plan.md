@@ -203,27 +203,27 @@ Release timing: production deploys only on push to `main` (CI `deploy` job). Mer
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Unit tests pass (incl. theme guard): `npm run test:unit`
-- [x] 1.3 Type/Astro check passes: `npx astro check`
-- [x] 1.4 Build succeeds: `npm run build`
-- [x] 1.5 New landing spec and full e2e suite pass against the fresh build: `npm run test:e2e`
-- [x] 1.6 No starter copy left in `src/`
+- [x] 1.1 Lint passes: `npm run lint` — 4fff7fa
+- [x] 1.2 Unit tests pass (incl. theme guard): `npm run test:unit` — 4fff7fa
+- [x] 1.3 Type/Astro check passes: `npx astro check` — 4fff7fa
+- [x] 1.4 Build succeeds: `npm run build` — 4fff7fa
+- [x] 1.5 New landing spec and full e2e suite pass against the fresh build: `npm run test:e2e` — 4fff7fa
+- [x] 1.6 No starter copy left in `src/` — 4fff7fa
 
 #### Manual
 
-- [x] 1.7 Preview `/` shows NoteItDown tab title, h1, subtitle and three panels with PRD copy and topical icons, light and dark
-- [x] 1.8 Layout matches the previous page; no new links or actions
+- [x] 1.7 Preview `/` shows NoteItDown tab title, h1, subtitle and three panels with PRD copy and topical icons, light and dark — 4fff7fa
+- [x] 1.8 Layout matches the previous page; no new links or actions — 4fff7fa
 
 ### Phase 2: README rename
 
 #### Automated
 
-- [ ] 2.1 No starter naming at the README top or clone block
-- [ ] 2.2 `public/template.png` is gone and unreferenced
-- [ ] 2.3 Build still succeeds: `npm run build`
+- [x] 2.1 No starter naming at the README top or clone block
+- [x] 2.2 `public/template.png` is gone and unreferenced
+- [x] 2.3 Build still succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 README renders correctly on GitHub
+- [x] 2.4 README renders correctly on GitHub
 - [ ] 2.5 After merge to `main` and the CI `deploy` job, the live landing page shows the new copy (deadline 2026-11-04)

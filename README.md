@@ -1,8 +1,6 @@
-# 10x Astro Starter
+# NoteItDown
 
-![](./public/template.png)
-
-A modern, opinionated starter template for building fast, accessible web applications.
+A TTRPG notepad that makes relations managing and data recall easy. Notes are linked by exact name and shown on a memory map.
 
 ## Tech Stack
 
@@ -23,8 +21,8 @@ A modern, opinionated starter template for building fast, accessible web applica
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+git clone https://github.com/Hornster/NoteItDown.git
+cd NoteItDown
 ```
 
 2. Install dependencies:
@@ -203,7 +201,7 @@ BASE_URL=http://localhost:4321 npm run smoke
 
 It needs a reachable Supabase instance (local or cloud) with email confirmation disabled.
 
-> **Note:** this script exists primarily to guard the development of the starter itself — it is a fast sanity check that dependency upgrades did not break the build, the Cloudflare adapter or the Supabase auth flow. It is **not** a substitute for the Vitest suites above.
+> **Note:** this script exists primarily to guard the development of the app — it is a fast sanity check that dependency upgrades did not break the build, the Cloudflare adapter or the Supabase auth flow. It is **not** a substitute for the Vitest suites above.
 
 ## CI
 
