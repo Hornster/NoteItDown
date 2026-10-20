@@ -1,10 +1,10 @@
 ---
 change_id: landing-page-copy
 title: Landing page shows NoteItDown title, subtitle and three new panels
-status: impl_reviewed
+status: archived
 created: 2026-10-20
 updated: 2026-10-20
-archived_at: null
+archived_at: 2026-10-20T16:56:55Z
 ---
 
 ## Notes

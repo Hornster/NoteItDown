@@ -192,4 +192,4 @@ None for this milestone. Every layer v3 touches is reported `present` or `partia
 
 ## Done
 
-(Empty — `/10x-archive` appends an entry here when a change whose `Change ID` matches an item above is archived.)
+- **S-01: visitor sees the landing page titled "NoteItDown" with the new subtitle and the three panels "Make notes", "Keep noting" and "Recall" (Recall starts with the trimmed map sentence), with no starter-template text left and no new actions or links.** — Archived 2026-10-20 → `context/archive/2026-10-20-landing-page-copy/`. Lesson: —.
