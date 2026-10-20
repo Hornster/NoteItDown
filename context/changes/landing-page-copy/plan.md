@@ -226,4 +226,4 @@ Release timing: production deploys only on push to `main` (CI `deploy` job). Mer
 #### Manual
 
 - [x] 2.4 README renders correctly on GitHub — bf0d4a9
-- [ ] 2.5 After merge to `main` and the CI `deploy` job, the live landing page shows the new copy (deadline 2026-11-04)
+- [x] 2.5 After merge to `main` and the CI `deploy` job, the live landing page shows the new copy (deadline 2026-11-04)
