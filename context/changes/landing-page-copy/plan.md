@@ -219,11 +219,11 @@ Release timing: production deploys only on push to `main` (CI `deploy` job). Mer
 
 #### Automated
 
-- [x] 2.1 No starter naming at the README top or clone block
-- [x] 2.2 `public/template.png` is gone and unreferenced
-- [x] 2.3 Build still succeeds: `npm run build`
+- [x] 2.1 No starter naming at the README top or clone block — bf0d4a9
+- [x] 2.2 `public/template.png` is gone and unreferenced — bf0d4a9
+- [x] 2.3 Build still succeeds: `npm run build` — bf0d4a9
 
 #### Manual
 
-- [x] 2.4 README renders correctly on GitHub
+- [x] 2.4 README renders correctly on GitHub — bf0d4a9
 - [ ] 2.5 After merge to `main` and the CI `deploy` job, the live landing page shows the new copy (deadline 2026-11-04)
