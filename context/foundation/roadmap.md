@@ -41,7 +41,7 @@ NoteItDown is a notepad for a solo TTRPG participant that links campaign notes b
 
 | ID   | Change ID             | Outcome (user can …)                                                                                     | Prerequisites | PRD refs                                       | Status   |
 | ---- | --------------------- | -------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------- | -------- |
-| S-01 | landing-page-copy     | visitor sees the NoteItDown title, subtitle and the three new panels instead of starter copy            | —             | US-02, FR-001, FR-002                          | in-progress |
+| S-01 | landing-page-copy     | visitor sees the NoteItDown title, subtitle and the three new panels instead of starter copy            | —             | US-02, FR-001, FR-002                          | done |
 | S-02 | description-search    | user can find a note by a trait in its description on the dashboard and the map                         | S-01          | US-01, FR-003, FR-005, FR-007, FR-014, FR-015  | proposed |
 | S-03 | db-error-handling     | user sees an accurate status and a clear generic message when a DB operation fails                       | —             | FR-011, FR-012, FR-014                         | ready    |
 | S-04 | fuzzy-name-search     | user can find a note by a misspelled name, with toggle choices remembered across navigation              | S-02          | US-01, FR-004, FR-005, FR-006, FR-007, FR-013  | proposed |
@@ -88,7 +88,7 @@ None for this milestone. Every layer v3 touches is reported `present` or `partia
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Hard deadline 2026-11-04 (course submission), so it ships first and small; copy only, no layout redesign (PRD §Non-Goals).
-- **Status:** in-progress
+- **Status:** done
 
 ### S-02: Description search
 

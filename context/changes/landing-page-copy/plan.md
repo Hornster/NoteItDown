@@ -21,7 +21,7 @@ An anonymous visitor opening `/` sees a tab titled "NoteItDown", the h1 "NoteItD
 - Exact copy (PRD v3 `context/foundation/prd-v3.md:131-133`):
   - Title: `NoteItDown`
   - Subtitle: `A TTRPG notepad that makes relations managing and data recall easy.`
-  - Make notes: `Note the NPC, note their quest and reference the NPC in the description`
+  - Make notes: `Note the NPC, note their quest and reference the NPC in the description.` (final period added to PRD and copy during implementation, 4fff7fa)
   - Keep noting: `The references are updated automatically whenever you update, add or delete a note. Immediately.`
   - Recall: `Find where Boblin the Goblin lived through the interactive memory map with search capability.` (trimmed; the money clause is FR-015, shipped with S-02)
 - Dictionary rule (`context/foundation/lessons.md`, "Use the central dictionaries in all code"): "NoteItDown" will appear twice in `src/` (h1 + Layout default title) → becomes a `MESSAGES` key with the `_TITLE` suffix (page-title fallback). All other landing strings appear once → stay inline. e2e oracles stay literal and never import `MESSAGES`.
@@ -35,7 +35,7 @@ An anonymous visitor opening `/` sees a tab titled "NoteItDown", the h1 "NoteItD
 - No change to the Sign In / Sign Up buttons, including for signed-in visitors (existing behavior).
 - No fix of the README's stale CI section (still lists `ci`/`smoke` jobs instead of `ci`/`local-stack`/`deploy`) or other README content beyond starter naming — observation only.
 - No change to `src/lib/config-status.ts`'s `docsUrl` pointing at the starter repo's Supabase docs (operator-facing banner, still a valid doc link).
-- No edits to the PRD copy itself (e.g. the missing final period on the "Make notes" text is kept verbatim — see Open Risks in the brief).
+- No edits to the PRD copy itself (e.g. the missing final period on the "Make notes" text is kept verbatim — see Open Risks in the brief) — revised during implementation: period added to PRD, copy and e2e oracle (4fff7fa).
 
 ## Implementation Approach
 
